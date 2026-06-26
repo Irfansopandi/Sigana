@@ -311,6 +311,12 @@
     <a href="{{ route('admin.transparency.index') }}" class="nav-link {{ request()->routeIs('admin.transparency.*') ? 'active' : '' }}">
         <i class="fa-solid fa-file-lines"></i> <span>Laporan Transparansi</span>
     </a>
+    <a href="{{ route('admin.volunteers.index') }}" class="nav-link {{ request()->routeIs('admin.volunteers.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-shield-halved"></i> <span>Data Relawan</span>
+    </a>
+    <a href="{{ route('admin.assignments.index') }}" class="nav-link {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-list-check"></i> <span>Penugasan Relawan</span>
+    </a>
 
     <div class="nav-label">Sistem</div>
     <a href="{{ route('admin.settings.index') }}" class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
@@ -383,6 +389,40 @@
         timer: 5000,
         timerProgressBar: true,
         background: '#22c55e',
+        color: '#ffffff',
+        iconColor: '#ffffff',
+    });
+</script>
+@endif
+
+@if(session('success'))
+<script>
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: '{{ session('success') }}',
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        background: '#22c55e',
+        color: '#ffffff',
+        iconColor: '#ffffff',
+    });
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'error',
+        title: '{{ session('error') }}',
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+        background: '#ef4444',
         color: '#ffffff',
         iconColor: '#ffffff',
     });

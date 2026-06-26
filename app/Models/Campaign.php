@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,8 +24,9 @@ class Campaign extends Model
         'description_short',
         'description_long',
         'victims',
-        'latitude',  
+        'latitude',
         'longitude',
+        'assigned_to',
     ];
 
     protected $casts = [
@@ -119,5 +121,10 @@ class Campaign extends Model
     public function transparencyReport()
     {
         return $this->hasOne(TransparencyReport::class);
+    }
+
+    public function assignedVolunteer()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
     }
 }

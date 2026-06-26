@@ -32,6 +32,9 @@
             <div class="fw-semibold">{{ $report->remaining }}</div>
           </div>
         </div>
+        <div class="mt-3 d-flex justify-content-end">
+          <a href="{{ route('admin.transparency.show', $report) }}" class="btn btn-sm btn-outline-primary">Detail</a>
+        </div>
       </div>
     </div>
   </div>

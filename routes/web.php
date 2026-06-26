@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\AdminCampaignController;
 use App\Http\Controllers\Admin\AdminDonationController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminTransparencyController;
+use App\Http\Controllers\Admin\AdminVolunteerController;
+use App\Http\Controllers\Admin\AdminAssignmentController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Relawan\RelawanDashboardController;
 use App\Http\Controllers\User\UserDashboardController;
@@ -64,6 +66,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::delete('/campaigns/{campaign}', [AdminCampaignController::class, 'destroy'])->name('campaigns.destroy');
     Route::get('/donations', [AdminDonationController::class, 'index'])->name('donations.index');
     Route::get('/transparency', [AdminTransparencyController::class, 'index'])->name('transparency.index');
+    Route::get('/transparency/{report}', [AdminTransparencyController::class, 'show'])->name('transparency.show');
+    Route::match(['put','patch'], '/transparency/{report}', [AdminTransparencyController::class, 'update'])->name('transparency.update');
+    Route::get('/volunteers', [AdminVolunteerController::class, 'index'])->name('volunteers.index');
+    Route::get('/volunteers/{user}', [AdminVolunteerController::class, 'show'])->name('volunteers.show');
+    Route::post('/volunteers/{user}/verify', [AdminVolunteerController::class, 'verify'])->name('volunteers.verify');
+    Route::get('/assignments', [AdminAssignmentController::class, 'index'])->name('assignments.index');
+    Route::get('/assignments/create', [AdminAssignmentController::class, 'create'])->name('assignments.create');
+    Route::post('/assignments', [AdminAssignmentController::class, 'store'])->name('assignments.store');
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
 });
 

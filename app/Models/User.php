@@ -24,6 +24,7 @@ class User extends Authenticatable
         'google_id',
         'phone',
         'role',
+        'email_verified_at',
     ];
 
     /**
@@ -63,5 +64,27 @@ class User extends Authenticatable
     public function isUser(): bool
     {
         return $this->role === 'user';
+    }
+
+    public function getProfileCompleteAttribute(): bool
+    {
+        return filled($this->name)
+            && filled($this->email)
+            && filled($this->phone);
+    }
+
+    public function getIsVerifiedAttribute(): bool
+    {
+        return !is_null($this->email_verified_at);
+    }
+
+    public function isProfileComplete(): bool
+    {
+        return $this->profile_complete;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->is_verified;
     }
 }
