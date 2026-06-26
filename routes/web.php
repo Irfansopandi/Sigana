@@ -30,6 +30,8 @@ Route::post('/bencana/donasi/update-status', [DonationController::class, 'update
 Route::get('/transparansi', [HomeController::class, 'transparansi'])->name('transparansi');
 Route::get('/transparansi/{slug}', [HomeController::class, 'transparansiDetail'])->name('transparansi.detail');
 Route::get('/kontak', [HomeController::class, 'kontak'])->name('kontak');
+Route::get('/gabung-relawan', [RegisterController::class, 'showRelawan'])->name('register.relawan');
+Route::post('/gabung-relawan', [RegisterController::class, 'storeRelawan'])->name('register.relawan.store');
 
 // Midtrans webhook
 Route::post('/midtrans/notification', [DonationController::class, 'notification'])->name('midtrans.notification');
@@ -80,11 +82,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 // Relawan
 Route::prefix('relawan')->name('relawan.')->middleware(['auth', 'role:relawan'])->group(function () {
     Route::get('/dashboard', [RelawanDashboardController::class, 'index'])->name('dashboard');
-    // tambah route relawan lainnya di sini
+    Route::get('/laporan', function () { return 'Coming soon'; })->name('laporan.index');
+    Route::get('/laporan/create', function () { return 'Coming soon'; })->name('laporan.create');
 });
 
 // User
 Route::prefix('user')->name('user.')->middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
-    // tambah route user lainnya di sini
+    Route::get('/laporan/bencana/create', function () { return 'Coming soon'; })->name('laporan.bencana.create');
 });

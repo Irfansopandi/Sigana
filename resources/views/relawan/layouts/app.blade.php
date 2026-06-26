@@ -357,7 +357,29 @@
     </header>
 
   <main class="main-content">
+    @if(auth()->user()->status === 'pending')
+      <div class="alert border-0 mb-4 d-flex align-items-start gap-3"
+          style="background:#fffbeb;border-left:4px solid #f59e0b !important;border-radius:10px;">
+        <i class="fa-solid fa-clock-rotate-left mt-1" style="color:#f59e0b;font-size:1.1rem;"></i>
+        <div>
+          <div class="fw-bold" style="color:#92400e;">Akun Sedang Diverifikasi</div>
+          <div class="small text-muted">Akun relawan Anda sedang ditinjau admin (1–3 hari kerja). Fitur akan aktif setelah verifikasi selesai.</div>
+        </div>
+      </div>
+      <div style="position:relative;">
+        <div style="position:absolute;inset:0;background:rgba(255,255,255,0.75);
+                    backdrop-filter:blur(4px);z-index:10;border-radius:12px;
+                    display:flex;align-items:center;justify-content:center;">
+          <div class="text-center">
+            <i class="fa-solid fa-lock fa-2x mb-2" style="color:#d1d5db;"></i>
+            <div class="text-muted small fw-semibold">Tersedia setelah verifikasi</div>
+          </div>
+        </div>
+      @endif
     @yield('content')
+    @if(auth()->user()->status === 'pending')
+    </div>
+    @endif
   </main>
 </div>
 
