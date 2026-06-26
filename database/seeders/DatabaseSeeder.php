@@ -10,7 +10,10 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         \App\Models\User::truncate();
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
         // Dummy per role
         User::create([
             'name'     => 'Admin SIGANA',

@@ -90,5 +90,4 @@ Route::get('/laporan/bencana/create', function () { return 'Coming soon'; })->mi
 // User
 Route::prefix('user')->name('user.')->middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/laporan/bencana/create', function () { return 'Coming soon'; })->name('laporan.bencana.create');
 });
