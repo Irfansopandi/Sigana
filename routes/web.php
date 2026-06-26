@@ -1,0 +1,65 @@
+<?php
+
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Relawan\RelawanDashboardController;
+use App\Http\Controllers\User\UserDashboardController;
+use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\DonationController;
+use Illuminate\Support\Facades\Route;
+
+// Public routes
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/tentang', [HomeController::class, 'tentang'])->name('tentang');
+Route::get('/bencana', [HomeController::class, 'bencana'])->name('bencana');
+Route::get('/bencana/{slug}', [DonationController::class, 'bencanaDetail'])->name('bencana.detail');
+Route::get('/bencana/{slug}/donasi', [HomeController::class, 'bencanaDonasiPage'])->name('bencana.donasi');
+Route::post('/bencana/{slug}/donasi/transaction', [DonationController::class, 'createTransaction'])->name('bencana.donasi.transaction');
+Route::get('/bencana/{slug}/donasi/finish', [DonationController::class, 'finish'])->name('bencana.donasi.finish');
+Route::post('/bencana/donasi/update-status', [DonationController::class, 'updateStatus'])->name('bencana.donasi.update-status');
+Route::get('/transparansi', [HomeController::class, 'transparansi'])->name('transparansi');
+Route::get('/transparansi/{slug}', [HomeController::class, 'transparansiDetail'])->name('transparansi.detail');
+Route::get('/kontak', [HomeController::class, 'kontak'])->name('kontak');
+
+// Midtrans webhook
+Route::post('/midtrans/notification', [DonationController::class, 'notification'])->name('midtrans.notification');
+
+// Auth
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+    Route::get('/register', [RegisterController::class, 'create'])->name('register.create');
+    Route::post('/register', [RegisterController::class, 'store'])->name('register');
+
+    // Forgot Password
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'showEmailForm'])->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendOtp'])->name('password.send-otp');
+    Route::get('/forgot-password/otp', [ForgotPasswordController::class, 'showOtpForm'])->name('password.otp.form');
+    Route::post('/forgot-password/otp', [ForgotPasswordController::class, 'verifyOtp'])->name('password.verify-otp');
+    Route::get('/forgot-password/reset', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset.form');
+    Route::post('/forgot-password/reset', [ForgotPasswordController::class, 'resetPassword'])->name('password.update');
+});
+
+Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.redirect');
+Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
+// Admin
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    // tambah route admin lainnya di sini
+});
+
+// Relawan
+Route::prefix('relawan')->name('relawan.')->middleware(['auth', 'role:relawan'])->group(function () {
+    Route::get('/dashboard', [RelawanDashboardController::class, 'index'])->name('dashboard');
+    // tambah route relawan lainnya di sini
+});
+
+// User
+Route::prefix('user')->name('user.')->middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+    // tambah route user lainnya di sini
+});
