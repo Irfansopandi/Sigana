@@ -83,8 +83,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 Route::prefix('relawan')->name('relawan.')->middleware(['auth', 'role:relawan'])->group(function () {
     Route::get('/dashboard', [RelawanDashboardController::class, 'index'])->name('dashboard');
     Route::get('/laporan', function () { return 'Coming soon'; })->name('laporan.index');
-    Route::get('/laporan/create', function () { return 'Coming soon'; })->name('laporan.create');
 });
+
+Route::get('/laporan/bencana/create', function () { return 'Coming soon'; })->middleware(['auth', 'role:user'])->name('laporan.bencana.create');
 
 // User
 Route::prefix('user')->name('user.')->middleware(['auth', 'role:user'])->group(function () {
