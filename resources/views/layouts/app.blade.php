@@ -35,7 +35,7 @@
   <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/jpeg" href="{{ asset('storage/assets/logo/logo-sigana.jpeg') }}">
+  <link rel="icon" type="image/jpeg" href="{{ asset('storage/assets/logo/logo-bulat.webp') }}">
 
   @stack('styles')
 </head>

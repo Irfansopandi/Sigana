@@ -24,6 +24,14 @@ class User extends Authenticatable
         'google_id',
         'phone',
         'role',
+        'status',        // active | pending | inactive
+        'nik',
+        'jenis_kelamin',
+        'tanggal_lahir',
+        'alamat',
+        'keahlian',      // JSON array
+        'pengalaman',
+        'foto_ktp', 
     ];
 
     /**
@@ -46,6 +54,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'tanggal_lahir'  => 'date',
+            'keahlian'  => 'array',
         ];
     }
 

@@ -203,6 +203,11 @@ html:has(body.auth-page) {
             <h5 class="mb-4">
               <i class="fa-solid fa-right-to-bracket me-2" style="color: #38bdf8;"></i>Masuk Ke SIGANA
             </h5>
+            @if(session('relawan_registered'))
+              <div class="alert alert-success rounded-3 mb-3" style="font-size:0.82rem;">
+                  <i class="fa-solid fa-circle-check me-1"></i> {{ session('relawan_registered') }}
+              </div>
+            @endif
 
             <form method="POST" action="{{ route('login.store') }}">
               @csrf

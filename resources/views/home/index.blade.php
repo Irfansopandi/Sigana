@@ -18,9 +18,22 @@
           aman, cepat, dan terpercaya.
         </p>
         <div class="hero-buttons">
-          <a href="#" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero">
-            <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporkan Bencana
-          </a>
+          @auth
+            @if(auth()->user()->role === 'relawan')
+              <a href="{{ route('relawan.laporan.create') }}" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporan Lapangan
+              </a>
+            @else
+              <a href="{{ route('laporan.bencana.create') }}" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporkan Bencana
+              </a>
+            @endif
+          @else
+            <a href="#" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero"
+              data-bs-toggle="modal" data-bs-target="#modalAuthRequired">
+              <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporkan Bencana
+            </a>
+          @endauth
           <a href="{{ route('bencana')}}" class="btn btn-green-custom px-4 py-3" id="btn-donasi-hero">
             <i class="fa-solid fa-heart me-2"></i>Donasi Sekarang
           </a>
@@ -691,6 +704,32 @@
           </p>
           <button class="btn btn-primary px-4" data-bs-dismiss="modal">Selesai</button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- Modal: Harus Login --}}
+<div class="modal fade" id="modalAuthRequired" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4">
+      <div class="mb-3">
+        <i class="fa-solid fa-lock fa-3x text-warning"></i>
+      </div>
+      <h5 class="fw-bold mb-2">Login Diperlukan</h5>
+      <p class="text-muted mb-4">
+        Untuk melaporkan bencana, Anda harus login atau membuat akun terlebih dahulu.
+      </p>
+      <div class="d-flex gap-2 justify-content-center">
+        <a href="{{ route('login') }}" class="btn btn-primary px-4">
+          <i class="fa-solid fa-right-to-bracket me-1"></i>Login
+        </a>
+        <a href="{{ route('register.create') }}" class="btn btn-outline-primary px-4">
+          <i class="fa-solid fa-user-plus me-1"></i>Daftar
+        </a>
+      </div>
+      <div class="mt-3">
+        <button class="btn btn-sm btn-link text-muted" data-bs-dismiss="modal">Batal</button>
       </div>
     </div>
   </div>
