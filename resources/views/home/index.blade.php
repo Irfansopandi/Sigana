@@ -35,10 +35,10 @@
             </a>
           @endauth
           @if(!auth()->check() || auth()->user()->role !== 'admin')
-          <a href="{{ route('bencana')}}" class="btn btn-green-custom px-4 py-3" id="btn-donasi-hero">
-            <i class="fa-solid fa-heart me-2"></i>Donasi Sekarang
-          </a>
-        @endif
+            <a href="{{ route('bencana')}}" class="btn btn-green-custom px-4 py-3" id="btn-donasi-hero">
+              <i class="fa-solid fa-heart me-2"></i>Donasi Sekarang
+            </a>
+          @endif
         </div>
       </div>
 
