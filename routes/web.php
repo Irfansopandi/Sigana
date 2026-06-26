@@ -4,6 +4,11 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminCampaignController;
+use App\Http\Controllers\Admin\AdminDonationController;
+use App\Http\Controllers\Admin\AdminSettingsController;
+use App\Http\Controllers\Admin\AdminTransparencyController;
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Relawan\RelawanDashboardController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\Auth\GoogleController;
@@ -49,7 +54,17 @@ Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name
 // Admin
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-    // tambah route admin lainnya di sini
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('/campaigns', [AdminCampaignController::class, 'index'])->name('campaigns.index');
+    Route::get('/campaigns/create', [AdminCampaignController::class, 'create'])->name('campaigns.create');
+    Route::post('/campaigns', [AdminCampaignController::class, 'store'])->name('campaigns.store');
+    Route::get('/campaigns/{campaign}', [AdminCampaignController::class, 'show'])->name('campaigns.show');
+    Route::get('/campaigns/{campaign}/edit', [AdminCampaignController::class, 'edit'])->name('campaigns.edit');
+    Route::match(['put', 'patch'], '/campaigns/{campaign}', [AdminCampaignController::class, 'update'])->name('campaigns.update');
+    Route::delete('/campaigns/{campaign}', [AdminCampaignController::class, 'destroy'])->name('campaigns.destroy');
+    Route::get('/donations', [AdminDonationController::class, 'index'])->name('donations.index');
+    Route::get('/transparency', [AdminTransparencyController::class, 'index'])->name('transparency.index');
+    Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
 });
 
 // Relawan

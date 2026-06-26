@@ -299,21 +299,21 @@
     </a>
 
     <div class="nav-label">Manajemen</div>
-    <a href="#" class="nav-link">
+    <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
         <i class="fa-solid fa-users"></i> <span>Pengguna</span>
     </a>
-    <a href="#" class="nav-link">
+    <a href="{{ route('admin.campaigns.index') }}" class="nav-link {{ request()->routeIs('admin.campaigns.*') ? 'active' : '' }}">
         <i class="fa-solid fa-hand-holding-heart"></i> <span>Kampanye Bencana</span>
     </a>
-    <a href="#" class="nav-link">
+    <a href="{{ route('admin.donations.index') }}" class="nav-link {{ request()->routeIs('admin.donations.*') ? 'active' : '' }}">
         <i class="fa-solid fa-money-bill-transfer"></i> <span>Donasi</span>
     </a>
-    <a href="#" class="nav-link">
+    <a href="{{ route('admin.transparency.index') }}" class="nav-link {{ request()->routeIs('admin.transparency.*') ? 'active' : '' }}">
         <i class="fa-solid fa-file-lines"></i> <span>Laporan Transparansi</span>
     </a>
 
     <div class="nav-label">Sistem</div>
-    <a href="#" class="nav-link">
+    <a href="{{ route('admin.settings.index') }}" class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
         <i class="fa-solid fa-gear"></i> <span>Pengaturan</span>
     </a>
 
