@@ -23,7 +23,7 @@
               <a href="{{ route('relawan.laporan.create') }}" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero">
                 <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporan Lapangan
               </a>
-            @else
+            @elseif (auth()->user()->role === 'user')
               <a href="{{ route('laporan.bencana.create') }}" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero">
                 <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporkan Bencana
               </a>
