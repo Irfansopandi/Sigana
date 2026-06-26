@@ -23,7 +23,7 @@
               <a href="{{ route('relawan.laporan.create') }}" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero">
                 <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporan Lapangan
               </a>
-            @else
+            @elseif (auth()->user()->role === 'user')
               <a href="{{ route('laporan.bencana.create') }}" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero">
                 <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporkan Bencana
               </a>
@@ -34,9 +34,11 @@
               <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporkan Bencana
             </a>
           @endauth
+          @if(!auth()->check() || auth()->user()->role !== 'admin')
           <a href="{{ route('bencana')}}" class="btn btn-green-custom px-4 py-3" id="btn-donasi-hero">
             <i class="fa-solid fa-heart me-2"></i>Donasi Sekarang
           </a>
+        @endif
         </div>
       </div>
 
