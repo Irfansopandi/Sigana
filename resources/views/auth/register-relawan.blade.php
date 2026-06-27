@@ -151,6 +151,104 @@ body.auth-page {
 /* ── Step panes ── */
 .step-pane { display: none; }
 .step-pane.active { display: block; }
+
+/* ── Mobile fix ── */
+@media (max-width: 767.98px) {
+  html:has(body.auth-page),
+  body.auth-page {
+    overflow: hidden !important;
+    height: 100vh !important;
+  }
+  .auth-hero {
+    height: 100vh !important;
+    overflow-y: auto !important;
+    align-items: center !important;
+    padding: 12px 0 !important;
+  }
+  .auth-card {
+    max-width: 280px !important;
+    margin: 0 auto !important;
+  }
+  .auth-card .card-body {
+    padding: 0.85rem !important;
+  }
+  .auth-card h5 {
+    font-size: 0.85rem !important;
+  }
+  .auth-card div[style*="border-radius:50%"] {
+    box-shadow: none !important;
+  }
+  .auth-card .form-label {
+    font-size: 0.7rem !important;
+  }
+  .auth-card .form-control,
+  .auth-card .form-select {
+    font-size: 0.74rem !important;
+    padding: 0.4rem 0.6rem !important;
+  }
+  .auth-card .input-icon-wrap .form-control {
+    padding-left: 30px !important;
+  }
+  .auth-card .input-icon-wrap .input-icon {
+    left: 10px !important;
+    font-size: 0.7rem !important;
+  }
+  .auth-card .step-circle {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 9px !important;
+  }
+  .auth-card .form-section-heading {
+    font-size: 0.78rem !important;
+  }
+  .auth-card .keahlian-check .form-check-label {
+    font-size: 0.68rem !important;
+  }
+  .auth-card .btn-step-next,
+  .auth-card .btn-step-back {
+    font-size: 0.76rem !important;
+    padding: 0.45rem 0.9rem !important;
+  }
+
+  .auth-card .d-flex.align-items-center.gap-3.mb-3 {
+    margin-bottom: 0.5rem !important;
+  }
+  .auth-card .row.g-2 {
+    margin-bottom: 0 !important;
+  }
+  .auth-card .mb-2 {
+    margin-bottom: 0.4rem !important;
+  }
+  .auth-card textarea.form-control {
+    min-height: 44px !important;
+  }
+  .auth-card .form-section-heading {
+    margin-bottom: 6px !important;
+    padding-bottom: 4px !important;
+  }
+  .auth-card .step-indicator {
+    margin-bottom: 4px !important;
+  }
+  .auth-card .form-section-label {
+    margin-bottom: 0 !important;
+    font-size: 0.55rem !important;
+  }
+  .auth-card p.text-muted {
+    font-size: 0.65rem !important;
+    line-height: 1.3 !important;
+  }
+  .auth-card .form-control,
+  .auth-card .form-select {
+    padding: 0.32rem 0.55rem !important;
+  }
+  .auth-card textarea.form-control {
+    padding: 0.32rem 0.55rem !important;
+  }
+  .auth-card .auth-footer-link {
+    margin-top: 4px !important;
+    font-size: 0.72rem !important;
+  }
+}
 </style>
 @endpush
 
@@ -451,10 +549,9 @@ body.auth-page {
         </form>
 
         <p class="auth-footer-link mt-2">
-          Sudah punya akun? <a href="{{ route('login') }}">Login di sini</a>
-        </p>
-        <p class="auth-footer-link">
-          Daftar sebagai donatur? <a href="{{ route('register.create') }}">Daftar di sini</a>
+          <a href="{{ route('login') }}">Login</a>
+          <span class="text-muted mx-1"> & </span>
+          <a href="{{ route('register.create') }}">Daftar sebagai Donatur</a>
         </p>
 
       </div>

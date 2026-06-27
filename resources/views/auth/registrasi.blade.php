@@ -161,6 +161,57 @@ body.auth-page {
   }
 }
 
+@media (max-width: 767.98px) {
+  html:has(body.auth-page) { overflow: hidden !important; }
+  .auth-hero {
+    height: 100vh !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+  }
+  .auth-card {
+    max-width: 280px !important;
+    margin: 0 auto !important;
+  }
+  .auth-card .card-body {
+    padding: 0.9rem !important;
+  }
+  .auth-card .auth-logo-ring {
+    width: 80px !important;
+    height: 80px !important;
+    box-shadow: none !important;
+    animation: none !important;
+  }
+  .auth-card h5 {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.6rem !important;
+  }
+  .auth-card h6 {
+    font-size: 0.82rem !important;
+  }
+  .auth-card .form-label {
+    font-size: 0.73rem !important;
+    margin-bottom: 0.15rem !important;
+  }
+  .auth-card .form-control-sm {
+    font-size: 0.75rem !important;
+    padding: 0.35rem 0.6rem !important;
+  }
+  .auth-card .mb-2 {
+    margin-bottom: 0.45rem !important;
+  }
+  .auth-card .btn {
+    font-size: 0.8rem !important;
+    padding: 0.45rem !important;
+  }
+  .auth-card .form-check-label {
+    font-size: 0.7rem !important;
+  }
+  .auth-card .small,
+  .auth-card small {
+    font-size: 0.68rem !important;
+  }
+}
+
 @media (max-height: 750px) and (min-width: 992px) {
   .auth-logo-ring { width: 90px; height: 90px; }
   .auth-heading { font-size: 1.3rem; }

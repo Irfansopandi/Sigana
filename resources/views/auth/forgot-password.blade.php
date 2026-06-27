@@ -8,8 +8,6 @@ body.auth-page #mainNavbar,
 body.auth-page footer.footer {
   display: none !important;
 }
-body.auth-page { overflow: hidden; }
-html:has(body.auth-page) { overflow: hidden !important; }
 
 .auth-hero {
   min-height: 100vh;
@@ -88,6 +86,42 @@ html:has(body.auth-page) { overflow: hidden !important; }
   background: #e2e8f0;
 }
 .step-line.done { background: #0ea5e9; }
+.auth-hero .col-lg-5:first-child {
+  display: block !important;
+}
+@media (min-width: 768px) {
+  body.auth-page { overflow: hidden; }
+  html:has(body.auth-page) { overflow: hidden !important; }
+}
+@media (max-width: 767.98px) {
+  .auth-hero {
+    min-height: 100vh !important;
+    height: 100vh !important;
+    align-items: center !important;
+    padding: 16px 0 !important;
+  }
+  .auth-card {
+    max-width: 280px !important;
+    margin: 0 auto !important;
+  }
+  .card-body {
+    padding: 1rem !important;
+  }
+  .step-indicator { margin-bottom: 16px !important; }
+  .step-dot {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.7rem !important;
+  }
+  .step-line { width: 36px !important; }
+  h5 { font-size: 1rem !important; }
+  .otp-inputs input {
+    width: 38px !important;
+    height: 46px !important;
+    font-size: 1.1rem !important;
+  }
+  .otp-inputs { gap: 6px !important; }
+}
 </style>
 @endpush
 
