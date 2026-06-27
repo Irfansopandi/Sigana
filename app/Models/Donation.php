@@ -17,6 +17,7 @@ class Donation extends Model
         'message',
         'payment_method',
         'payment_status',
+        'snap_token',
     ];
 
     protected $casts = [

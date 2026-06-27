@@ -186,10 +186,12 @@
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" 
         data-client-key="{{ config('services.midtrans.client_key') }}"></script>
 
-{{-- Midtrans Snap JS --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  let selectedAmount = null; // tidak ada default
+  // =====================
+  // State & Elements
+  // =====================
+  let selectedAmount = null;
 
   const nominalBtns    = document.querySelectorAll('.nominal-btn');
   const nominalKustom  = document.getElementById('nominalKustom');
@@ -197,7 +199,11 @@ document.addEventListener('DOMContentLoaded', function () {
   const summaryTotal   = document.getElementById('summaryTotal');
   const pesanInput     = document.getElementById('donaturPesan');
   const pesanCounter   = document.getElementById('pesanCounter');
+  const btnKirim       = document.getElementById('btnDonasiKirim');
 
+  // =====================
+  // Helpers
+  // =====================
   function formatRupiah(num) {
     return 'Rp' + parseInt(num).toLocaleString('id-ID');
   }
@@ -212,41 +218,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // Counter pesan
-  if (pesanInput && pesanCounter) {
-    pesanInput.addEventListener('input', () => {
-      pesanCounter.textContent = pesanInput.value.length + ' / 500';
-    });
-  }
-
-  // Klik tombol nominal → otomatis isi ke input custom
-  nominalBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      nominalBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedAmount = parseInt(btn.getAttribute('data-amount'));
-      nominalKustom.value = selectedAmount;
-      clearNominalError();
-      updateSummary();
-    });
-  });
-
-  // Input manual nominal
-  nominalKustom.addEventListener('input', (e) => {
-    const val = parseInt(e.target.value) || 0;
-
-    nominalBtns.forEach(b => {
-      b.classList.toggle('active', parseInt(b.getAttribute('data-amount')) === val);
-    });
-
-    selectedAmount = val > 0 ? val : null;
-    if (selectedAmount) clearNominalError();
-    updateSummary();
-  });
-
-  // =====================
-  // Fungsi Validasi
-  // =====================
   function setError(inputEl, errorEl, msg) {
     inputEl.style.borderColor = '#ef4444';
     errorEl.textContent = '⚠ ' + msg;
@@ -270,6 +241,19 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('nominalError').classList.add('d-none');
   }
 
+  function setBtnLoading() {
+    btnKirim.disabled = true;
+    btnKirim.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Memproses...';
+  }
+
+  function resetBtn() {
+    btnKirim.disabled = false;
+    btnKirim.innerHTML = '<i class="fa-solid fa-lock me-2"></i>Kirim Donasi Sekarang';
+  }
+
+  // =====================
+  // Validasi
+  // =====================
   function validateNominal() {
     if (!selectedAmount || selectedAmount < 10000) {
       setNominalError('Pilih atau masukkan nominal donasi (minimal Rp10.000).');
@@ -282,8 +266,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function validateNama() {
     const namaInput = document.getElementById('donaturNama');
     const namaError = document.getElementById('namaError');
-    const val = namaInput.value.trim();
-    if (!val) {
+    if (!namaInput.value.trim()) {
       setError(namaInput, namaError, 'Nama lengkap wajib diisi.');
       return false;
     }
@@ -291,22 +274,49 @@ document.addEventListener('DOMContentLoaded', function () {
     return true;
   }
 
-  // Real-time validasi saat blur
+  // =====================
+  // Events: Nominal
+  // =====================
+  nominalBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      nominalBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedAmount = parseInt(btn.getAttribute('data-amount'));
+      nominalKustom.value = selectedAmount;
+      clearNominalError();
+      updateSummary();
+    });
+  });
+
+  nominalKustom.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value) || 0;
+    nominalBtns.forEach(b => {
+      b.classList.toggle('active', parseInt(b.getAttribute('data-amount')) === val);
+    });
+    selectedAmount = val > 0 ? val : null;
+    if (selectedAmount) clearNominalError();
+    updateSummary();
+  });
+
+  // =====================
+  // Events: Pesan Counter & Nama Blur
+  // =====================
+  if (pesanInput && pesanCounter) {
+    pesanInput.addEventListener('input', () => {
+      pesanCounter.textContent = pesanInput.value.length + ' / 500';
+    });
+  }
+
   document.getElementById('donaturNama').addEventListener('blur', validateNama);
-
   // =====================
-  // Submit → Midtrans Snap
+  // Submit
   // =====================
-  document.getElementById('btnDonasiKirim').addEventListener('click', async () => {
-    const nama    = document.getElementById('donaturNama').value.trim();
-    const pesan   = document.getElementById('donaturPesan').value.trim();
-    const nominal = selectedAmount;
-
+  btnKirim.addEventListener('click', async () => {
     const nominalValid = validateNominal();
-    const namaValid     = validateNama();
+    const namaValid    = validateNama();
 
     if (!nominalValid) {
-      document.getElementById('nominalKustom').focus();
+      nominalKustom.focus();
       Swal.fire({
         icon: 'warning',
         title: 'Nominal belum diisi',
@@ -327,9 +337,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    const btn = document.getElementById('btnDonasiKirim');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Memproses...';
+    setBtnLoading();
 
     try {
       const response = await fetch('{{ route("bencana.donasi.transaction", $campaign->slug) }}', {
@@ -339,9 +347,9 @@ document.addEventListener('DOMContentLoaded', function () {
           'X-CSRF-TOKEN': '{{ csrf_token() }}',
         },
         body: JSON.stringify({
-          amount:         nominal,
-          name:           nama,
-          message:        pesan,
+          amount:         selectedAmount,
+          name:           document.getElementById('donaturNama').value.trim(),
+          message:        document.getElementById('donaturPesan').value.trim(),
           payment_method: 'SNAP',
         }),
       });
@@ -349,46 +357,27 @@ document.addEventListener('DOMContentLoaded', function () {
       const data = await response.json();
 
       if (data.errors) {
-        const firstError = Object.values(data.errors)[0][0];
         Swal.fire({
           icon: 'error',
           title: 'Validasi gagal',
-          text: firstError,
+          text: Object.values(data.errors)[0][0],
           confirmButtonColor: '#16a34a',
         });
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-lock me-2"></i>Kirim Donasi Sekarang';
+        resetBtn();
         return;
       }
 
-      snap.pay(data.snap_token, {
-          onSuccess: async function(result) {
-              await fetch('{{ route("bencana.donasi.update-status") }}', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                      'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                  },
-                  body: JSON.stringify({ order_id: data.order_id }),
-              });
-              window.location.href = '{{ route("bencana.donasi.finish", $campaign->slug) }}?order_id=' + data.order_id;
-          },
-          onClose: function() {
-              btn.disabled = false;
-              btn.innerHTML = '<i class="fa-solid fa-lock me-2"></i>Kirim Donasi Sekarang';
-          },
-      });
+      window.location.href = data.payment_url;
 
     } catch (error) {
-      console.error('Error detail:', error);
+      console.error(error);
       Swal.fire({
         icon: 'error',
         title: 'Terjadi kesalahan',
         text: 'Silakan coba lagi.',
         confirmButtonColor: '#16a34a',
       });
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-lock me-2"></i>Kirim Donasi Sekarang';
+      resetBtn();
     }
   });
 });

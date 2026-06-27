@@ -133,7 +133,7 @@ class RegisterController extends Controller
             'tanggal_lahir'  => $request->tanggal_lahir,
             'phone'          => $request->phone,
             'alamat'         => $request->alamat,
-            'keahlian'       => json_encode($request->keahlian),
+            'keahlian'       => $request->keahlian,
             'pengalaman'     => $request->pengalaman,
             'email'          => $request->email,
             'password'       => Hash::make($request->password),

@@ -20,34 +20,62 @@ class AdminDashboardController extends Controller
             'success_donations' => Donation::where('payment_status', 'success')->count(),
         ];
 
-        $recentUsers = User::latest()->take(3)->get();
-        $recentCampaigns = Campaign::latest()->take(3)->get();
-        $recentDonations = Donation::where('payment_status', 'success')->latest()->take(3)->get();
+        // Garfik 1: status bencana
+        $statsChart = Campaign::selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total','status')
+            ->toArray();
 
-        $recentActivities = collect([
-            [
-                'type' => 'user',
-                'icon' => 'fa-solid fa-user-plus',
-                'title' => 'Pengguna baru terdaftar',
-                'description' => $recentUsers->first()?->name ? $recentUsers->first()->name . ' bergabung sebagai ' . $recentUsers->first()->role : 'Belum ada aktivitas pengguna',
-                'time' => $recentUsers->first()?->created_at?->diffForHumans() ?? '-',
-            ],
-            [
-                'type' => 'campaign',
-                'icon' => 'fa-solid fa-hand-holding-heart',
-                'title' => 'Kampanye terbaru dibuat',
-                'description' => $recentCampaigns->first()?->title ?? 'Belum ada kampanye baru',
-                'time' => $recentCampaigns->first()?->created_at?->diffForHumans() ?? '-',
-            ],
-            [
-                'type' => 'donation',
-                'icon' => 'fa-solid fa-coins',
-                'title' => 'Donasi berhasil masuk',
-                'description' => $recentDonations->first()?->name ? $recentDonations->first()->name . ' berdonasi ' . $recentDonations->first()->amount : 'Belum ada donasi berhasil',
-                'time' => $recentDonations->first()?->created_at?->diffForHumans() ?? '-',
-            ],
-        ]);
+        $statsChart = array_merge([
+            'Darurat' => 0,
+            'Waspada' => 0,
+            'Aktif'   => 0,
+            'Selesai' => 0,
+        ], $statsChart);
 
-        return view('admin.dashboard', compact('stats', 'recentUsers', 'recentCampaigns', 'recentDonations', 'recentActivities'));
+        // Garik 2: Donasi per kampanye (top 6)
+        $donationChart = Donation::where('payment_status', 'success')
+            ->join('campaigns', 'donations.campaign_id', '=', 'campaigns.id')
+            ->selectRaw('campaigns.title, SUM(donations.amount) as total')
+            ->groupBy('campaigns.id', 'campaigns.title')
+            ->orderByDesc('total')
+            ->get();
+
+        $recentUsers = User::latest()->take(5)->get();
+        $recentCampaigns = Campaign::latest()->take(5)->get();
+        $recentDonations = Donation::where('payment_status', 'success')->latest()->take(5)->get();
+
+        $recentActivities = collect();
+            foreach ($recentUsers as $user) {
+            $recentActivities->push([
+                'type'        => 'user',
+                'icon'        => 'fa-solid fa-user-plus',
+                'title'       => 'Pengguna baru terdaftar',
+                'description' => $user->name . ' bergabung sebagai ' . $user->role,
+                'time'        => $user->created_at->diffForHumans(),
+            ]);
+        }
+
+        foreach ($recentCampaigns as $campaign) {
+            $recentActivities->push([
+                'type'        => 'campaign',
+                'icon'        => 'fa-solid fa-hand-holding-heart',
+                'title'       => 'Kampanye terbaru dibuat',
+                'description' => $campaign->title,
+                'time'        => $campaign->created_at->diffForHumans(),
+            ]);
+        }
+
+        foreach ($recentDonations as $donation) {
+            $recentActivities->push([
+                'type'        => 'donation',
+                'icon'        => 'fa-solid fa-coins',
+                'title'       => 'Donasi berhasil masuk',
+                'description' => $donation->name . ' berdonasi Rp ' . number_format(( float)$donation->getRawOriginal('amount'), 0, ',', '.'),
+                'time'        => $donation->created_at->diffForHumans(),
+            ]);
+        }
+
+        return view('admin.dashboard', compact('stats', 'recentUsers', 'recentCampaigns', 'recentDonations', 'recentActivities','statsChart', 'donationChart'));
     }
 }

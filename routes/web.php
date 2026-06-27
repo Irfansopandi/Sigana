@@ -25,6 +25,7 @@ Route::get('/bencana', [HomeController::class, 'bencana'])->name('bencana');
 Route::get('/bencana/{slug}', [DonationController::class, 'bencanaDetail'])->name('bencana.detail');
 Route::get('/bencana/{slug}/donasi', [HomeController::class, 'bencanaDonasiPage'])->name('bencana.donasi');
 Route::post('/bencana/{slug}/donasi/transaction', [DonationController::class, 'createTransaction'])->name('bencana.donasi.transaction');
+Route::get('/bencana/{slug}/donasi/payment/{donation}', [DonationController::class, 'payment'])->name('bencana.donasi.payment');
 Route::get('/bencana/{slug}/donasi/finish', [DonationController::class, 'finish'])->name('bencana.donasi.finish');
 Route::post('/bencana/donasi/update-status', [DonationController::class, 'updateStatus'])->name('bencana.donasi.update-status');
 Route::get('/transparansi', [HomeController::class, 'transparansi'])->name('transparansi');
@@ -59,6 +60,7 @@ Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
     Route::get('/campaigns', [AdminCampaignController::class, 'index'])->name('campaigns.index');
     Route::get('/campaigns/create', [AdminCampaignController::class, 'create'])->name('campaigns.create');
     Route::post('/campaigns', [AdminCampaignController::class, 'store'])->name('campaigns.store');

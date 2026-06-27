@@ -189,13 +189,12 @@
             Donasi Anda sedang dalam proses verifikasi. Selesaikan pembayaran sesuai instruksi yang telah dikirim.
           </p>
           <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <button id="btnCekStatus" class="btn btn-success px-4 py-2 fw-bold" style="border-radius:12px;">
+              <i class="fa-solid fa-rotate me-2"></i>Saya Sudah Bayar
+            </button>
             <a href="{{ route('bencana.detail', $campaign->slug) }}" 
-               class="btn btn-primary px-4 py-2 fw-bold" style="border-radius:12px;">
+              class="btn btn-outline-secondary px-4 py-2 fw-bold" style="border-radius:12px;">
               <i class="fa-solid fa-arrow-left me-2"></i>Kembali ke Detail
-            </a>
-            <a href="{{ route('bencana') }}" 
-               class="btn btn-outline-primary px-4 py-2 fw-bold" style="border-radius:12px;">
-              <i class="fa-solid fa-heart me-2"></i>Kampanye Lainnya
             </a>
           </div>
         </div>
@@ -207,5 +206,46 @@
   </div>
 </section>
 
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+const btnCek = document.getElementById('btnCekStatus');
+if (btnCek) {
+  btnCek.addEventListener('click', async function () {
+    this.disabled = true;
+    this.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Mengecek...';
 
+    try {
+      const response = await fetch('{{ route("bencana.donasi.update-status") }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        },
+        body: JSON.stringify({ order_id: '{{ $donation->order_id ?? "" }}' }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success' || data.status === 'already_success') {
+        window.location.reload();
+      } else {
+        Swal.fire({
+          icon: 'info',
+          title: 'Pembayaran Belum Terdeteksi',
+          text: 'Pembayaran Anda belum kami terima. Pastikan transfer sudah dilakukan.',
+          confirmButtonColor: '#16a34a',
+        });
+        this.disabled = false;
+        this.innerHTML = '<i class="fa-solid fa-rotate me-2"></i>Saya Sudah Bayar';
+      }
+    } catch (e) {
+      Swal.fire({ icon: 'error', title: 'Terjadi kesalahan', text: 'Silakan coba lagi.' });
+      this.disabled = false;
+      this.innerHTML = '<i class="fa-solid fa-rotate me-2"></i>Saya Sudah Bayar';
+    }
+  });
+}
+</script>
+@endpush
 @endsection

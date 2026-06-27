@@ -315,8 +315,8 @@
         </a>
             
         <div class="nav-label">Lainnya</div>
-        <a href="{{ route('home') }}" class="nav-link" target="_blank">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i><span> Lihat Situs</span>
+        <a href="{{ route('home') }}" class="nav-link">
+            <i class="fa-solid fa-globe"></i><span> Lihat Situs</span>
         </a>
     </nav>
 

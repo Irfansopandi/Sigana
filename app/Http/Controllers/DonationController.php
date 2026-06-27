@@ -70,17 +70,31 @@ class DonationController extends Controller
                     'name'     => 'Donasi: ' . substr($campaign->title, 0, 50),
                 ]
             ],
-            'callbacks' => [
-                'finish' => route('bencana.donasi.finish', $campaign->slug),
-            ],
         ];
 
         $snapToken = Snap::getSnapToken($params);
 
+        $donation->update(['snap_token' => $snapToken]);
+
         return response()->json([
-            'snap_token' => $snapToken,
-            'order_id'   => $orderId,
+            'snap_token'  => $snapToken,
+            'order_id'    => $orderId,
+            'payment_url' => route('bencana.donasi.payment', ['slug' => $campaign->slug, 'donation' => $donation->id]),
         ]);
+    }
+
+    public function payment($slug, $donation)
+    {
+        $campaign = Campaign::where('slug', $slug)->firstOrFail();
+        $donation = Donation::findOrFail($donation);
+
+        // Kalau sudah success, langsung redirect ke finish
+        if ($donation->getRawOriginal('payment_status') === 'success') {
+            return redirect()->route('bencana.donasi.finish', $campaign->slug)
+                ->with('order_id', $donation->order_id);
+        }
+
+        return view('bencana.donasi-payment', compact('campaign', 'donation'));
     }
 
     /**
@@ -166,15 +180,16 @@ class DonationController extends Controller
 
     public function updateStatus(Request $request)
     {
-        $donation = Donation::where('order_id', $request->order_id)->firstOrFail();
+         $donation = Donation::where('order_id', $request->order_id)->firstOrFail();
 
         if ($donation->getRawOriginal('payment_status') === 'success') {
             return response()->json(['status' => 'already_success']);
         }
 
-        // Ambil detail transaksi dari Midtrans
         $transactionStatus = (object) \Midtrans\Transaction::status($request->order_id);
-        $paymentType = $transactionStatus->payment_type ?? null;
+        $paymentType   = $transactionStatus->payment_type ?? null;
+        $txStatus      = $transactionStatus->transaction_status ?? null;
+        $fraudStatus   = $transactionStatus->fraud_status ?? null;
 
         $paymentMethod = $paymentType;
         if ($paymentType === 'bank_transfer' && isset($transactionStatus->va_numbers[0]->bank)) {
@@ -191,15 +206,25 @@ class DonationController extends Controller
             $paymentMethod = $transactionStatus->store ?? 'cstore';
         }
 
+        if ($txStatus === 'settlement' || ($txStatus === 'capture' && $fraudStatus === 'accept')) {
+            $status = 'success';
+        } elseif (in_array($txStatus, ['cancel', 'deny', 'expire'])) {
+            $status = 'expire';
+        } else {
+            $status = 'pending';
+        }
+
         $donation->update([
-            'payment_status' => 'success',
+            'payment_status' => $status,
             'payment_method' => $paymentMethod,
         ]);
 
-        $campaign = $donation->campaign;
-        $campaign->collected_raw = $campaign->collected_raw + $donation->getRawOriginal('amount');
-        $campaign->save();
+        if ($status === 'success') {
+            $campaign = $donation->campaign;
+            $campaign->collected_raw += $donation->getRawOriginal('amount');
+            $campaign->save();
+        }
 
-        return response()->json(['status' => 'ok']);
+        return response()->json(['status' => $status]);
     }
 }

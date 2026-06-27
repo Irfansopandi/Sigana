@@ -271,9 +271,6 @@ if (statsSection) {
     });
   }
 
-  // ==========================================
-  // Halaman Donasi: Standalone Form flow is handled inside donasi.blade.php script tag
-  // ==========================================
 
   // ==========================================
   // Bencana Page: Search, Category Filter, and Sorting
