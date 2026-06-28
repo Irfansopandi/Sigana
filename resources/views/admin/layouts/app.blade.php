@@ -9,7 +9,7 @@
   {{-- icon boostrap --}}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <!-- Favicon -->
-  <link rel="icon" type="image/jpeg" href="{{ asset('storage/assets/logo/logo-sigana.jpeg') }}">
+  <link rel="icon" type="image/jpeg" href="{{ asset('storage/assets/logo/logo-bulat.webp') }}">
   <style>
     :root {
       --navy-900: #0a2540;
@@ -242,14 +242,21 @@
 
     /* ── TOPBAR ── */
     .topbar {
-      height: 60px;
+      height: 60px !important;
+      min-height: 60px !important;
+      flex-shrink: 0 !important;
       background: #fff;
       border-bottom: 1px solid #e2e8f0;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 24px;
-      position: sticky; top: 0; z-index: 50;
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: var(--sidebar-w);
+      z-index: 50;
+      transition: left .3s ease;
     }
 
     .topbar-title { font-weight: 600; color: var(--navy-900); font-size: .95rem; }
@@ -267,7 +274,10 @@
 
 
     /* ── CONTENT ── */
-    .main-content { padding: 24px; flex: 1; }
+    .main-content { padding: 24px; padding-top: 84px; flex: 1; }
+    .sidebar.collapsed ~ .main-wrapper .topbar {
+      left: 70px;
+    }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 991px) {
@@ -276,6 +286,8 @@
       .main-wrapper { margin-left: 0; }
     }
   </style>
+
+
   @stack('styles')
 </head>
 <body>
@@ -324,8 +336,8 @@
     </a>
 
     <div class="nav-label">Lainnya</div>
-    <a href="{{ route('home') }}" class="nav-link" target="_blank">
-        <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>Lihat Situs</span>
+    <a href="{{ route('home') }}" class="nav-link">
+        <i class="fa-solid fa-globe"></i> <span>Lihat Situs</span>
     </a>
 </nav>
 
@@ -475,6 +487,7 @@ toggleBtn.addEventListener('click', () => {
 if (window.innerWidth >= 992 && localStorage.getItem('sidebar_collapsed') === 'true') {
   sidebar.classList.add('collapsed');
 }
+
 </script>
 </body>
 </html>

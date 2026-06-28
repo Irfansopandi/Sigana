@@ -149,6 +149,55 @@ html:has(body.auth-page) {
   .auth-hero .row { flex-direction: column; }
   .auth-hero .col-lg-5 { width: 100%; max-width: 100%; }
 }
+
+@media (max-width: 767.98px) {
+  html:has(body.auth-page) { overflow: hidden !important; }
+  .auth-hero {
+    height: 100vh !important;
+    overflow: hidden !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .auth-card {
+    max-width: 280px !important;
+    margin: 0 auto !important;
+  }
+  .auth-card .card-body {
+    padding: 1rem !important;
+  }
+  .auth-card .auth-logo-ring {
+    width: 80px !important;
+    height: 80px !important;
+    box-shadow: none !important;
+    animation: none !important;
+  }
+  .auth-card h5 {
+    font-size: 0.92rem !important;
+    margin-bottom: 0.7rem !important;
+  }
+  .auth-card h6 {
+    font-size: 0.82rem !important;
+  }
+  .auth-card .form-label {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+  .auth-card .form-control {
+    font-size: 0.78rem !important;
+    padding: 0.4rem 0.65rem !important;
+  }
+  .auth-card .mb-3 {
+    margin-bottom: 0.55rem !important;
+  }
+  .auth-card .btn {
+    font-size: 0.8rem !important;
+    padding: 0.45rem !important;
+  }
+  .auth-card .small,
+  .auth-card small {
+    font-size: 0.7rem !important;
+  }
+}
 </style>
 @endpush
 

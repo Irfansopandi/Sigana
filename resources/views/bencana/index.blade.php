@@ -151,20 +151,53 @@
       <div class="row align-items-center g-4">
         <div class="col-lg-7">
           <span class="section-tag section-tag-white mb-3">
-            <i class="fa-solid fa-hands-holding-child me-1"></i> Tanggap Darurat
-          </span>
-          <h2 class="fw-bold text-white mb-3" style="font-size: 2rem;">Laporkan Kejadian Bencana di Sekitar Anda</h2>
+            <i class="fa-solid fa-hands-holding-child me-1"></i> 
+              @auth @if(auth()->user()->role === 'user') Tanggap Darurat @else Bergabunglah @endif @else Bergabunglah @endauth
+            </span>
+          <h2 class="fw-bold text-white mb-3" style="font-size: 2rem;">
+            @auth
+              @if(auth()->user()->role === 'user')
+                Laporkan Kejadian Bencana di Sekitar Anda
+              @else
+                Jadilah Bagian dari Gerakan Kemanusiaan Indonesia
+              @endif
+            @else
+              Jadilah Bagian dari Gerakan Kemanusiaan Indonesia
+            @endauth
+          </h2>
           <p class="text-white mb-0" style="opacity: 0.85; line-height: 1.7;">
-            Mengetahui ada kejadian bencana alam yang belum tertangani? Laporkan segera ke platform kami agar tim relawan dan dinas sosial dapat berkoordinasi melakukan penanganan dan membuka galang dana darurat.
+            @auth
+              @if(auth()->user()->role === 'user')
+                Mengetahui ada kejadian bencana alam yang belum tertangani? Laporkan segera ke platform kami agar tim relawan dan dinas sosial dapat berkoordinasi melakukan penanganan dan membuka galang dana darurat.
+              @else
+                Ribuan relawan dan donatur sudah bersama kami. Setiap kontribusi Anda, sekecil apapun, bermakna besar bagi korban bencana yang membutuhkan pertolongan segera.
+              @endif
+            @else
+              Ribuan relawan dan donatur sudah bersama kami. Setiap kontribusi Anda, sekecil apapun, bermakna besar bagi korban bencana yang membutuhkan pertolongan segera.
+            @endauth
           </p>
         </div>
+
         <div class="col-lg-5 text-lg-end d-flex flex-column flex-lg-row gap-3 justify-content-lg-end">
-          <a href="#" class="btn btn-lapor d-flex align-items-center justify-content-center gap-2">
-            <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporkan Bencana
+          <a href="{{ route('bencana') }}" class="btn btn-donasi d-flex align-items-center justify-content-center gap-2">
+            <i class="fa-solid fa-heart"></i> Donasi Sekarang
           </a>
-          <a href="#" class="btn btn-relawan btn-outline-light about-cta-btn-outline d-flex align-items-center justify-content-center gap-2">
-            <i class="fa-solid fa-user-plus me-2"></i>Gabung Relawan
+          @guest
+          <a href="{{ route('register.relawan') }}" class="btn btn-relawan btn-outline-light about-cta-btn-outline d-flex align-items-center justify-content-center gap-2">
+            <i class="fa-solid fa-user-plus"></i> Daftar Relawan
           </a>
+          @endguest
+          @auth
+            @if(auth()->user()->role === 'user')
+            <a href="{{ route('laporan.bencana.create') }}" class="btn btn-lapor d-flex align-items-center justify-content-center gap-2">
+              <i class="fa-solid fa-triangle-exclamation"></i> Laporkan Bencana
+            </a>
+            @else
+            <a href="{{ route('register.relawan') }}" class="btn btn-relawan btn-outline-light about-cta-btn-outline d-flex align-items-center justify-content-center gap-2">
+              <i class="fa-solid fa-user-plus"></i> Daftar Relawan
+            </a>
+            @endif
+          @endauth
         </div>
       </div>
     </div>
