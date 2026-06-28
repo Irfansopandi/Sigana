@@ -91,15 +91,17 @@ Route::prefix('relawan')->name('relawan.')->middleware(['auth', 'role:relawan'])
     Route::get('/laporan', function () { return 'Coming soon'; })->name('laporan.index');
 });
 
-Route::middleware(['auth', 'role:user'])->group(function () {
-    Route::get('/laporan/bencana/create', [UserDashboardController::class, 'createReport'])->name('laporan.bencana.create');
-    Route::post('/laporan/bencana', [UserDashboardController::class, 'storeReport'])->name('laporan.bencana.store');
-});
 
 // User
 Route::prefix('user')->name('user.')->middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
     Route::get('/kampanye', [UserDashboardController::class, 'campaigns'])->name('campaigns');
+    Route::get('/lapor-bencana', [UserDashboardController::class, 'indexReport'])->name('lapor-bencana');
+    Route::get('/lapor-bencana/create', [UserDashboardController::class, 'createReport'])->name('lapor-bencana.create');
+    Route::post('/lapor-bencana', [UserDashboardController::class, 'storeReport'])->name('lapor-bencana.store');
+    Route::delete('lapor-bencana/{campaign}', [UserDashboardController::class, 'destroyReport'])->name('lapor-bencana.destroy');
+    Route::get('/lapor-bencana/{campaign}/edit', [UserDashboardController::class, 'editReport'])->name('lapor-bencana.edit');
+    Route::put('/lapor-bencana/{campaign}', [UserDashboardController::class, 'updateReport'])->name('lapor-bencana.update');
     Route::get('/riwayat-donasi', [UserDashboardController::class, 'donationHistory'])->name('donation-history');
     Route::get('/transparansi', [UserDashboardController::class, 'transparency'])->name('transparency');
     Route::get('/profil', [UserDashboardController::class, 'profile'])->name('profile');

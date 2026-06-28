@@ -9,7 +9,7 @@
   {{-- icon boostrap --}}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <!-- Favicon -->
-  <link rel="icon" type="image/jpeg" href="{{ asset('storage/assets/logo/logo-sigana.jpeg') }}">
+  <link rel="icon" type="image/jpeg" href="{{ asset('storage/assets/logo/logo-bulat.webp') }}">
   <style>
     :root {
       --navy-900: #0a2540;
@@ -265,6 +265,14 @@
       font-size: .8rem; font-weight: 600;
     }
 
+  .card-hover {
+    transition: transform .2s, box-shadow .2s;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(15,23,42,.10) !important;
+  }
+
 
     /* ── CONTENT ── */
     .main-content { padding: 24px; flex: 1; }
@@ -297,6 +305,11 @@
     <div class="nav-label">Utama</div>
     <a href="{{ route('user.dashboard') }}" class="nav-link {{ request()->routeIs('user.dashboard') ? 'active' : '' }}">
         <i class="fa-solid fa-gauge"></i><span> Dashboard</span>
+    </a>
+
+    <div class="nav-label">Pelaporan</div>
+    <a href="{{ route('user.lapor-bencana') }}" class="nav-link {{ request()->routeIs('user.lapor-bencana') ? 'active' : '' }}">
+        <i class="fa-solid fa-triangle-exclamation"></i><span> Lapor Bencana</span>
     </a>
 
     <div class="nav-label">Donasi</div>

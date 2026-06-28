@@ -89,4 +89,9 @@ class User extends Authenticatable
     {
         return $this->is_verified;
     }
+
+    public function donations()
+    {
+        return $this->hasMany(Donation::class);
+    }
 }

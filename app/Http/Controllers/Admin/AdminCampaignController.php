@@ -27,6 +27,7 @@ class AdminCampaignController extends Controller
 
         $slug = Str::slug($validated['title']) . '-' . time();
         $validated['slug'] = $slug;
+        $validated['report_status'] = 'disetujui'; // Campaign buatan admin otomatis disetujui
 
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('campaigns', 'public');

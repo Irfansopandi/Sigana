@@ -24,7 +24,7 @@
                 <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporan Lapangan
               </a>
             @elseif (auth()->user()->role === 'user')
-              <a href="{{ route('laporan.bencana.create') }}" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero">
+              <a href="{{ route('user.lapor-bencana.store') }}" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero">
                 <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporkan Bencana
               </a>
             @endif

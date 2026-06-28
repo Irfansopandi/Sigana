@@ -11,29 +11,33 @@ class HomeController extends Controller
      */
     public function index()
     {
+        $campaigns = Campaign::where('report_status', 'disetujui')
+            ->orderByDesc('date_published')->take(3)->get();
 
-        $campaigns = Campaign::orderByDesc('date_published')->take(3)->get();
-        $transparansi = Campaign::with('transparencyReport')->orderByDesc('date_published')->take(3)->get();
-        $totalDonasi = Campaign::sum('collected_raw');
+        $transparansi = Campaign::where('report_status', 'disetujui')
+            ->with('transparencyReport')->orderByDesc('date_published')->take(3)->get();
+
+        $totalDonasi = Campaign::where('report_status', 'disetujui')->sum('collected_raw');
         $totalDonatur = \App\Models\Donation::count();
-        $totalKampanye = Campaign::count();
+        $totalKampanye = Campaign::where('report_status', 'disetujui')->count();
         $totalKorbanTerbantu = \App\Models\TransparencyReport::sum('beneficiaries');
 
-        // Mapbox markers — hanya campaign yang punya koordinat
-        $campaignMarkers = Campaign::whereNotNull('latitude')
-        ->whereNotNull('longitude')
-        ->get()
-        ->map(fn($c) => [
-            'title'     => $c->title,
-            'location'  => $c->location,
-            'status'    => $c->status,
-            'category'  => $c->category,
-            'slug'      => $c->slug,
-            'latitude'  => (float) $c->latitude,
-            'longitude' => (float) $c->longitude,
-            'collected' => $c->collected,
-            'progress'  => $c->progress,
-        ]);
+        // Mapbox markers — hanya campaign yang sudah disetujui dan punya koordinat
+        $campaignMarkers = Campaign::where('report_status', 'disetujui')
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->get()
+            ->map(fn($c) => [
+                'title'     => $c->title,
+                'location'  => $c->location,
+                'status'    => $c->status,
+                'category'  => $c->category,
+                'slug'      => $c->slug,
+                'latitude'  => (float) $c->latitude,
+                'longitude' => (float) $c->longitude,
+                'collected' => $c->collected,
+                'progress'  => $c->progress,
+            ]);
 
         return view('home.index', compact('campaigns','transparansi', 'totalDonasi', 'totalDonatur', 'totalKampanye','totalKorbanTerbantu','campaignMarkers'));
     }
@@ -51,16 +55,20 @@ class HomeController extends Controller
      */
     public function bencana()
     {
-        $campaigns = Campaign::orderByDesc('date_published')->get();
-        return view('bencana.index', compact('campaigns'));    }
+        $campaigns = Campaign::where('report_status', 'disetujui')
+            ->orderByDesc('date_published')->get();
 
+        return view('bencana.index', compact('campaigns'));
+    }
 
     /**
      * Tampilkan halaman Donasi Bencana.
      */
     public function bencanaDonasiPage($slug)
     {
-        $campaign = Campaign::where('slug', $slug)->firstOrFail();
+        $campaign = Campaign::where('slug', $slug)
+            ->where('report_status', 'disetujui')
+            ->firstOrFail();
 
         return view('bencana.donasi', compact('campaign'));
     }
@@ -70,7 +78,8 @@ class HomeController extends Controller
      */
     public function transparansi()
     {
-        $campaigns = Campaign::with('transparencyReport')->orderByDesc('date_published')->get();
+        $campaigns = Campaign::where('report_status', 'disetujui')
+            ->with('transparencyReport')->orderByDesc('date_published')->get();
 
         $totalCollected = $campaigns->sum('collected_raw');
         $totalUsed = $campaigns->sum(fn($c) => $c->transparencyReport->getRawOriginal('used') ?? 0);
@@ -80,14 +89,14 @@ class HomeController extends Controller
         return view('transparansi.index', compact('campaigns', 'totalCollected', 'totalUsed', 'totalRemaining', 'totalDonors'));
     }
 
-    
-
     /**
      * Tampilkan halaman detail transparansi bencana tertentu.
      */
     public function transparansiDetail($slug)
     {
-        $campaign = Campaign::where('slug', $slug)->firstOrFail();
+        $campaign = Campaign::where('slug', $slug)
+            ->where('report_status', 'disetujui')
+            ->firstOrFail();
 
         $report = TransparencyReport::with(['allocations', 'timeline', 'evidence', 'docs'])
             ->where('campaign_id', $campaign->id)
@@ -103,5 +112,4 @@ class HomeController extends Controller
     {
         return view('kontak.index');
     }
-
 }
