@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\URL;
+use Carbon\Carbon;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -37,5 +38,7 @@ class AppServiceProvider extends ServiceProvider
             return $user instanceof User && $user->isUser();
         });
          Paginator::useBootstrapFive();
+
+        Carbon::setLocale('id');
     }
 }

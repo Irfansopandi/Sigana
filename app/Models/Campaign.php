@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -36,27 +37,81 @@ class Campaign extends Model
 
     protected $casts = [
         'date_published' => 'date',
-        'collected_raw' => 'integer',
-        'target_raw' => 'integer',
+        'collected_raw'  => 'integer',
+        'target_raw'     => 'integer',
+        'days_left'      => 'integer',
     ];
+
+    // ─────────────────────────────────────────────
+    //  COUNTDOWN & RIWAYAT
+    // ─────────────────────────────────────────────
+
+    /**
+     * Sisa hari kampanye dihitung otomatis dari date_published + durasi DB.
+     * Nilai days_left di DB = total durasi kampanye (tidak pernah berubah).
+     */
+    public function getDaysLeftAttribute(): int
+    {
+        $duration  = $this->attributes['days_left'] ?? 0;
+        $published = Carbon::parse($this->attributes['date_published']);
+        $deadline  = $published->copy()->addDays($duration);
+
+        $remaining = (int) now()->startOfDay()->diffInDays($deadline, false);
+        return max(0, $remaining);
+    }
+
+    /**
+     * Total durasi asli kampanye (nilai mentah dari DB).
+     * Berguna untuk halaman riwayat / arsip.
+     */
+    public function getDurationAttribute(): int
+    {
+        return (int) ($this->attributes['days_left'] ?? 0);
+    }
+
+    /**
+     * Tanggal berakhir kampanye (date_published + durasi DB).
+     */
+    public function getDeadlineAttribute(): string
+    {
+        $duration  = $this->attributes['days_left'] ?? 0;
+        $published = Carbon::parse($this->attributes['date_published']);
+        return $published->copy()->addDays($duration)->format('d M Y');
+    }
+
+    /**
+     * Apakah kampanye sudah berakhir?
+     */
+    public function getIsExpiredAttribute(): bool
+    {
+        return $this->days_left <= 0;
+    }
+
+    // ─────────────────────────────────────────────
+    //  STATUS
+    // ─────────────────────────────────────────────
 
     public function getStatusClassAttribute(): string
     {
         return match ($this->status) {
             'Darurat' => 'bg-danger',
             'Waspada' => 'bg-warning text-dark',
-            'Aktif' => 'bg-primary',
-            default => 'bg-secondary',
+            'Aktif'   => 'bg-primary',
+            default   => 'bg-secondary',
         };
     }
 
-    public function getStatusIconroAttribute(): string
+    public function getStatusIconAttribute(): string
     {
         return match ($this->status) {
-            'Aktif' => 'fa-solid fa-circle-dot',
-            default => 'fa-solid fa-triangle-exclamation',
+            'Aktif'  => 'fa-solid fa-circle-dot',
+            default  => 'fa-solid fa-triangle-exclamation',
         };
     }
+
+    // ─────────────────────────────────────────────
+    //  DANA
+    // ─────────────────────────────────────────────
 
     public function getCollectedAttribute(): string
     {
@@ -76,21 +131,27 @@ class Campaign extends Model
 
     public function getProgressAttribute(): string
     {
-        $raw = $this->progress_raw;
-        $formatted = (floor($raw) == $raw) ? number_format($raw, 0) : number_format($raw, 1);
+        $raw       = $this->progress_raw;
+        $formatted = (floor($raw) == $raw)
+            ? number_format($raw, 0)
+            : number_format($raw, 1);
         return $formatted . '%';
     }
 
     public function getProgressColorAttribute(): string
     {
         $p = $this->progress_raw;
-        return match(true) {
-            $p >= 75 => '#22c55e',  // hijau  - hampir tercapai
-            $p >= 50 => '#3b82f6',  // biru   - setengah jalan
-            $p >= 25 => '#f59e0b',  // kuning - baru mulai
-            default  => '#ef4444',  // merah  - kritis
+        return match (true) {
+            $p >= 75 => '#22c55e',  // hijau  – hampir tercapai
+            $p >= 50 => '#3b82f6',  // biru   – setengah jalan
+            $p >= 25 => '#f59e0b',  // kuning – baru mulai
+            default  => '#ef4444',  // merah  – kritis
         };
     }
+
+    // ─────────────────────────────────────────────
+    //  TANGGAL
+    // ─────────────────────────────────────────────
 
     public function getDatePublishedAttribute($value): string
     {
@@ -99,11 +160,19 @@ class Campaign extends Model
 
     private function formatIndonesianDate($date): string
     {
-        $bulan = [1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',
-                7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'];
-        $carbon = \Carbon\Carbon::parse($date);
+        $bulan = [
+            1  => 'Januari',   2  => 'Februari', 3  => 'Maret',
+            4  => 'April',     5  => 'Mei',       6  => 'Juni',
+            7  => 'Juli',      8  => 'Agustus',   9  => 'September',
+            10 => 'Oktober',   11 => 'November',  12 => 'Desember',
+        ];
+        $carbon = Carbon::parse($date);
         return $carbon->day . ' ' . $bulan[$carbon->month] . ' ' . $carbon->year;
     }
+
+    // ─────────────────────────────────────────────
+    //  RELASI
+    // ─────────────────────────────────────────────
 
     public function needs()
     {
@@ -114,7 +183,7 @@ class Campaign extends Model
     {
         return $this->hasMany(Donation::class);
     }
-    
+
     public function getDonorsCountAttribute(): int
     {
         return $this->donations()

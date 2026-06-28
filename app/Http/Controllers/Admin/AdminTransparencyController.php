@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\TransparencyReport;
 use Illuminate\Http\Request;
+use App\Services\NotificationService;
 
 class AdminTransparencyController extends Controller
 {
@@ -33,6 +34,7 @@ class AdminTransparencyController extends Controller
 
         $report->update(array_merge($validated, $this->statusMeta($validated['status'])));
         $report->refresh();
+        NotificationService::transparencyUpdated($report);
 
         return redirect()->route('admin.transparency.index')->with('success', 'Status laporan berhasil diperbarui.');
     }

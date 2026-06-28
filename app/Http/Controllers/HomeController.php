@@ -11,22 +11,33 @@ class HomeController extends Controller
      */
     public function index()
     {
+        // Hanya kampanye aktif (belum expired)
         $campaigns = Campaign::where('report_status', 'disetujui')
-            ->orderByDesc('date_published')->take(3)->get();
+            ->orderByDesc('date_published')
+            ->get()
+            ->filter(fn($c) => !$c->is_expired)
+            ->take(3)
+            ->values();
 
         $transparansi = Campaign::where('report_status', 'disetujui')
-            ->with('transparencyReport')->orderByDesc('date_published')->take(3)->get();
+            ->with('transparencyReport')
+            ->orderByDesc('date_published')
+            ->get()
+            ->filter(fn($c) => !$c->is_expired)
+            ->take(3)
+            ->values();
 
-        $totalDonasi = Campaign::where('report_status', 'disetujui')->sum('collected_raw');
-        $totalDonatur = \App\Models\Donation::count();
-        $totalKampanye = Campaign::where('report_status', 'disetujui')->count();
+        $totalDonasi        = Campaign::where('report_status', 'disetujui')->sum('collected_raw');
+        $totalDonatur       = \App\Models\Donation::count();
+        $totalKampanye      = Campaign::where('report_status', 'disetujui')->get()->filter(fn($c) => !$c->is_expired)->count();
         $totalKorbanTerbantu = \App\Models\TransparencyReport::sum('beneficiaries');
 
-        // Mapbox markers — hanya campaign yang sudah disetujui dan punya koordinat
+        // Mapbox markers — hanya campaign aktif yang punya koordinat
         $campaignMarkers = Campaign::where('report_status', 'disetujui')
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->get()
+            ->filter(fn($c) => !$c->is_expired)
             ->map(fn($c) => [
                 'title'     => $c->title,
                 'location'  => $c->location,
@@ -37,9 +48,15 @@ class HomeController extends Controller
                 'longitude' => (float) $c->longitude,
                 'collected' => $c->collected,
                 'progress'  => $c->progress,
-            ]);
+            ])
+            ->values();
 
-        return view('home.index', compact('campaigns','transparansi', 'totalDonasi', 'totalDonatur', 'totalKampanye','totalKorbanTerbantu','campaignMarkers'));
+        return view('home.index', compact(
+            'campaigns', 'transparansi',
+            'totalDonasi', 'totalDonatur',
+            'totalKampanye', 'totalKorbanTerbantu',
+            'campaignMarkers'
+        ));
     }
 
     /**
@@ -55,8 +72,12 @@ class HomeController extends Controller
      */
     public function bencana()
     {
+        // Filter expired di PHP karena days_left adalah accessor
         $campaigns = Campaign::where('report_status', 'disetujui')
-            ->orderByDesc('date_published')->get();
+            ->orderByDesc('date_published')
+            ->get()
+            ->filter(fn($c) => !$c->is_expired)
+            ->values();
 
         return view('bencana.index', compact('campaigns'));
     }
@@ -70,6 +91,11 @@ class HomeController extends Controller
             ->where('report_status', 'disetujui')
             ->firstOrFail();
 
+        // Blokir akses donasi kalau kampanye sudah selesai
+        if ($campaign->is_expired) {
+            return redirect()->route('bencana')->with('error', 'Kampanye ini sudah berakhir dan tidak menerima donasi.');
+        }
+
         return view('bencana.donasi', compact('campaign'));
     }
 
@@ -79,14 +105,19 @@ class HomeController extends Controller
     public function transparansi()
     {
         $campaigns = Campaign::where('report_status', 'disetujui')
-            ->with('transparencyReport')->orderByDesc('date_published')->get();
+            ->with('transparencyReport')
+            ->orderByDesc('date_published')
+            ->get();
 
-        $totalCollected = $campaigns->sum('collected_raw');
-        $totalUsed = $campaigns->sum(fn($c) => $c->transparencyReport->getRawOriginal('used') ?? 0);
-        $totalRemaining = $totalCollected - $totalUsed;
-        $totalDonors = \App\Models\Donation::count();
+        $totalCollected  = $campaigns->sum('collected_raw');
+        $totalUsed       = $campaigns->sum(fn($c) => $c->transparencyReport?->getRawOriginal('used') ?? 0);
+        $totalRemaining  = $totalCollected - $totalUsed;
+        $totalDonors     = \App\Models\Donation::count();
 
-        return view('transparansi.index', compact('campaigns', 'totalCollected', 'totalUsed', 'totalRemaining', 'totalDonors'));
+        return view('transparansi.index', compact(
+            'campaigns', 'totalCollected',
+            'totalUsed', 'totalRemaining', 'totalDonors'
+        ));
     }
 
     /**

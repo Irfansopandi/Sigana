@@ -9,6 +9,7 @@ use App\Models\TransparencyReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
 class UserDashboardController extends Controller
@@ -31,6 +32,20 @@ class UserDashboardController extends Controller
         return view('user.campaigns', compact('campaigns'));
     }
 
+    /**
+     * Kampanye yang sudah selesai (expired)
+     */
+    public function archivedCampaigns()
+    {
+        $campaigns = Campaign::where('report_status', 'disetujui')
+            ->latest()
+            ->get()
+            ->filter(fn($c) => $c->is_expired)
+            ->values();
+ 
+        return view('user.campaigns-archived', compact('campaigns'));
+    }
+
     public function donationHistory()
     {
         $donations = Donation::where('user_id', Auth::id())->latest()->get();
@@ -39,7 +54,15 @@ class UserDashboardController extends Controller
 
     public function transparency()
     {
-        $reports = TransparencyReport::latest()->get();
+        $reports = TransparencyReport::with('campaign')
+            ->whereHas('campaign', function ($q) {
+                $q->where('submitted_by', Auth::id())
+                ->where('report_status', 'disetujui');
+            })
+            ->latest()
+            ->get();
+
+
         return view('user.transparency', compact('reports'));
     }
 
@@ -47,6 +70,68 @@ class UserDashboardController extends Controller
     {
         $user = Auth::user();
         return view('user.profile', compact('user'));
+    }
+
+    public function updateInfo(Request $request)
+    {
+        $user = \App\Models\User::find(Auth::id());
+        $request->validate([
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|email|unique:users,email,' . $user->id,
+            'phone'         => 'nullable|digits_between:10,15',
+            'jenis_kelamin' => 'nullable|in:L,P',
+            'tanggal_lahir' => 'nullable|date',
+        ]);
+        
+
+        $user->name          = $request->name;
+        $user->email         = $request->email;
+        $user->phone         = $request->phone;
+        $user->jenis_kelamin = $request->jenis_kelamin;
+        $user->tanggal_lahir = $request->tanggal_lahir;
+        $user->save();
+
+        return redirect()->route('user.profile')->with('success', 'Informasi profil berhasil diperbarui.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'password'         => 'required|min:8|confirmed',
+        ]);
+
+        $user = \App\Models\User::find(Auth::id());
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return redirect()->route('user.profile')->with('error', 'Password lama tidak sesuai.');
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return redirect()->route('user.profile')->with('success', 'Password berhasil diubah.');
+    }
+
+    public function updatePhoto(Request $request)
+    {
+        $request->validate(['photo' => 'required|image|mimes:jpeg,png,jpg|max:2048']);
+
+        $user = \App\Models\User::find(Auth::id());
+
+        if ($user->photo) {
+            Storage::disk('public')->delete($user->photo);
+        }
+
+        $path = $request->file('photo')->store('foto-profile', 'public');
+        $user->photo = $path;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Foto profil berhasil diperbarui.',
+            'url'     => asset('storage/' . $path),
+        ]);
     }
 
     public function indexReport()

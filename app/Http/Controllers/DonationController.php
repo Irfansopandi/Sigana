@@ -146,6 +146,10 @@ class DonationController extends Controller
             $campaign = $donation->campaign;
             $campaign->collected_raw = $campaign->collected_raw + $donation->getRawOriginal('amount');
             $campaign->save();
+
+            if ($donation->user_id) {
+                \App\Services\NotificationService::donationSuccess($donation);
+            }
         }
 
         $donation->update([
@@ -225,6 +229,10 @@ class DonationController extends Controller
             $campaign = $donation->campaign;
             $campaign->collected_raw += $donation->getRawOriginal('amount');
             $campaign->save();
+
+            if ($donation->user_id) {
+                \App\Services\NotificationService::donationSuccess($donation);
+            }
         }
 
         return response()->json(['status' => $status]);

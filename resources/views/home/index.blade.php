@@ -1,5 +1,46 @@
 @extends('layouts.app')
 
+<style>
+#btn-lapor-hero,
+#btn-donasi-hero {
+  font-size: 0.85rem !important;
+  padding: 0.75rem 1.2rem !important;
+}
+
+#btn-relawan-hero {
+  font-size: 0.85rem;
+  padding: 0.75rem 1.2rem !important;
+  border: 1.5px solid #81878f;
+  color: #81878f;
+  background: transparent;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  line-height: 1.5;
+  display: inline-flex;
+  align-items: center;
+}
+
+#btn-relawan-hero:hover {
+  border-color: #111827;
+  color: #111827;
+  background: transparent;
+  box-shadow: 0 6px 20px rgba(37, 35, 35, 0.294);
+}
+
+[data-bs-theme="dark"] #btn-relawan-hero {
+  border-color: #475569;
+  color: #94a3b8;
+  background: transparent;
+}
+
+[data-bs-theme="dark"] #btn-relawan-hero:hover {
+  border-color: #e2e8f0;
+  color: #f1f5f9;
+  background: transparent;
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.294);
+}
+</style>
+
 @section('content')
 
 {{-- Section: Hero --}}
@@ -17,7 +58,7 @@
           Laporkan kejadian bencana di sekitar Anda dan salurkan bantuan kepada korban melalui platform digital yang
           aman, cepat, dan terpercaya.
         </p>
-        <div class="hero-buttons">
+        <div class="hero-buttons" style="gap: 10px;">
           @auth
             @if(auth()->user()->role === 'relawan')
               <a href="{{ route('relawan.laporan.create') }}" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero">
@@ -32,6 +73,9 @@
             <a href="#" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero"
               data-bs-toggle="modal" data-bs-target="#modalAuthRequired">
               <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporkan Bencana
+            </a>
+            <a href="{{ route('register.relawan') }}" class="btn btn-outline-primary px-4 py-3" id="btn-relawan-hero">
+              <i class="fa-solid fa-hands-helping me-2"></i>Daftar Relawan
             </a>
           @endauth
           @if(!auth()->check() || auth()->user()->role !== 'admin')
