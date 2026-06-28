@@ -11,6 +11,7 @@ class HomeController extends Controller
      */
     public function index()
     {
+
         $campaigns = Campaign::orderByDesc('date_published')->take(3)->get();
         $transparansi = Campaign::with('transparencyReport')->orderByDesc('date_published')->take(3)->get();
         $totalDonasi = Campaign::sum('collected_raw');
