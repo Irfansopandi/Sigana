@@ -66,6 +66,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/campaigns/{campaign}/edit', [AdminCampaignController::class, 'edit'])->name('campaigns.edit');
     Route::match(['put', 'patch'], '/campaigns/{campaign}', [AdminCampaignController::class, 'update'])->name('campaigns.update');
     Route::delete('/campaigns/{campaign}', [AdminCampaignController::class, 'destroy'])->name('campaigns.destroy');
+
+
+    Route::post('/campaigns/{campaign}/approve', [AdminCampaignController::class, 'approve'])->name('campaigns.approve');
+    Route::post('/campaigns/{campaign}/reject', [AdminCampaignController::class, 'reject'])->name('campaigns.reject');
     Route::get('/donations', [AdminDonationController::class, 'index'])->name('donations.index');
     Route::get('/transparency', [AdminTransparencyController::class, 'index'])->name('transparency.index');
     Route::get('/transparency/{report}', [AdminTransparencyController::class, 'show'])->name('transparency.show');
@@ -85,9 +89,16 @@ Route::prefix('relawan')->name('relawan.')->middleware(['auth', 'role:relawan'])
     Route::get('/laporan', function () { return 'Coming soon'; })->name('laporan.index');
 });
 
-Route::get('/laporan/bencana/create', function () { return 'Coming soon'; })->middleware(['auth', 'role:user'])->name('laporan.bencana.create');
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/laporan/bencana/create', [UserDashboardController::class, 'createReport'])->name('laporan.bencana.create');
+    Route::post('/laporan/bencana', [UserDashboardController::class, 'storeReport'])->name('laporan.bencana.store');
+});
 
 // User
 Route::prefix('user')->name('user.')->middleware(['auth', 'role:user'])->group(function () {
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/kampanye', [UserDashboardController::class, 'campaigns'])->name('campaigns');
+    Route::get('/riwayat-donasi', [UserDashboardController::class, 'donationHistory'])->name('donation-history');
+    Route::get('/transparansi', [UserDashboardController::class, 'transparency'])->name('transparency');
+    Route::get('/profil', [UserDashboardController::class, 'profile'])->name('profile');
 });

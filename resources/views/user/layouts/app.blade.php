@@ -300,18 +300,18 @@
     </a>
 
     <div class="nav-label">Donasi</div>
-    <a href="#" class="nav-link">
+    <a href="{{ route('user.campaigns') }}" class="nav-link {{ request()->routeIs('user.campaigns') ? 'active' : '' }}">
         <i class="fa-solid fa-hand-holding-heart"></i><span> Kampanye Bencana</span>
     </a>
-    <a href="#" class="nav-link">
+    <a href="{{ route('user.donation-history') }}" class="nav-link {{ request()->routeIs('user.donation-history') ? 'active' : '' }}">
         <i class="fa-solid fa-clock-rotate-left"></i><span> Riwayat Donasi</span>
     </a>
 
     <div class="nav-label">Informasi</div>
-    <a href="#" class="nav-link">
+    <a href="{{ route('user.transparency') }}" class="nav-link {{ request()->routeIs('user.transparency') ? 'active' : '' }}">
         <i class="fa-solid fa-file-lines"></i><span> Transparansi Dana</span>
     </a>
-    <a href="#" class="nav-link">
+    <a href="{{ route('user.profile') }}" class="nav-link {{ request()->routeIs('user.profile') ? 'active' : '' }}">
         <i class="fa-solid fa-user"></i><span> Profil Saya</span>
     </a>
 

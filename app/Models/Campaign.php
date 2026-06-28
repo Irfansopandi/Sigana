@@ -27,6 +27,11 @@ class Campaign extends Model
         'latitude',
         'longitude',
         'assigned_to',
+        'submitted_by',
+        'report_status',
+        'documentation_1',
+        'documentation_2',
+        'documentation_3',
     ];
 
     protected $casts = [

@@ -24,7 +24,14 @@
             <h6 class="fw-semibold mb-1">{{ $campaign->title }}</h6>
             <div class="small text-muted">{{ $campaign->location }}</div>
           </div>
-          <span class="badge {{ $campaign->status_class }}">{{ $campaign->status }}</span>
+          <div class="d-flex gap-2 flex-wrap">
+            @if($campaign->report_status)
+              <span class="badge {{ $campaign->report_status === 'disetujui' ? 'bg-success' : ($campaign->report_status === 'ditolak' ? 'bg-danger' : 'bg-warning text-dark') }}">
+                {{ ucfirst($campaign->report_status) }}
+              </span>
+            @endif
+            <span class="badge {{ $campaign->status_class }}">{{ $campaign->status }}</span>
+          </div>
         </div>
         <div class="small text-muted mb-2">Terkumpul {{ $campaign->collected }} dari {{ $campaign->target }}</div>
         <div class="progress" style="height: 8px;">
@@ -32,7 +39,20 @@
         </div>
         <div class="mt-3 d-flex justify-content-between align-items-center">
           <span class="small text-muted">{{ $campaign->progress }}</span>
-          <a href="{{ route('admin.campaigns.show', $campaign) }}" class="link-primary small">Detail</a>
+          <div class="d-flex gap-2">
+            @if($campaign->report_status === 'menunggu')
+              <form action="{{ route('admin.campaigns.approve', $campaign) }}" method="POST" style="display: inline;">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-success">Setujui</button>
+              </form>
+              <form action="{{ route('admin.campaigns.reject', $campaign) }}" method="POST" style="display: inline;">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-danger">Tolak</button>
+              </form>
+            @endif
+            <a href="{{ route('admin.campaigns.edit', $campaign) }}" class="btn btn-sm btn-primary">Edit</a>
+            <a href="{{ route('admin.campaigns.show', $campaign) }}" class="link-primary small">Detail</a>
+          </div>
         </div>
       </div>
     </div>

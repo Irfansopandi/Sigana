@@ -17,8 +17,15 @@ class RoleMiddleware
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
+        $normalizedRole = $user->role ?? 'user';
 
-        if (!in_array($user->role, $roles)) {
+        $allowedRoles = array_map(function ($role) {
+            return strtolower($role);
+        }, $roles);
+
+        $userRole = strtolower($normalizedRole);
+
+        if (!in_array($userRole, $allowedRoles) && !in_array('user', $allowedRoles)) {
             abort(403, 'Akses ditolak.');
         }
 

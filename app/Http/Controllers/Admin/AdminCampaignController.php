@@ -62,6 +62,16 @@ class AdminCampaignController extends Controller
             $validated['image'] = $request->file('image')->store('campaigns', 'public');
         }
 
+        // Handle documentation files
+        foreach (['documentation_1', 'documentation_2', 'documentation_3'] as $field) {
+            if ($request->hasFile($field)) {
+                if ($campaign->$field && Storage::disk('public')->exists($campaign->$field)) {
+                    Storage::disk('public')->delete($campaign->$field);
+                }
+                $validated[$field] = $request->file($field)->store('reports', 'public');
+            }
+        }
+
         $campaign->update($validated);
 
         return redirect()->route('admin.campaigns.show', $campaign)->with('success', 'Kampanye berhasil diperbarui!');
@@ -73,9 +83,27 @@ class AdminCampaignController extends Controller
             Storage::disk('public')->delete($campaign->image);
         }
 
+        foreach (['documentation_1', 'documentation_2', 'documentation_3'] as $field) {
+            if ($campaign->$field && Storage::disk('public')->exists($campaign->$field)) {
+                Storage::disk('public')->delete($campaign->$field);
+            }
+        }
+
         $campaign->delete();
 
         return redirect()->route('admin.campaigns.index')->with('success', 'Kampanye berhasil dihapus.');
+    }
+
+    public function approve(Campaign $campaign)
+    {
+        $campaign->update(['report_status' => 'disetujui']);
+        return redirect()->route('admin.campaigns.index')->with('success', 'Laporan bencana berhasil disetujui!');
+    }
+
+    public function reject(Campaign $campaign)
+    {
+        $campaign->update(['report_status' => 'ditolak']);
+        return redirect()->route('admin.campaigns.index')->with('success', 'Laporan bencana berhasil ditolak!');
     }
 
     private function validateCampaign(Request $request): array
@@ -94,6 +122,10 @@ class AdminCampaignController extends Controller
             'victims' => 'nullable|integer|min:0',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            'report_status' => 'nullable|string|in:menunggu,disetujui,ditolak',
+            'documentation_1' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'documentation_2' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'documentation_3' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
     }
 }

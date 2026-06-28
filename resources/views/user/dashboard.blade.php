@@ -56,6 +56,51 @@
   </div>
 </div>
 
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-white border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
+    <h6 class="fw-semibold mb-0">Laporan Bencana Saya</h6>
+    <a href="{{ route('laporan.bencana.create') }}" class="btn btn-sm btn-primary">+ Buat Laporan</a>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-3">#</th>
+            <th>Judul</th>
+            <th>Lokasi</th>
+            <th>Status Verifikasi</th>
+            <th>Waktu</th>
+          </tr>
+        </thead>
+        <tbody>
+          @forelse($reports as $i => $report)
+          <tr>
+            <td class="ps-3 text-muted small">{{ $i + 1 }}</td>
+            <td class="fw-medium">{{ $report->title }}</td>
+            <td class="text-muted small">{{ $report->location }}</td>
+            <td>
+              @if($report->report_status === 'disetujui')
+                <span class="badge bg-success">Disetujui</span>
+              @elseif($report->report_status === 'ditolak')
+                <span class="badge bg-danger">Ditolak</span>
+              @else
+                <span class="badge bg-warning text-dark">Menunggu</span>
+              @endif
+            </td>
+            <td class="text-muted small">{{ $report->created_at->translatedFormat('d M Y') }}</td>
+          </tr>
+          @empty
+          <tr>
+            <td colspan="5" class="text-center py-4 text-muted">Belum ada laporan bencana yang Anda kirim.</td>
+          </tr>
+          @endforelse
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <div class="card border-0 shadow-sm">
   <div class="card-header bg-white border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
     <h6 class="fw-semibold mb-0">Kampanye Butuh Bantuan</h6>

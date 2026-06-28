@@ -43,6 +43,24 @@
   @method('PUT')
 
   <div class="form-section">
+    <h6><i class="fa-solid fa-check-circle me-2"></i>Verifikasi Laporan</h6>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label for="report_status" class="form-label">Status Verifikasi</label>
+        <select class="form-select @error('report_status') is-invalid @enderror" id="report_status" name="report_status">
+          <option value="">-- Pilih Status --</option>
+          @foreach(['menunggu','disetujui','ditolak'] as $option)
+            <option value="{{ $option }}" {{ old('report_status', $campaign->report_status) === $option ? 'selected' : '' }}>{{ ucfirst($option) }}</option>
+          @endforeach
+        </select>
+        @error('report_status')
+          <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
     <h6><i class="fa-solid fa-info-circle me-2"></i>Informasi Dasar</h6>
     <div class="row g-3">
       <div class="col-md-6">
@@ -154,7 +172,7 @@
   </div>
 
   <div class="form-section">
-    <h6><i class="fa-solid fa-image me-2"></i>Gambar & Lokasi</h6>
+    <h6><i class="fa-solid fa-image me-2"></i>Gambar & Dokumentasi</h6>
     <div class="row g-3">
       <div class="col-md-6">
         <label for="image" class="form-label">Foto Kampanye</label>
@@ -168,7 +186,7 @@
         @enderror
       </div>
 
-      <div class="col-md-3">
+      <div class="col-md-6">
         <label for="latitude" class="form-label">Latitude (Opsional)</label>
         <input type="number" class="form-control @error('latitude') is-invalid @enderror" id="latitude" 
                name="latitude" value="{{ old('latitude', $campaign->latitude) }}" step="0.0001">
@@ -177,7 +195,7 @@
         @enderror
       </div>
 
-      <div class="col-md-3">
+      <div class="col-md-6">
         <label for="longitude" class="form-label">Longitude (Opsional)</label>
         <input type="number" class="form-control @error('longitude') is-invalid @enderror" id="longitude" 
                name="longitude" value="{{ old('longitude', $campaign->longitude) }}" step="0.0001">
@@ -185,6 +203,25 @@
           <div class="invalid-feedback">{{ $message }}</div>
         @enderror
       </div>
+
+      @foreach(['documentation_1', 'documentation_2', 'documentation_3'] as $idx => $field)
+        <div class="col-md-4">
+          <label for="{{ $field }}" class="form-label">Dokumentasi {{ $idx + 1 }}</label>
+          <input type="file" class="form-control @error($field) is-invalid @enderror" id="{{ $field }}" 
+                 name="{{ $field }}" accept=".pdf,image/*">
+          <small class="text-muted">Format: PDF, JPG, PNG (Max 2MB)</small>
+          @if($campaign->$field)
+            <div class="mt-2">
+              <a href="{{ asset('storage/' . $campaign->$field) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                <i class="fa-solid fa-eye"></i> Lihat Dokumentasi {{ $idx + 1 }}
+              </a>
+            </div>
+          @endif
+          @error($field)
+            <div class="invalid-feedback d-block">{{ $message }}</div>
+          @enderror
+        </div>
+      @endforeach
     </div>
   </div>
 
