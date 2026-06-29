@@ -128,6 +128,7 @@
                 </label>
                 <input type="text" id="donaturNama" class="form-control" 
                       placeholder="Masukkan nama Anda"
+                      value="{{ Auth::check()? Auth::user()->name : '' }}"
                       style="height: 52px; border-radius: 12px; border: 1px solid rgba(15,23,42,0.1);">
                 <div id="namaError" class="text-danger small mt-1 d-none">
                   <i class="fa-solid fa-circle-exclamation me-1"></i>Nama lengkap wajib diisi.

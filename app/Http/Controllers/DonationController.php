@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Campaign;
 use App\Models\Donation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Midtrans\Config;
 use Midtrans\Snap;
 
@@ -45,6 +46,7 @@ class DonationController extends Controller
         $donation = Donation::create([
             'campaign_id'    => $campaign->id,
             'order_id'       => $orderId,
+            'user_id'        => Auth::check() ? Auth::id() : null,
             'name'           => $request->name,
             'amount'         => $request->amount,
             'phone'          => $request->phone,
@@ -144,6 +146,10 @@ class DonationController extends Controller
             $campaign = $donation->campaign;
             $campaign->collected_raw = $campaign->collected_raw + $donation->getRawOriginal('amount');
             $campaign->save();
+
+            if ($donation->user_id) {
+                \App\Services\NotificationService::donationSuccess($donation);
+            }
         }
 
         $donation->update([
@@ -223,6 +229,10 @@ class DonationController extends Controller
             $campaign = $donation->campaign;
             $campaign->collected_raw += $donation->getRawOriginal('amount');
             $campaign->save();
+
+            if ($donation->user_id) {
+                \App\Services\NotificationService::donationSuccess($donation);
+            }
         }
 
         return response()->json(['status' => $status]);

@@ -9,7 +9,7 @@
   {{-- icon boostrap --}}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <!-- Favicon -->
-  <link rel="icon" type="image/jpeg" href="{{ asset('storage/assets/logo/logo-sigana.jpeg') }}">
+  <link rel="icon" type="image/jpeg" href="{{ asset('storage/assets/logo/logo-bulat.webp') }}">
  <style>
     :root {
       --navy-900: #0a2540;

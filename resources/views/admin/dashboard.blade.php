@@ -83,37 +83,45 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0,0,0,0.15);
 }
-  /* Stat Cards */
+/* start card */
 .stat-card {
   border: 0;
-  border-radius: 1.1rem;
+  border-radius: 16px !important;
   transition: transform .2s ease, box-shadow .2s ease;
   overflow: hidden;
   position: relative;
+  background: #fff;
 }
 
 .stat-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.10);
 }
 
-.stat-card-blue   { background: linear-gradient(135deg, #2563eb, #60a5fa); }
-.stat-card-yellow { background: linear-gradient(135deg, #d97706, #fbbf24); }
-.stat-card-green  { background: linear-gradient(135deg, #059669, #34d399); }
-.stat-card-purple { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+.stat-card .card-body {
+  min-height: 90px;
+}
+
+.stat-card-blue   { border-left: 4px solid #2563eb !important; }
+.stat-card-yellow { border-left: 4px solid #d97706 !important; }
+.stat-card-green  { border-left: 4px solid #059669 !important; }
+.stat-card-purple { border-left: 4px solid #7c3aed !important; }
 
 .stat-card .stat-icon {
   width: 48px; height: 48px;
   border-radius: 12px;
-  background: rgba(255,255,255,0.2);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.2rem;
-  color: #fff;
   flex-shrink: 0;
 }
 
-.stat-card .stat-label { color: rgba(255,255,255,0.8); font-size: 0.8rem; }
-.stat-card .stat-value { color: #fff; font-weight: 700; font-size: 1.4rem; }
+.stat-card-blue   .stat-icon { background: rgba(37,99,235,0.1);  color: #2563eb; }
+.stat-card-yellow .stat-icon { background: rgba(217,119,6,0.1);  color: #d97706; }
+.stat-card-green  .stat-icon { background: rgba(5,150,105,0.1);  color: #059669; }
+.stat-card-purple .stat-icon { background: rgba(124,58,237,0.1); color: #7c3aed; }
+
+.stat-card .stat-label { color: #64748b; font-size: 0.8rem; }
+.stat-card .stat-value { color: #0f172a; font-weight: 700; font-size: 1.4rem; }
 
   .quick-action-card {
     border: 1px solid #e2e8f0;
@@ -226,29 +234,29 @@
           </div>
         </div>
       </div>
-    <div class="col-sm-6 col-xl-3">
-      <div class="card stat-card stat-card-yellow shadow-sm">
-        <div class="card-body d-flex align-items-center gap-3 p-4">
-          <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-          <div>
-            <div class="stat-label">Total Bencana</div>
-            <div class="stat-value">{{ $stats['campaigns'] }}</div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card stat-card-yellow shadow-sm">
+          <div class="card-body d-flex align-items-center gap-3 p-4">
+            <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div>
+              <div class="stat-label">Total Bencana</div>
+              <div class="stat-value">{{ $stats['campaigns'] }}</div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-      <div class="card stat-card stat-card-green shadow-sm">
-        <div class="card-body d-flex align-items-center gap-3 p-4">
-          <div class="stat-icon"><i class="fa-solid fa-coins"></i></div>
-          <div>
-            <div class="stat-label">Donasi Sukses</div>
-            <div class="stat-value" style="font-size:1.1rem;">Rp {{ number_format($stats['donations'], 0, ',', '.') }}</div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card stat-card-green shadow-sm">
+          <div class="card-body d-flex align-items-center gap-3 p-4">
+            <div class="stat-icon"><i class="fa-solid fa-coins"></i></div>
+            <div>
+              <div class="stat-label">Donasi Sukses</div>
+              <div class="stat-value" style="font-size:1.1rem;">Rp {{ number_format($stats['donations'], 0, ',', '.') }}</div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
+      <div class="col-sm-6 col-xl-3">
         <div class="card stat-card stat-card-purple shadow-sm">
           <div class="card-body d-flex align-items-center gap-3 p-4">
             <div class="stat-icon"><i class="fa-solid fa-user-shield"></i></div>

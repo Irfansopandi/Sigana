@@ -5,14 +5,13 @@
 
 @push('styles')
 <style>
-  .stat-card { border: 0; border-radius: 1.1rem; transition: transform .2s ease, box-shadow .2s ease; overflow: hidden; }
-  .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(15,23,42,0.12); }
-  .stat-card-green  { background: linear-gradient(135deg, #059669, #34d399); }
-  .stat-card-red    { background: linear-gradient(135deg, #dc2626, #f87171); }
-  .stat-icon { width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:#fff; flex-shrink:0; }
-  .stat-label { color:rgba(255,255,255,0.8); font-size:0.8rem; }
-  .stat-value { color:#fff; font-weight:700; font-size:1.4rem; }
-  .stat-card-blue { background: linear-gradient(135deg, #2563eb, #60a5fa); }
+.stat-card-item {
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.stat-card-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.10) !important;
+}
 
 .volunteer-avatar {
   width: 34px; height: 34px;
@@ -65,34 +64,40 @@
 {{-- Stat Cards --}}
 <div class="row g-3 mb-4">
   <div class="col-sm-4">
-    <div class="card stat-card stat-card-blue shadow-sm">
+    <div class="card border-0 shadow-sm h-100 stat-card-item" style="border-radius:16px; border-left:4px solid #2563eb !important;">
       <div class="card-body d-flex align-items-center gap-3 p-4">
-        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(37,99,235,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fa-solid fa-users" style="color:#2563eb;font-size:1.2rem;"></i>
+        </div>
         <div>
-          <div class="stat-label">Total Relawan</div>
-          <div class="stat-value">{{ $stats['total'] }}</div>
+          <div class="small" style="color:#64748b;">Total Relawan</div>
+          <div class="fw-bold" style="font-size:1.4rem;color:#0f172a;">{{ $stats['total'] }}</div>
         </div>
       </div>
     </div>
   </div>
   <div class="col-sm-4">
-    <div class="card stat-card stat-card-green shadow-sm">
+    <div class="card border-0 shadow-sm h-100 stat-card-item" style="border-radius:16px; border-left:4px solid #059669 !important;">
       <div class="card-body d-flex align-items-center gap-3 p-4">
-        <div class="stat-icon"><i class="fa-solid fa-user-check"></i></div>
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(5,150,105,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fa-solid fa-user-check" style="color:#059669;font-size:1.2rem;"></i>
+        </div>
         <div>
-          <div class="stat-label">Terverifikasi</div>
-          <div class="stat-value">{{ $stats['verified'] }}</div>
+          <div class="small" style="color:#64748b;">Terverifikasi</div>
+          <div class="fw-bold" style="font-size:1.4rem;color:#0f172a;">{{ $stats['verified'] }}</div>
         </div>
       </div>
     </div>
   </div>
   <div class="col-sm-4">
-    <div class="card stat-card stat-card-red shadow-sm">
+    <div class="card border-0 shadow-sm h-100 stat-card-item" style="border-radius:16px; border-left:4px solid #dc2626 !important;">
       <div class="card-body d-flex align-items-center gap-3 p-4">
-        <div class="stat-icon"><i class="fa-solid fa-user-clock"></i></div>
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(220,38,38,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fa-solid fa-user-clock" style="color:#dc2626;font-size:1.2rem;"></i>
+        </div>
         <div>
-          <div class="stat-label">Belum Diverifikasi</div>
-          <div class="stat-value">{{ $stats['unverified'] }}</div>
+          <div class="small" style="color:#64748b;">Belum Diverifikasi</div>
+          <div class="fw-bold" style="font-size:1.4rem;color:#0f172a;">{{ $stats['unverified'] }}</div>
         </div>
       </div>
     </div>

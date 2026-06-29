@@ -152,7 +152,7 @@
           @guest
           <li class="nav-item">
             <a class="nav-link {{ request()->routeIs('register.relawan') ? 'active' : '' }}" href="{{ route('register.relawan') }}" id="nav-relawan">
-              <i class="fa-solid fa-hand-holding-heart me-1"></i>Gabung Relawan
+              Daftar Relawan
             </a>
           </li>
           @endguest

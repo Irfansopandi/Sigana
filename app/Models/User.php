@@ -24,7 +24,10 @@ class User extends Authenticatable
         'google_id',
         'phone',
         'role',
+        'photo',
         'email_verified_at',
+        'tanggal_lahir',
+        'jenis_kelamin',
     ];
 
     /**
@@ -88,5 +91,10 @@ class User extends Authenticatable
     public function isVerified(): bool
     {
         return $this->is_verified;
+    }
+
+    public function donations()
+    {
+        return $this->hasMany(Donation::class);
     }
 }

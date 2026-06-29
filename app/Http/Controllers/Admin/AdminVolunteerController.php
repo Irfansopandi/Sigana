@@ -52,4 +52,27 @@ class AdminVolunteerController extends Controller
 
         return redirect()->route('admin.volunteers.index')->with('success', 'Relawan berhasil diverifikasi.');
     }
+
+    public function update(Request $request, User $user)
+    {
+        if ($user->role !== 'relawan') {
+            return redirect()->route('admin.volunteers.index')->with('error', 'Relawan tidak ditemukan.');
+        }
+
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|email|unique:users,email,' . $user->id,
+            'phone'         => 'nullable|digits_between:8,15',
+            'jenis_kelamin' => 'nullable|in:L,P',
+            'tanggal_lahir' => 'nullable|date',
+            'nik'           => 'nullable|string|max:16',
+            'alamat'        => 'nullable|string',
+            'pengalaman'    => 'nullable|string',
+        ]);
+
+        $user->update($validated);
+
+        return redirect()->route('admin.volunteers.show', $user)
+            ->with('success', 'Data relawan berhasil diperbarui.');
+    }
 }

@@ -7,13 +7,32 @@ use App\Models\Campaign;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Services\NotificationService;
+use Carbon\Carbon;
 
 class AdminCampaignController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $campaigns = Campaign::latest()->paginate(12);
-        return view('admin.campaigns.index', compact('campaigns'));
+        $status = $request->get('status', 'all');
+        
+        $query = Campaign::latest();
+        
+        if ($status !== 'all') {
+            $query->where('report_status', $status);
+        }
+        
+        $campaigns = $query->paginate(8)->withQueryString();
+        
+        // Stats tetap dari semua data
+        $stats = [
+            'total'     => Campaign::count(),
+            'disetujui' => Campaign::where('report_status', 'disetujui')->count(),
+            'menunggu'  => Campaign::where('report_status', 'menunggu')->count(),
+            'ditolak'   => Campaign::where('report_status', 'ditolak')->count(),
+        ];
+        
+        return view('admin.campaigns.index', compact('campaigns', 'stats', 'status'));
     }
 
     public function create()
@@ -27,6 +46,7 @@ class AdminCampaignController extends Controller
 
         $slug = Str::slug($validated['title']) . '-' . time();
         $validated['slug'] = $slug;
+        $validated['report_status'] = 'disetujui'; // Campaign buatan admin otomatis disetujui
 
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('campaigns', 'public');
@@ -62,13 +82,15 @@ class AdminCampaignController extends Controller
             $validated['image'] = $request->file('image')->store('campaigns', 'public');
         }
 
-        // Handle documentation files
-        foreach (['documentation_1', 'documentation_2', 'documentation_3'] as $field) {
-            if ($request->hasFile($field)) {
-                if ($campaign->$field && Storage::disk('public')->exists($campaign->$field)) {
-                    Storage::disk('public')->delete($campaign->$field);
+        // Dokumentasi - handle array upload
+        if ($request->hasFile('documentation')) {
+            $files = $request->file('documentation');
+            foreach ($files as $i => $file) {
+                $field = 'documentation_' . ($i + 1);
+                if ($i < 3) {
+                    $path = $file->store('documentation', 'public');
+                    $validated[$field] = $path;
                 }
-                $validated[$field] = $request->file($field)->store('reports', 'public');
             }
         }
 
@@ -97,12 +119,15 @@ class AdminCampaignController extends Controller
     public function approve(Campaign $campaign)
     {
         $campaign->update(['report_status' => 'disetujui']);
+        NotificationService::campaignApproved($campaign);
+        NotificationService::newCampaignPublished($campaign);
         return redirect()->route('admin.campaigns.index')->with('success', 'Laporan bencana berhasil disetujui!');
     }
 
     public function reject(Campaign $campaign)
     {
         $campaign->update(['report_status' => 'ditolak']);
+        NotificationService::campaignRejected($campaign);
         return redirect()->route('admin.campaigns.index')->with('success', 'Laporan bencana berhasil ditolak!');
     }
 
@@ -127,5 +152,59 @@ class AdminCampaignController extends Controller
             'documentation_2' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'documentation_3' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
+    }
+
+    public function archived(Request $request)
+    {
+        $search   = $request->get('search');
+        $category = $request->get('category');
+        $sort     = $request->get('sort', 'newest');
+
+        $query = Campaign::where('report_status', 'disetujui')->get();
+
+        // Filter hanya yang sudah expired
+        $archived = $query->filter(fn($c) => $c->is_expired);
+
+        if ($search) {
+            $archived = $archived->filter(fn($c) =>
+                str_contains(strtolower($c->title), strtolower($search)) ||
+                str_contains(strtolower($c->location), strtolower($search))
+            );
+        }
+
+        if ($category) {
+            $archived = $archived->filter(fn($c) =>
+                strtolower($c->category) === strtolower($category)
+            );
+        }
+
+        $archived = match ($sort) {
+            'oldest'   => $archived->sortBy(fn($c) => strtotime($c->getRawOriginal('date_published'))),
+            'progress' => $archived->sortByDesc(fn($c) => $c->progress_raw),
+            default    => $archived->sortByDesc(fn($c) => strtotime($c->getRawOriginal('date_published'))),
+        };
+
+        $totalArchived  = $archived->count();
+        $totalCollected = $archived->sum('collected_raw');
+        $totalTarget    = $archived->sum('target_raw');
+        $avgProgress    = $totalArchived > 0 ? round($archived->avg('progress_raw'), 1) : 0;
+
+        $campaigns = $this->paginateCollection($archived, 12, $request);
+
+        return view('admin.campaigns.archived', compact(
+            'campaigns', 'totalArchived', 'totalCollected', 'totalTarget', 'avgProgress'
+        ));
+    }
+
+    private function paginateCollection($collection, int $perPage, Request $request)
+    {
+        $page  = $request->get('page', 1);
+        $total = $collection->count();
+        $items = $collection->forPage($page, $perPage)->values();
+
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $items, $total, $perPage, $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
     }
 }

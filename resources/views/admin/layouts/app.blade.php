@@ -307,39 +307,48 @@
   <nav class="sidebar-nav">
     <div class="nav-label">Utama</div>
     <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-        <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
+      <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
     </a>
 
-    <div class="nav-label">Manajemen</div>
+    <div class="nav-label">Pengguna</div>
     <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-users"></i> <span>Pengguna</span>
-    </a>
-    <a href="{{ route('admin.campaigns.index') }}" class="nav-link {{ request()->routeIs('admin.campaigns.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-hand-holding-heart"></i> <span>Kampanye Bencana</span>
-    </a>
-    <a href="{{ route('admin.donations.index') }}" class="nav-link {{ request()->routeIs('admin.donations.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-money-bill-transfer"></i> <span>Donasi</span>
-    </a>
-    <a href="{{ route('admin.transparency.index') }}" class="nav-link {{ request()->routeIs('admin.transparency.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-file-lines"></i> <span>Laporan Transparansi</span>
+      <i class="fa-solid fa-users"></i> <span>Pengguna</span>
     </a>
     <a href="{{ route('admin.volunteers.index') }}" class="nav-link {{ request()->routeIs('admin.volunteers.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-shield-halved"></i> <span>Data Relawan</span>
+      <i class="fa-solid fa-shield-halved"></i> <span>Data Relawan</span>
     </a>
     <a href="{{ route('admin.assignments.index') }}" class="nav-link {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-list-check"></i> <span>Penugasan Relawan</span>
+      <i class="fa-solid fa-list-check"></i> <span>Penugasan Relawan</span>
+    </a>
+
+    <div class="nav-label">Bencana</div>
+    <a href="{{ route('admin.campaigns.index') }}" 
+      class="nav-link {{ request()->routeIs('admin.campaigns.*') && !request()->routeIs('admin.campaigns.archived') ? 'active' : '' }}">
+      <i class="fa-solid fa-hand-holding-heart"></i> <span>Kampanye Bencana</span>
+    </a>
+    <a href="{{ route('admin.campaigns.archived') }}" 
+      class="nav-link {{ request()->routeIs('admin.campaigns.archived') ? 'active' : '' }}">
+      <i class="fa-solid fa-clock-rotate-left"></i> <span>Kampanye Bencana Selesai</span>
+    </a>
+
+    <div class="nav-label">Keuangan</div>
+    <a href="{{ route('admin.donations.index') }}" class="nav-link {{ request()->routeIs('admin.donations.*') ? 'active' : '' }}">
+      <i class="fa-solid fa-money-bill-transfer"></i> <span>Donasi</span>
+    </a>
+    <a href="{{ route('admin.transparency.index') }}" class="nav-link {{ request()->routeIs('admin.transparency.*') ? 'active' : '' }}">
+      <i class="fa-solid fa-file-lines"></i> <span>Laporan Transparansi</span>
     </a>
 
     <div class="nav-label">Sistem</div>
     <a href="{{ route('admin.settings.index') }}" class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-gear"></i> <span>Pengaturan</span>
+      <i class="fa-solid fa-gear"></i> <span>Pengaturan</span>
     </a>
 
     <div class="nav-label">Lainnya</div>
     <a href="{{ route('home') }}" class="nav-link">
-        <i class="fa-solid fa-globe"></i> <span>Lihat Situs</span>
+      <i class="fa-solid fa-globe"></i> <span>Lihat Situs</span>
     </a>
-</nav>
+  </nav>
 
 
   <div class="sidebar-footer">

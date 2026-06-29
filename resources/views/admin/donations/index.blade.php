@@ -19,6 +19,14 @@
     color: #2563eb !important;
     background: #fff !important;
   }
+
+  .stat-card-item {
+  transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .stat-card-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.10) !important;
+  }
 </style>
 @endpush
 
@@ -33,27 +41,27 @@
 {{-- Stats --}}
 <div class="row g-3 mb-4">
   <div class="col-12 col-md-6">
-    <div class="card border-0 shadow-sm p-3" style="border-radius:1rem; background:linear-gradient(135deg,#2563eb,#60a5fa);">
-      <div class="d-flex align-items-center gap-3">
-        <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;">
-          <i class="fa-solid fa-users text-white fs-5"></i>
+    <div class="card border-0 shadow-sm h-100 stat-card-item" style="border-radius:16px; border-left:4px solid #2563eb !important;">
+      <div class="card-body d-flex align-items-center gap-3 p-4">
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(37,99,235,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fa-solid fa-users" style="color:#2563eb;font-size:1.2rem;"></i>
         </div>
         <div>
-          <div class="text-white opacity-75 small">Total Donatur</div>
-          <div class="fw-bold fs-4 text-white">{{ number_format($stats['total_donatur']) }}</div>
+          <div class="small" style="color:#64748b;">Total Donatur</div>
+          <div class="fw-bold" style="font-size:1.4rem;color:#0f172a;">{{ number_format($stats['total_donatur']) }}</div>
         </div>
       </div>
     </div>
   </div>
   <div class="col-12 col-md-6">
-    <div class="card border-0 shadow-sm p-3" style="border-radius:1rem; background:linear-gradient(135deg,#059669,#34d399);">
-      <div class="d-flex align-items-center gap-3">
-        <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;">
-          <i class="fa-solid fa-coins text-white fs-5"></i>
+    <div class="card border-0 shadow-sm h-100 stat-card-item" style="border-radius:16px; border-left:4px solid #059669 !important;">
+      <div class="card-body d-flex align-items-center gap-3 p-4">
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(5,150,105,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="fa-solid fa-coins" style="color:#059669;font-size:1.2rem;"></i>
         </div>
         <div>
-          <div class="text-white opacity-75 small">Total Terkumpul</div>
-          <div class="fw-bold fs-4 text-white">Rp {{ number_format($stats['total_nominal'], 0, ',', '.') }}</div>
+          <div class="small" style="color:#64748b;">Total Terkumpul</div>
+          <div class="fw-bold" style="font-size:1.4rem;color:#0f172a;">Rp {{ number_format($stats['total_nominal'], 0, ',', '.') }}</div>
         </div>
       </div>
     </div>

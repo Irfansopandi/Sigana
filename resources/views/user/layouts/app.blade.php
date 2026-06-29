@@ -9,7 +9,7 @@
   {{-- icon boostrap --}}
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <!-- Favicon -->
-  <link rel="icon" type="image/jpeg" href="{{ asset('storage/assets/logo/logo-sigana.jpeg') }}">
+  <link rel="icon" type="image/jpeg" href="{{ asset('storage/assets/logo/logo-bulat.webp') }}">
   <style>
     :root {
       --navy-900: #0a2540;
@@ -242,7 +242,7 @@
 
     /* ── TOPBAR ── */
     .topbar {
-      height: 60px;
+      height: 60px !important;
       background: #fff;
       border-bottom: 1px solid #e2e8f0;
       display: flex;
@@ -264,6 +264,35 @@
       display: flex; align-items: center; justify-content: center;
       font-size: .8rem; font-weight: 600;
     }
+    #notifBtn {
+        background: none;
+        border: none;
+    }
+    #notifIcon {
+        display: inline-block;
+        transition: transform 0.2s;
+    }
+    #notifBtn:hover #notifIcon {
+        transform: rotate(15deg);
+    }
+
+    #notifDropdown {
+        border-radius: 16px !important;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+        overflow: hidden !important;
+    }
+
+    #notifDropdown .card-header {
+        border-radius: 16px 16px 0 0 !important;
+    }
+
+  .card-hover {
+    transition: transform .2s, box-shadow .2s;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(15,23,42,.10) !important;
+  }
 
 
     /* ── CONTENT ── */
@@ -299,9 +328,18 @@
         <i class="fa-solid fa-gauge"></i><span> Dashboard</span>
     </a>
 
+    <div class="nav-label">Pelaporan</div>
+    <a href="{{ route('user.lapor-bencana') }}" class="nav-link {{ request()->routeIs('user.lapor-bencana') ? 'active' : '' }}">
+        <i class="fa-solid fa-triangle-exclamation"></i><span> Lapor Bencana</span>
+    </a>
+
     <div class="nav-label">Donasi</div>
     <a href="{{ route('user.campaigns') }}" class="nav-link {{ request()->routeIs('user.campaigns') ? 'active' : '' }}">
         <i class="fa-solid fa-hand-holding-heart"></i><span> Kampanye Bencana</span>
+    </a>
+    <a href="{{ route('user.campaigns.archived') }}" 
+      class="nav-link {{ request()->routeIs('user.campaigns.archived') ? 'active' : '' }}">
+        <i class="fa-solid fa-clock-rotate-left"></i><span> Kampanye Selesai</span>
     </a>
     <a href="{{ route('user.donation-history') }}" class="nav-link {{ request()->routeIs('user.donation-history') ? 'active' : '' }}">
         <i class="fa-solid fa-clock-rotate-left"></i><span> Riwayat Donasi</span>
@@ -324,8 +362,13 @@
 
   <div class="sidebar-footer">
     <div class="sidebar-user">
-      <div class="sidebar-user-avatar">
-        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+      <div class="sidebar-user-avatar overflow-hidden">
+          @if(auth()->user()->photo)
+              <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="avatar"
+                  class="user-avatar-img" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">
+          @else
+              {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+          @endif
       </div>
       <div class="sidebar-user-info">
         <div class="name">{{ auth()->user()->name }}</div>
@@ -350,11 +393,40 @@
             </button>
             <span class="topbar-title">@yield('page_title', 'Dashboard')</span>
         </div>
-        <div class="topbar-right">
-            <span class="text-muted small">{{ now()->translatedFormat('l, d F Y') }}</span>
-            <div class="topbar-badge">
-            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+        <div class="topbar-right d-flex align-items-center gap-2">
+          {{-- Notifikasi --}}
+            <div class="position-relative" id="notifWrapper">
+                <button class="btn p-0 position-relative" id="notifBtn" style="width:36px;height:36px;background:none;border:none;">
+                    <i class="fa-solid fa-bell text-muted fs-5" id="notifIcon"></i>
+                    <span class="position-absolute badge rounded-pill bg-danger d-none" 
+                        id="notifBadge" style="font-size:.6rem; top:-4px; right:-6px;"></span>
+                </button>
+
+                {{-- Dropdown --}}
+                <div class="card shadow border-0 position-absolute d-none" 
+                    id="notifDropdown" style="width:320px;z-index:999;right:0;top:100%;">
+                    <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
+                        <span class="fw-semibold small">Notifikasi</span>
+                        <a href="{{ route('user.notifications') }}" 
+                          class="btn btn-sm btn-outline-secondary rounded-pill px-3 text-decoration-none" 
+                          style="font-size:.75rem;">
+                            Lihat semua
+                        </a>
+                    </div>
+                    <div class="card-body p-0" id="notifList" style="max-height:320px;overflow-y:auto;">
+                        <div class="text-center text-muted small py-4" id="notifEmpty">Tidak ada notifikasi baru</div>
+                    </div>
+                </div>
             </div>
+            <span class="text-muted small">{{ now()->translatedFormat('l, d F Y') }}</span>
+            @if(auth()->user()->photo)
+                <img src="{{ asset('storage/' . auth()->user()->photo) }}"
+                    class="user-avatar-img" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+            @else
+                <div class="topbar-badge">
+                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                </div>
+            @endif
         </div>
     </header>
 
@@ -452,6 +524,62 @@ toggleBtn.addEventListener('click', () => {
 if (window.innerWidth >= 992 && localStorage.getItem('sidebar_collapsed') === 'true') {
   sidebar.classList.add('collapsed');
 }
+
+// notofikasi
+const notifBtn = document.getElementById('notifBtn');
+const notifDropdown = document.getElementById('notifDropdown');
+const notifBadge = document.getElementById('notifBadge');
+const notifList = document.getElementById('notifList');
+const notifEmpty = document.getElementById('notifEmpty');
+
+const icons = {
+    campaign_approved: '<i class="fa-solid fa-circle-check text-success"></i>',
+    campaign_rejected: '<i class="fa-solid fa-circle-xmark text-danger"></i>',
+    donation_success:  '<i class="fa-solid fa-heart text-pink" style="color:#ec4899"></i>',
+    transparency_update: '<i class="fa-solid fa-file-lines text-primary"></i>',
+    new_campaign:      '<i class="fa-solid fa-hand-holding-heart text-warning"></i>',
+};
+
+function loadNotif() {
+    fetch('{{ route("user.notifications.unread") }}')
+        .then(r => r.json())
+        .then(data => {
+            if (data.count > 0) {
+                notifBadge.classList.remove('d-none');
+                notifBadge.textContent = data.count > 9 ? '9+' : data.count;
+            } else {
+                notifBadge.classList.add('d-none');
+            }
+
+            if (data.notifications.length > 0) {
+                notifEmpty.classList.add('d-none');
+                notifList.innerHTML = data.notifications.map(n => `
+                    <a href="${n.url ?? '#'}" class="d-flex gap-3 px-3 py-2 text-decoration-none border-bottom notif-item ${!n.is_read ? 'bg-light' : ''}"
+                        data-id="${n.id}">
+                        <div class="mt-1">${icons[n.type] ?? '<i class="fa-solid fa-bell text-muted"></i>'}</div>
+                        <div>
+                            <div class="small fw-semibold text-dark">${n.title}</div>
+                            <div class="small text-muted">${n.message}</div>
+                        </div>
+                    </a>
+                `).join('');
+            }
+        });
+}
+
+notifBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notifDropdown.classList.toggle('d-none');
+    loadNotif();
+});
+
+document.addEventListener('click', () => notifDropdown.classList.add('d-none'));
+notifDropdown.addEventListener('click', e => e.stopPropagation());
+
+// Auto refresh tiap 30 detik
+loadNotif();
+setInterval(loadNotif, 30000);
+
 </script>
 </body>
 </html>

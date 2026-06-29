@@ -189,7 +189,7 @@
           @endguest
           @auth
             @if(auth()->user()->role === 'user')
-            <a href="{{ route('laporan.bencana.create') }}" class="btn btn-lapor d-flex align-items-center justify-content-center gap-2">
+            <a href="{{ route('user.lapor-bencana.store') }}" class="btn btn-lapor d-flex align-items-center justify-content-center gap-2">
               <i class="fa-solid fa-triangle-exclamation"></i> Laporkan Bencana
             </a>
             @else
