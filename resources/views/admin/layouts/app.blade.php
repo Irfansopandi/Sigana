@@ -353,8 +353,13 @@
 
   <div class="sidebar-footer">
     <div class="sidebar-user">
-      <div class="sidebar-user-avatar">
-        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+      <div class="sidebar-user-avatar overflow-hidden">
+          @if(auth()->user()->photo)
+              <img src="{{ Storage::url(auth()->user()->photo) }}" alt="foto"
+                  style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+          @else
+              {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+          @endif
       </div>
       <div class="sidebar-user-info">
         <div class="name">{{ auth()->user()->name }}</div>
@@ -381,8 +386,13 @@
         </div>
         <div class="topbar-right">
             <span class="text-muted small">{{ now()->translatedFormat('l, d F Y') }}</span>
-            <div class="topbar-badge">
-            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+            <div class="topbar-badge overflow-hidden">
+                @if(auth()->user()->photo)
+                    <img src="{{ Storage::url(auth()->user()->photo) }}" alt="foto"
+                        style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                @else
+                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                @endif
             </div>
         </div>
     </header>
@@ -495,6 +505,34 @@ toggleBtn.addEventListener('click', () => {
 // Ingat state desktop
 if (window.innerWidth >= 992 && localStorage.getItem('sidebar_collapsed') === 'true') {
   sidebar.classList.add('collapsed');
+}
+
+
+// pp profile
+function previewPhoto(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Ukuran foto maksimal 2MB.');
+      input.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      // Preview avatar utama
+      const initial = document.getElementById('avatarInitial');
+      if (initial) initial.style.display = 'none';
+      const preview = document.getElementById('avatarPreview');
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+
+      // ✅ Update topbar badge & sidebar footer real-time
+      document.querySelectorAll('.topbar-badge, .sidebar-user-avatar').forEach(el => {
+        el.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+      });
+    };
+    reader.readAsDataURL(file);
+  }
 }
 
 </script>

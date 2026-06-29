@@ -12,17 +12,22 @@ class GoogleController extends Controller
     public function callback()
     {
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            $googleProvider = Socialite::driver('google');
+            /** @var \Laravel\Socialite\Two\AbstractProvider $googleProvider */
+            $googleUser = $googleProvider->stateless()->user();
 
-            $user = User::updateOrCreate(
-                ['email' => $googleUser->getEmail()],
-                [
-                    'name'      => $googleUser->getName(),
-                    'google_id' => $googleUser->getId(),
-                    'password'  => bcrypt(\Illuminate\Support\Str::random(16)),
-                    'role'      => 'user',
-                ]
-            );
+            $user = User::firstOrNew(['email' => $googleUser->getEmail()]);
+
+            if (!$user->exists) {
+                // User baru → isi data awal dari Google
+                $user->name     = $googleUser->getName();
+                $user->password = bcrypt(\Illuminate\Support\Str::random(16));
+                $user->role     = 'user';
+            }
+
+            // google_id aman diupdate tiap login (untuk jaga-jaga kalau belum tersimpan)
+            $user->google_id = $googleUser->getId();
+            $user->save();
 
             Auth::login($user, true);
 
@@ -37,6 +42,8 @@ class GoogleController extends Controller
     }
     public function redirect()
     {
-        return Socialite::driver('google')->stateless()->redirect();
+        $googleProvider = Socialite::driver('google');
+        /** @var \Laravel\Socialite\Two\AbstractProvider $googleProvider */
+        return $googleProvider->stateless()->redirect();
     }
 }

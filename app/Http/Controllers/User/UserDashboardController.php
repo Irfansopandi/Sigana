@@ -27,7 +27,9 @@ class UserDashboardController extends Controller
     {
         $campaigns = Campaign::where('report_status', 'disetujui')
             ->latest()
-            ->get();
+            ->get()
+            ->reject(fn($c) => $c->is_expired)
+            ->values();
 
         return view('user.campaigns', compact('campaigns'));
     }

@@ -82,7 +82,7 @@
         </div>
         <div>
           <div class="small" style="color:#64748b;">Total</div>
-          <div class="fw-bold" style="font-size:1.4rem;color:#0f172a;">{{ $campaigns->total() }}</div>
+          <div class="fw-bold" style="font-size:1.4rem;color:#0f172a;">{{ $stats['total'] }}</div>
         </div>
       </div>  
     </div>
@@ -95,7 +95,7 @@
         </div>
         <div>
           <div class="small" style="color:#64748b;">Disetujui</div>
-          <div class="fw-bold" style="font-size:1.4rem;color:#0f172a;">{{ $campaigns->getCollection()->where('report_status','disetujui')->count() }}</div>
+          <div class="fw-bold" style="font-size:1.4rem;color:#0f172a;">{{ $stats['disetujui'] }}</div>
         </div>
       </div>
     </div>
@@ -108,7 +108,7 @@
         </div>
         <div>
           <div class="small" style="color:#64748b;">Menunggu</div>
-          <div class="fw-bold" style="font-size:1.4rem;color:#0f172a;">{{ $campaigns->getCollection()->where('report_status','menunggu')->count() }}</div>
+          <div class="fw-bold" style="font-size:1.4rem;color:#0f172a;">{{ $stats['menunggu'] }}</div>
         </div>
       </div>
     </div>
@@ -121,7 +121,7 @@
         </div>
         <div>
           <div class="small" style="color:#64748b;">Ditolak</div>
-          <div class="fw-bold" style="font-size:1.4rem;color:#0f172a;">{{ $campaigns->getCollection()->where('report_status','ditolak')->count() }}</div>
+          <div class="fw-bold" style="font-size:1.4rem;color:#0f172a;">{{ $stats['ditolak'] }}</div>
         </div>
       </div>
     </div>

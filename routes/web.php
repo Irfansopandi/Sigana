@@ -90,8 +90,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::get('/settings/profile', [AdminSettingsController::class, 'profile'])->name('settings.profile');
     Route::match(['put', 'patch'], '/settings/profile', [AdminSettingsController::class, 'updateProfile'])->name('settings.profile.update');
-    Route::get('/settings/system', [AdminSettingsController::class, 'system'])->name('settings.system');
-    Route::match(['put', 'patch'], '/settings/system', [AdminSettingsController::class, 'updateSystem'])->name('settings.system.update');
 });
 
 // Relawan

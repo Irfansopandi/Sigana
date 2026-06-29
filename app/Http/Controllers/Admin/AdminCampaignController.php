@@ -15,23 +15,29 @@ class AdminCampaignController extends Controller
     public function index(Request $request)
     {
         $status = $request->get('status', 'all');
-        
-        $query = Campaign::latest();
-        
-        if ($status !== 'all') {
-            $query->where('report_status', $status);
-        }
-        
-        $campaigns = $query->paginate(8)->withQueryString();
-        
-        // Stats tetap dari semua data
+
+        // Ambil SEMUA campaign dulu (tanpa filter status), buang yang sudah expired
+        $allCampaigns = Campaign::latest()->get();
+        $activeCampaigns = $allCampaigns->reject(function ($c) {
+            return $c->report_status === 'disetujui' && $c->is_expired;
+        });
+
+        // Stats dihitung dari campaign yang masih aktif (konsisten dengan tab & listing)
         $stats = [
-            'total'     => Campaign::count(),
-            'disetujui' => Campaign::where('report_status', 'disetujui')->count(),
-            'menunggu'  => Campaign::where('report_status', 'menunggu')->count(),
-            'ditolak'   => Campaign::where('report_status', 'ditolak')->count(),
+            'total'     => $activeCampaigns->count(),
+            'disetujui' => $activeCampaigns->where('report_status', 'disetujui')->count(),
+            'menunggu'  => $activeCampaigns->where('report_status', 'menunggu')->count(),
+            'ditolak'   => $activeCampaigns->where('report_status', 'ditolak')->count(),
         ];
-        
+
+        // Baru filter berdasarkan tab status yang dipilih
+        if ($status !== 'all') {
+            $activeCampaigns = $activeCampaigns->where('report_status', $status);
+        }
+
+        // Paginate manual karena filternya di level Collection, bukan query DB
+        $campaigns = $this->paginateCollection($activeCampaigns->values(), 8, $request);
+
         return view('admin.campaigns.index', compact('campaigns', 'stats', 'status'));
     }
 
@@ -53,6 +59,17 @@ class AdminCampaignController extends Controller
             $validated['image'] = $imagePath;
         } else {
             $validated['image'] = 'campaigns/default.jpg';
+        }
+
+        // Dokumentasi - handle array upload (sama seperti di update())
+        if ($request->hasFile('documentation')) {
+            $files = $request->file('documentation');
+            foreach ($files as $i => $file) {
+                if ($i < 3) {
+                    $field = 'documentation_' . ($i + 1);
+                    $validated[$field] = $file->store('documentation', 'public');
+                }
+            }
         }
 
         Campaign::create($validated);

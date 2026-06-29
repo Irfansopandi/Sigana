@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class AdminSettingsController extends Controller
 {
@@ -23,15 +24,31 @@ class AdminSettingsController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . auth()->id(),
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'nullable|digits_between:10,15',
             'current_password' => 'nullable|required_with:password',
             'password' => 'nullable|string|min:8|confirmed',
+            'photo' => 'nullable|image|mimes:jpeg,png,webp|max:2048',
         ]);
 
         $user = auth()->user();
         $user->name = $request->name;
         $user->email = $request->email;
         $user->phone = $request->phone;
+
+        // Hapus foto jika diminta
+        if ($request->boolean('remove_photo') && $user->photo) {
+            Storage::disk('public')->delete($user->photo);
+            $user->photo = null;
+        }
+
+        // Ganti foto kalau ada upload baru
+        if ($request->hasFile('photo')) {
+            if ($user->photo) {
+                Storage::disk('public')->delete($user->photo);
+            }
+            $user->photo = $request->file('photo')->store('foto-profile', 'public');
+        }
+
 
         if ($request->filled('password')) {
             if (!Hash::check($request->current_password, $user->password)) {
@@ -45,16 +62,4 @@ class AdminSettingsController extends Controller
         return back()->with('success', 'Profil berhasil diperbarui');
     }
 
-    public function system()
-    {
-        return view('admin.settings.system');
-    }
-
-    public function updateSystem(Request $request)
-    {
-        // Untuk saat ini, kita hanya kembalikan pesan sukses
-        // Di masa depan, ini bisa menyimpan ke database atau file konfigurasi
-        
-        return back()->with('success', 'Pengaturan sistem berhasil disimpan');
-    }
 }

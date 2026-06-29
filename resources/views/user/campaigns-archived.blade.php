@@ -298,8 +298,8 @@
         </div>
 
         {{-- Tombol Detail (tanpa tombol Donasi) --}}
-        <a href="{{ route('bencana.detail', $campaign->slug) }}" class="btn-detail">
-          <i class="fa-solid fa-eye me-1"></i> Lihat Detail
+        <a href="{{ route ('transparansi.detail', $campaign->slug) }}" class="btn-detail">
+          <i class="fa-solid fa-file-lines me-1"></i> Lihat Laporan
         </a>
       </div>
     </div>

@@ -9,10 +9,25 @@ use App\Services\NotificationService;
 
 class AdminTransparencyController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $reports = TransparencyReport::latest()->paginate(10);
-        return view('admin.transparency.index', compact('reports'));
+        $status = $request->get('status');
+
+        $query = TransparencyReport::with('campaign')->latest();
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        $reports        = $query->paginate(8)->withQueryString();
+        $totalAll       = TransparencyReport::count();
+        $totalAktif     = TransparencyReport::where('status', 'Aktif')->count();
+        $totalPenyaluran = TransparencyReport::where('status', 'Dalam Penyaluran')->count();
+        $totalSelesai   = TransparencyReport::where('status', 'Hampir Selesai')->count();
+
+        return view('admin.transparency.index', compact(
+            'reports', 'totalAll', 'totalAktif', 'totalPenyaluran', 'totalSelesai'
+        ));
     }
 
     public function show(TransparencyReport $report)
