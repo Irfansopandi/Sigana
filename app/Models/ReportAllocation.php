@@ -31,4 +31,11 @@ class ReportAllocation extends Model
     {
         return $this->belongsTo(TransparencyReport::class, 'report_id');
     }
+
+    public function getProgressAttribute($value): string
+    {
+        if (is_null($value)) return '100%';
+        $v = rtrim((string) $value, '%'); // handle kalau sudah ada %
+        return $v . '%';
+    }
 }

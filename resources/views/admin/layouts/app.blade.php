@@ -320,6 +320,10 @@
     <a href="{{ route('admin.assignments.index') }}" class="nav-link {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}">
       <i class="fa-solid fa-list-check"></i> <span>Penugasan Relawan</span>
     </a>
+      <a href="{{ route('admin.certificates.index') }}" class="nav-link {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}">
+        <i class="fa-solid fa-certificate"></i> <span>Sertifikat Relawan</span>
+      </a>
+
 
     <div class="nav-label">Bencana</div>
     <a href="{{ route('admin.campaigns.index') }}" 

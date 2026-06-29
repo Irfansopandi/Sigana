@@ -61,7 +61,7 @@
         <div class="hero-buttons" style="gap: 10px;">
           @auth
             @if(auth()->user()->role === 'relawan')
-              <a href="{{ route('relawan.laporan.create') }}" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero">
+              <a href="#" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero">
                 <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporan Lapangan
               </a>
             @elseif (auth()->user()->role === 'user')

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Models\User;
 use Carbon\Carbon;
+use App\Models\CampaignVolunteer;
+use App\Models\CampaignRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -200,5 +202,13 @@ class Campaign extends Model
     public function assignedVolunteer()
     {
         return $this->belongsTo(User::class, 'assigned_to');
+    }
+    public function volunteers()
+    {
+        return $this->hasMany(CampaignVolunteer::class);
+    }
+    public function roles()
+    {
+        return $this->hasMany(CampaignRole::class);
     }
 }

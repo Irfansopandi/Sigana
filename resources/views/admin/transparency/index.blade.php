@@ -49,6 +49,8 @@
   .border-aktif      { border-left-color: #3b82f6; }
   .border-penyaluran { border-left-color: #f59e0b; }
   .border-selesai    { border-left-color: #10b981; }
+  .border-done { border-left-color: #7c3aed; }
+  .badge-done  { background:#f5f3ff; color:#7c3aed; }
   
   .badge-aktif      { background:#eff6ff; color:#2563eb; }
   .badge-penyaluran { background:#fffbeb; color:#d97706; }
@@ -58,12 +60,48 @@
   .stat-aktif      { border-left-color: #2563eb; }
   .stat-penyaluran { border-left-color: #d97706; }
   .stat-selesai    { border-left-color: #059669; }
+  .stat-done       { border-left-color: #7c3aed; }
   .stat-icon {
     width: 44px; height: 44px;
     border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     font-size: 1.1rem;
     flex-shrink: 0;
+  }
+
+  .btn-pill {
+    border-radius: 999px;
+    font-size: 0.75rem;
+    padding: 5px 14px;
+    font-weight: 500;
+    border: 1.5px solid;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+  }
+  .btn-pill-view {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+    text-decoration: none;
+  }
+  .btn-pill-view:hover {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #93c5fd;
+    transform: translateY(-1px);
+  }
+  .btn-pill-edit {
+    background: #fff;
+    color: #475569;
+    border-color: #e2e8f0;
+    text-decoration: none;
+  }
+  .btn-pill-edit:hover {
+    background: #f8fafc;
+    color: #1e293b;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
   }
 </style>
 @endpush
@@ -76,7 +114,7 @@
 
 {{-- Stat Cards --}}
 <div class="row g-3 mb-4">
-  <div class="col-6 col-md-3">
+  <div class="col-6 col-md">
     <div class="stat-card-transparency stat-total">
       <div class="stat-icon" style="background:#e0f2fe; color:#0284c7;">
         <i class="fa-solid fa-file-lines"></i>
@@ -87,7 +125,7 @@
       </div>
     </div>
   </div>
-  <div class="col-6 col-md-3">
+  <div class="col-6 col-md">
     <div class="stat-card-transparency stat-aktif">
       <div class="stat-icon" style="background:#dbeafe; color:#2563eb;">
         <i class="fa-solid fa-circle-dot"></i>
@@ -98,7 +136,7 @@
       </div>
     </div>
   </div>
-  <div class="col-6 col-md-3">
+  <div class="col-6 col-md">
     <div class="stat-card-transparency stat-penyaluran">
       <div class="stat-icon" style="background:#fef3c7; color:#d97706;">
         <i class="fa-solid fa-truck"></i>
@@ -109,7 +147,7 @@
       </div>
     </div>
   </div>
-  <div class="col-6 col-md-3">
+  <div class="col-6 col-md">
     <div class="stat-card-transparency stat-selesai">
       <div class="stat-icon" style="background:#d1fae5; color:#059669;">
         <i class="fa-solid fa-circle-check"></i>
@@ -117,6 +155,17 @@
       <div>
         <div class="small text-muted">Hampir Selesai</div>
         <div class="fw-bold fs-4">{{ $totalSelesai }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md">
+    <div class="stat-card-transparency stat-done">
+      <div class="stat-icon" style="background:#f5f3ff; color:#7c3aed;">
+        <i class="fa-solid fa-flag-checkered"></i>
+      </div>
+      <div>
+        <div class="small text-muted">Selesai</div>
+        <div class="fw-bold fs-4">{{ $totalDoneSelesai }}</div>
       </div>
     </div>
   </div>
@@ -130,6 +179,7 @@
       'Aktif'            => ['label' => 'Aktif',           'color' => '#059669', 'bg' => '#ecfdf5', 'border' => '#a7f3d0', 'count' => $totalAktif],
       'Dalam Penyaluran' => ['label' => 'Dalam Penyaluran','color' => '#d97706', 'bg' => '#fffbeb', 'border' => '#fde68a', 'count' => $totalPenyaluran],
       'Hampir Selesai'   => ['label' => 'Hampir Selesai',  'color' => '#0284c7', 'bg' => '#f0f9ff', 'border' => '#bae6fd', 'count' => $totalSelesai],
+      'Selesai'          => ['label' => 'Selesai',         'color' => '#7c3aed', 'bg' => '#f5f3ff', 'border' => '#ddd6fe', 'count' => $totalDoneSelesai],
     ];
     $currentStatus = request('status', '');
   @endphp
@@ -161,16 +211,19 @@
     $borderClass = match($status) {
       'Dalam Penyaluran' => 'border-penyaluran',
       'Hampir Selesai'   => 'border-selesai',
+      'Selesai'          => 'border-done',
       default            => 'border-aktif',
     };
     $badgeClass = match($status) {
       'Dalam Penyaluran' => 'badge-penyaluran',
       'Hampir Selesai'   => 'badge-selesai',
+      'Selesai'          => 'badge-done',
       default            => 'badge-aktif',
     };
     $icon = match($status) {
       'Dalam Penyaluran' => 'fa-truck',
       'Hampir Selesai'   => 'fa-circle-check',
+      'Selesai'          => 'fa-flag-checkered',
       default            => 'fa-circle-dot',
     };
     $campaign = $report->campaign;
@@ -214,10 +267,11 @@
           </div>
         </div>
 
-        <div class="d-flex justify-content-end">
-          <a href="{{ route('admin.transparency.show', $report) }}"
-             class="btn btn-sm btn-outline-primary rounded-3"
-             style="font-size:0.75rem; padding:4px 10px;">
+        <div class="d-flex justify-content-end gap-2">
+          <a href="{{ route('admin.transparency.edit', $report) }}" class="btn-pill btn-pill-edit">
+            <i class="fa-solid fa-pen-to-square me-1"></i>Edit
+          </a>
+          <a href="{{ route('admin.transparency.show', $report) }}" class="btn-pill btn-pill-view">
             <i class="fa-solid fa-eye me-1"></i>Detail
           </a>
         </div>

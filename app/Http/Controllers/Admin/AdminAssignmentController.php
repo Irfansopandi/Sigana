@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Campaign;
+use App\Models\CampaignRole;
+use App\Models\CampaignVolunteer;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -11,29 +13,80 @@ class AdminAssignmentController extends Controller
 {
     public function index()
     {
-        $assignments = Campaign::with('assignedVolunteer')->latest()->paginate(12);
-        return view('admin.assignments.index', compact('assignments'));
+        $perPage = request('per_page', 10);
+
+        $campaigns = Campaign::withCount([
+            'volunteers',
+            'volunteers as menunggu_count' => fn($q) => $q->where('verifikasi', 'menunggu'),
+            'volunteers as diterima_count'  => fn($q) => $q->where('verifikasi', 'diterima'),
+        ])
+        ->when(request('search'), fn($q, $s) => $q->where('title', 'like', "%$s%"))
+        ->latest()
+        ->paginate($perPage)
+        ->withQueryString();
+
+        $totalMenunggu = \App\Models\CampaignVolunteer::where('verifikasi', 'menunggu')->count();
+        $totalDiterima = \App\Models\CampaignVolunteer::where('verifikasi', 'diterima')->count();
+        $totalDitolak  = \App\Models\CampaignVolunteer::where('verifikasi', 'ditolak')->count();
+
+        return view('admin.assignments.index', compact('campaigns','totalMenunggu', 'totalDiterima', 'totalDitolak'));
     }
 
-    public function create()
+    public function show(Campaign $campaign)
     {
-        $campaigns = Campaign::with('assignedVolunteer')->get();
-        $volunteers = User::where('role', 'relawan')->get();
-        return view('admin.assignments.create', compact('campaigns', 'volunteers'));
+        $campaign->load(['roles', 'roles.volunteers.user']);
+
+        $perPage = request('per_page', 10);
+        $filterTab = request('tab', 'semua');
+
+        $query = $campaign->volunteers()->with(['user', 'role'])->latest();
+
+        if ($filterTab !== 'semua') {
+            $query->where('verifikasi', $filterTab);
+        }
+
+        $volunteers = $query->paginate($perPage)->withQueryString();
+
+        return view('admin.assignments.show', compact('campaign', 'volunteers', 'filterTab'));
     }
 
-    public function store(Request $request)
+    public function storeRole(Request $request, Campaign $campaign)
     {
         $validated = $request->validate([
-            'campaign_id' => 'required|exists:campaigns,id',
-            'volunteer_id' => 'required|exists:users,id',
+            'nama'      => 'required|string|max:100',
+            'deskripsi' => 'nullable|string',
+            'kuota'     => 'nullable|integer|min:0',
         ]);
 
-        $campaign = Campaign::findOrFail($validated['campaign_id']);
-        $volunteer = User::where('role', 'relawan')->findOrFail($validated['volunteer_id']);
+        $campaign->roles()->create($validated);
 
-        $campaign->update(['assigned_to' => $volunteer->id]);
+        return redirect()->route('admin.assignments.show', $campaign)
+            ->with('success', 'Bagian tugas berhasil ditambahkan.');
+    }
 
-        return redirect()->route('admin.assignments.index')->with('success', 'Relawan berhasil ditugaskan.');
+    public function destroyRole(CampaignRole $role)
+    {
+        $campaignId = $role->campaign_id;
+        $role->delete();
+
+        return redirect()->route('admin.assignments.show', $campaignId)
+            ->with('success', 'Bagian tugas berhasil dihapus.');
+    }
+
+    public function verifikasi(Request $request, CampaignVolunteer $volunteer)
+    {
+        $validated = $request->validate([
+            'verifikasi'    => 'required|in:diterima,ditolak',
+            'catatan_admin' => 'nullable|string',
+        ]);
+
+        $volunteer->update([
+            'verifikasi'    => $validated['verifikasi'],
+            'catatan_admin' => $validated['catatan_admin'] ?? null,
+            'status'        => $validated['verifikasi'] === 'diterima' ? 'aktif' : 'selesai',
+        ]);
+
+        return redirect()->route('admin.assignments.show', $volunteer->campaign_id)
+            ->with('success', 'Status relawan berhasil diperbarui.');
     }
 }

@@ -47,7 +47,8 @@ class NotificationService
     {
         // Kirim ke semua user yang punya donasi di campaign ini
         $userIds = \App\Models\Donation::where('campaign_id', $report->campaign_id)
-            ->where('status', 'success')
+            ->where('payment_status', 'success')
+            ->whereNotNull('user_id')
             ->pluck('user_id')
             ->unique();
 

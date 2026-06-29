@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminTransparencyController;
 use App\Http\Controllers\Admin\AdminVolunteerController;
 use App\Http\Controllers\Admin\AdminAssignmentController;
+use App\Http\Controllers\Admin\AdminCertificateController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Relawan\RelawanDashboardController;
 use App\Http\Controllers\User\UserDashboardController;
@@ -79,17 +80,40 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/donations', [AdminDonationController::class, 'index'])->name('donations.index');
     Route::get('/transparency', [AdminTransparencyController::class, 'index'])->name('transparency.index');
     Route::get('/transparency/{report}', [AdminTransparencyController::class, 'show'])->name('transparency.show');
+    Route::get('/transparency/{report}/edit', [AdminTransparencyController::class, 'edit'])->name('transparency.edit');
+    Route::put('/transparency/{report}/info', [AdminTransparencyController::class, 'updateInfo'])->name('transparency.updateInfo');
+
+    // Alokasi Belanja
+    Route::post('/transparency/{report}/allocations', [AdminTransparencyController::class, 'storeAllocation'])->name('transparency.allocations.store');
+    Route::put('/transparency/allocations/{allocation}', [AdminTransparencyController::class, 'updateAllocation'])->name('transparency.allocations.update');
+    Route::delete('/transparency/allocations/{allocation}', [AdminTransparencyController::class, 'destroyAllocation'])->name('transparency.allocations.destroy');
+
+    // Timeline Penyaluran
+    Route::post('/transparency/{report}/timeline', [AdminTransparencyController::class, 'storeTimeline'])->name('transparency.timeline.store');
+    Route::put('/transparency/timeline/{timeline}', [AdminTransparencyController::class, 'updateTimeline'])->name('transparency.timeline.update');
+    Route::delete('/transparency/timeline/{timeline}', [AdminTransparencyController::class, 'destroyTimeline'])->name('transparency.timeline.destroy');
+
+    // Dokumen Pendukung
+    Route::post('/transparency/{report}/docs', [AdminTransparencyController::class, 'storeDoc'])->name('transparency.docs.store');
+    Route::delete('/transparency/docs/{doc}', [AdminTransparencyController::class, 'destroyDoc'])->name('transparency.docs.destroy');
     Route::match(['put','patch'], '/transparency/{report}', [AdminTransparencyController::class, 'update'])->name('transparency.update');
     Route::get('/volunteers', [AdminVolunteerController::class, 'index'])->name('volunteers.index');
     Route::get('/volunteers/{user}', [AdminVolunteerController::class, 'show'])->name('volunteers.show');
     Route::post('/volunteers/{user}/verify', [AdminVolunteerController::class, 'verify'])->name('volunteers.verify');
     Route::put('/volunteers/{user}', [AdminVolunteerController::class, 'update'])->name('volunteers.update');
     Route::get('/assignments', [AdminAssignmentController::class, 'index'])->name('assignments.index');
-    Route::get('/assignments/create', [AdminAssignmentController::class, 'create'])->name('assignments.create');
+    Route::get('/assignments/{campaign}', [AdminAssignmentController::class, 'show'])->name('assignments.show');
+    Route::post('/assignments/{campaign}/roles', [AdminAssignmentController::class, 'storeRole'])->name('assignments.roles.store');
+    Route::delete('/assignments/roles/{role}', [AdminAssignmentController::class, 'destroyRole'])->name('assignments.roles.destroy');
+    Route::post('/assignments/volunteers/{volunteer}/verifikasi', [AdminAssignmentController::class, 'verifikasi'])->name('assignments.verifikasi');
     Route::post('/assignments', [AdminAssignmentController::class, 'store'])->name('assignments.store');
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::get('/settings/profile', [AdminSettingsController::class, 'profile'])->name('settings.profile');
     Route::match(['put', 'patch'], '/settings/profile', [AdminSettingsController::class, 'updateProfile'])->name('settings.profile.update');
+    // sertifikat relawan
+    Route::get('/certificates', [AdminCertificateController::class, 'index'])->name('certificates.index');
+    Route::post('/certificates', [AdminCertificateController::class, 'store'])->name('certificates.store');
+    Route::delete('/certificates/{certificate}', [AdminCertificateController::class, 'destroy'])->name('certificates.destroy');
 });
 
 // Relawan
