@@ -121,8 +121,36 @@
               <span class="small text-muted"><i class="fa-regular fa-clock me-1 text-warning"></i> {{ $campaign->days_left }} hari lagi</span>
             </div>
             <div class="d-flex gap-2 mt-auto">
-              <a href="{{ route('bencana.detail', $campaign->slug) }}" class="btn btn-outline-primary flex-fill" style="border-radius: 12px;">Detail</a>
-              <a href="{{ route('bencana.donasi', $campaign->slug) }}" class="btn btn-green-custom flex-fill text-center" style="border-radius: 12px;"><i class="fa-solid fa-hand-holding-heart me-1"></i>Donasi</a>
+              <a href="{{ route('bencana.detail', $campaign->slug) }}" class="btn flex-fill text-center"
+                style="border-radius:12px; border:1.5px solid #2563eb; color:#2563eb; background:rgba(37,99,235,0.08); transition:all 0.3s ease;"
+                onmouseover="this.style.background='rgba(37,99,235,0.15)';this.style.boxShadow='0 6px 20px rgba(37,99,235,0.2)';"
+                onmouseout="this.style.background='rgba(37,99,235,0.08)';this.style.boxShadow='none';">
+                Detail
+              </a>
+              @auth
+                @if(auth()->user()->role === 'relawan')
+                  <a href="{{ route('register.relawan') }}" class="btn flex-fill text-center"
+                    style="border-radius:12px; border:1.5px solid #ef4444; color:#ef4444; background:rgba(239,68,68,0.08); transition:all 0.3s ease;"
+                    onmouseover="this.style.background='rgba(239,68,68,0.15)';this.style.boxShadow='0 6px 20px rgba(239,68,68,0.2)';"
+                    onmouseout="this.style.background='rgba(239,68,68,0.08)';this.style.boxShadow='none';">
+                    <i class="fa-solid fa-user-plus me-1"></i>Gabung Relawan
+                  </a>
+                @else
+                  <a href="{{ route('bencana.donasi', $campaign->slug) }}" class="btn flex-fill text-center"
+                    style="border-radius:12px; border:1.5px solid #16a34a; color:#16a34a; background:rgba(22,163,74,0.08); transition:all 0.3s ease;"
+                    onmouseover="this.style.background='rgba(22,163,74,0.15)';this.style.boxShadow='0 6px 20px rgba(22,163,74,0.2)';"
+                    onmouseout="this.style.background='rgba(22,163,74,0.08)';this.style.boxShadow='none';">
+                    <i class="fa-solid fa-hand-holding-heart me-1"></i>Donasi
+                  </a>
+                @endif
+              @else
+                <a href="{{ route('bencana.donasi', $campaign->slug) }}" class="btn flex-fill text-center"
+                  style="border-radius:12px; border:1.5px solid #16a34a; color:#16a34a; background:rgba(22,163,74,0.08); transition:all 0.3s ease;"
+                  onmouseover="this.style.background='rgba(22,163,74,0.15)';this.style.boxShadow='0 6px 20px rgba(22,163,74,0.2)';"
+                  onmouseout="this.style.background='rgba(22,163,74,0.08)';this.style.boxShadow='none';">
+                  <i class="fa-solid fa-hand-holding-heart me-1"></i>Donasi
+                </a>
+              @endauth
             </div>
           </div>
         </div>

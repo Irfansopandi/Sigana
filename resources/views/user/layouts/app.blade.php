@@ -33,13 +33,14 @@
     /* ── SIDEBAR ── */
     .sidebar {
       width: var(--sidebar-w);
-      min-height: 100vh;
+      height: 100vh;
       background: linear-gradient(180deg, var(--navy-900) 0%, var(--navy-800) 100%);
       display: flex;
       flex-direction: column;
       position: fixed;
       top: 0; left: 0;
       z-index: 100;
+      overflow: hidden;
       transition: transform .3s ease;
     }
 
@@ -67,7 +68,17 @@
     .sidebar-brand-text span.ga  { color: #f87171;     font-weight: 700; font-size: 1.1rem; }
     .sidebar-brand-text small    { color: rgba(255,255,255,0.45); font-size: 0.7rem; display: block; }
 
-    .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+    .sidebar-nav { 
+        flex: 1; 
+        padding: 12px 0; 
+        overflow-y: auto;  min-height: 0;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .sidebar-nav::-webkit-scrollbar {
+        display: none;
+    }
 
     .nav-label {
       color: rgba(255,255,255,0.3);
@@ -103,7 +114,8 @@
     .sidebar-footer {
       padding: 14px 20px;
       border-top: 1px solid rgba(255,255,255,0.08);
-      margin-bottom: 16px;
+      margin-bottom: 0;
+      flex-shrink: 0;
     }
 
     .sidebar-user {
@@ -238,6 +250,7 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      overflow-x: clip;
     }
 
     /* ── TOPBAR ── */
@@ -249,7 +262,22 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 24px;
-      position: sticky; top: 0; z-index: 50;
+      position: fixed; 
+      top: 0; 
+      left: var(--sidebar-w);
+      right: 0;
+      z-index: 50;
+    }
+
+    .sidebar.collapsed ~ .main-wrapper .topbar {
+    left: 70px;
+    }
+
+      /* ── CONTENT ── */
+    .main-content { 
+        padding: 24px; 
+        flex: 1; 
+        padding-top: 84px;
     }
 
     .topbar-title { font-weight: 600; color: var(--navy-900); font-size: .95rem; }
@@ -295,8 +323,7 @@
   }
 
 
-    /* ── CONTENT ── */
-    .main-content { padding: 24px; flex: 1; }
+  
 
     /* ── RESPONSIVE ── */
     @media (max-width: 991px) {

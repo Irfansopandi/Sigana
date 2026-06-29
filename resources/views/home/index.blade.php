@@ -59,32 +59,65 @@
           aman, cepat, dan terpercaya.
         </p>
         <div class="hero-buttons" style="gap: 10px;">
-          @auth
-            @if(auth()->user()->role === 'relawan')
-              <a href="#" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero">
-                <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporan Lapangan
-              </a>
-            @elseif (auth()->user()->role === 'user')
-              <a href="{{ route('user.lapor-bencana.store') }}" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero">
-                <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporkan Bencana
-              </a>
-            @endif
-          @else
-            <a href="#" class="btn btn-secondary-custom px-4 py-3" id="btn-lapor-hero"
-              data-bs-toggle="modal" data-bs-target="#modalAuthRequired">
+        @auth
+          @if(auth()->user()->role === 'admin')
+            {{-- Admin: tidak dapat button apapun --}}
+
+          @elseif(auth()->user()->role === 'relawan')
+            {{-- Relawan: Laporan + Daftar Relawan (ke kampanye) --}}
+            <a href="{{ route('user.lapor-bencana.store') }}" class="btn px-4 py-3" id="btn-lapor-hero"
+              style="border-radius:50px; border:1.5px solid #ef4444; color:#ef4444; background:rgba(239,68,68,0.08); font-size:0.85rem; transition:all 0.3s ease;"
+              onmouseover="this.style.background='rgba(239,68,68,0.15)';this.style.boxShadow='0 6px 20px rgba(239,68,68,0.2)';"
+              onmouseout="this.style.background='rgba(239,68,68,0.08)';this.style.boxShadow='none';">
               <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporkan Bencana
             </a>
-            <a href="{{ route('register.relawan') }}" class="btn btn-outline-primary px-4 py-3" id="btn-relawan-hero">
+            <a href="{{ route('bencana') }}" class="btn px-4 py-3"
+              style="border-radius:50px; border:1.5px solid #6c757d; color:#6c757d; background:rgba(108,117,125,0.08); font-size:0.85rem; transition:all 0.3s ease;"
+              onmouseover="this.style.background='rgba(108,117,125,0.15)';this.style.boxShadow='0 6px 20px rgba(108,117,125,0.2)';"
+              onmouseout="this.style.background='rgba(108,117,125,0.08)';this.style.boxShadow='none';">
               <i class="fa-solid fa-hands-helping me-2"></i>Daftar Relawan
             </a>
-          @endauth
-          @if(!auth()->check() || auth()->user()->role !== 'admin')
-            <a href="{{ route('bencana')}}" class="btn btn-green-custom px-4 py-3" id="btn-donasi-hero">
-              <i class="fa-solid fa-heart me-2"></i>Donasi Sekarang
+
+          @elseif(auth()->user()->role === 'user')
+            {{-- User: Laporan + Donasi --}}
+            <a href="{{ route('user.lapor-bencana.store') }}" class="btn px-4 py-3" id="btn-lapor-hero"
+              style="border-radius:50px; border:1.5px solid #ef4444; color:#ef4444; background:rgba(239,68,68,0.08); font-size:0.85rem; transition:all 0.3s ease;"
+              onmouseover="this.style.background='rgba(239,68,68,0.15)';this.style.boxShadow='0 6px 20px rgba(239,68,68,0.2)';"
+              onmouseout="this.style.background='rgba(239,68,68,0.08)';this.style.boxShadow='none';">
+              <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporkan Bencana
             </a>
+            <a href="{{ route('bencana') }}" class="btn px-4 py-3"
+              style="border-radius:50px; border:1.5px solid #16a34a; color:#16a34a; background:rgba(22,163,74,0.08); font-size:0.85rem; transition:all 0.3s ease;"
+              onmouseover="this.style.background='rgba(22,163,74,0.15)';this.style.boxShadow='0 6px 20px rgba(22,163,74,0.2)';"
+              onmouseout="this.style.background='rgba(22,163,74,0.08)';this.style.boxShadow='none';">
+              <i class="fa-solid fa-hand-holding-heart me-2"></i>Donasi
+            </a>
+
           @endif
-        </div>
+        @else
+          {{-- Guest: Laporan + Gabung Relawan + Donasi --}}
+          <a href="#" class="btn px-4 py-3" id="btn-lapor-hero"
+            data-bs-toggle="modal" data-bs-target="#modalAuthRequired"
+            style="border-radius:50px; border:1.5px solid #ef4444; color:#ef4444; background:rgba(239,68,68,0.08); font-size:0.85rem; transition:all 0.3s ease;"
+            onmouseover="this.style.background='rgba(239,68,68,0.15)';this.style.boxShadow='0 6px 20px rgba(239,68,68,0.2)';"
+            onmouseout="this.style.background='rgba(239,68,68,0.08)';this.style.boxShadow='none';">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>Laporkan Bencana
+          </a>
+          <a href="{{ route('register.relawan') }}" class="btn px-4 py-3" id="btn-relawan-hero"
+            style="border-radius:50px; border:1.5px solid #6c757d; color:#6c757d; background:rgba(108,117,125,0.08); font-size:0.85rem; transition:all 0.3s ease;"
+            onmouseover="this.style.background='rgba(108,117,125,0.15)';this.style.boxShadow='0 6px 20px rgba(108,117,125,0.2)';"
+            onmouseout="this.style.background='rgba(108,117,125,0.08)';this.style.boxShadow='none';">
+            <i class="fa-solid fa-hands-helping me-2"></i>Gabung Relawan
+          </a>
+          <a href="{{ route('bencana') }}" class="btn px-4 py-3"
+            style="border-radius:50px; border:1.5px solid #16a34a; color:#16a34a; background:rgba(22,163,74,0.08); font-size:0.85rem; transition:all 0.3s ease;"
+            onmouseover="this.style.background='rgba(22,163,74,0.15)';this.style.boxShadow='0 6px 20px rgba(22,163,74,0.2)';"
+            onmouseout="this.style.background='rgba(22,163,74,0.08)';this.style.boxShadow='none';">
+            <i class="fa-solid fa-hand-holding-heart me-2"></i>Donasi
+          </a>
+        @endauth
       </div>
+    </div> 
 
       {{-- Kanan: Hero Carousel --}}
       <div class="col-lg-6 mt-5 mt-lg-0 hero-image-wrapper text-center animate-on-scroll animate-fade-in-right">
@@ -340,10 +373,36 @@
               <span class="small text-muted"><i class="fa-regular fa-clock me-1"></i> {{ $campaign->days_left }} hari lagi</span>
             </div>
             <div class="d-flex gap-2">
-              <a href="{{ route('bencana.detail', $campaign->slug) }}" class="btn btn-outline-primary flex-fill">Detail</a>
-              <a href="{{ route('bencana.donasi', $campaign->slug) }}" class="btn btn-green-custom flex-fill text-center">
-                <i class="fa-solid fa-hand-holding-heart me-1"></i>Donasi
+              <a href="{{ route('bencana.detail', $campaign->slug) }}" class="btn flex-fill text-center"
+                style="border-radius:12px; border:1.5px solid #2563eb; color:#2563eb; background:rgba(37,99,235,0.08); transition:all 0.3s ease;"
+                onmouseover="this.style.background='rgba(37,99,235,0.15)';this.style.boxShadow='0 6px 20px rgba(37,99,235,0.2)';"
+                onmouseout="this.style.background='rgba(37,99,235,0.08)';this.style.boxShadow='none';">
+                Detail
               </a>
+              @auth
+                @if(auth()->user()->role === 'relawan')
+                  <a href="{{ route('register.relawan') }}" class="btn flex-fill text-center"
+                    style="border-radius:12px; border:1.5px solid #ef4444; color:#ef4444; background:rgba(239,68,68,0.08); transition:all 0.3s ease;"
+                    onmouseover="this.style.background='rgba(239,68,68,0.15)';this.style.boxShadow='0 6px 20px rgba(239,68,68,0.2)';"
+                    onmouseout="this.style.background='rgba(239,68,68,0.08)';this.style.boxShadow='none';">
+                    <i class="fa-solid fa-user-plus me-1"></i>Gabung Relawan
+                  </a>
+                @else
+                  <a href="{{ route('bencana.donasi', $campaign->slug) }}" class="btn flex-fill text-center"
+                    style="border-radius:12px; border:1.5px solid #16a34a; color:#16a34a; background:rgba(22,163,74,0.08); transition:all 0.3s ease;"
+                    onmouseover="this.style.background='rgba(22,163,74,0.15)';this.style.boxShadow='0 6px 20px rgba(22,163,74,0.2)';"
+                    onmouseout="this.style.background='rgba(22,163,74,0.08)';this.style.boxShadow='none';">
+                    <i class="fa-solid fa-hand-holding-heart me-1"></i>Donasi
+                  </a>
+                @endif
+              @else
+                 <a href="{{ route('bencana.donasi', $campaign->slug) }}" class="btn flex-fill text-center"
+                  style="border-radius:12px; border:1.5px solid #16a34a; color:#16a34a; background:rgba(22,163,74,0.08); transition:all 0.3s ease;"
+                  onmouseover="this.style.background='rgba(22,163,74,0.15)';this.style.boxShadow='0 6px 20px rgba(22,163,74,0.2)';"
+                  onmouseout="this.style.background='rgba(22,163,74,0.08)';this.style.boxShadow='none';">
+                  <i class="fa-solid fa-hand-holding-heart me-1"></i>Donasi
+                </a>
+              @endauth
             </div>
           </div>
         </div>

@@ -50,6 +50,18 @@
   .badge-diterima { background:#ecfdf5; color:#059669; border: 1px solid #a7f3d0; }
   .badge-ditolak  { background:#fef2f2; color:#dc2626; border: 1px solid #fecaca; }
 
+  .badge-koordinator { background:#fef9c3; color:#854d0e; border: 1px solid #fde047; }
+
+  .btn-koordinator { background:#fefce8; color:#854d0e; border: 1.5px solid #fde047;
+    border-radius: 8px; padding: 5px 12px; font-size: .78rem; font-weight: 500;
+    transition: all .2s; display: inline-flex; align-items: center; }
+  .btn-koordinator:hover { background:#fef9c3; border-color:#facc15; }
+
+  .btn-lepas-koordinator { background:#fff; color:#64748b; border: 1.5px solid #e2e8f0;
+    border-radius: 8px; padding: 5px 12px; font-size: .78rem; font-weight: 500;
+    transition: all .2s; display: inline-flex; align-items: center; }
+  .btn-lepas-koordinator:hover { background:#f8fafc; color:#475569; border-color:#cbd5e1; }
+
   .btn-icon-sm {
     width: 30px; height: 30px; border-radius: 7px; display: flex;
     align-items: center; justify-content: center; border: 1.5px solid;
@@ -116,27 +128,28 @@
       <h5><i class="fa-solid fa-users text-success me-2"></i>Pendaftar Relawan
         <span class="badge bg-light text-muted border ms-2" style="font-size:.75rem;">{{ $volunteers->count() }}</span>
       </h5>
-      
-        @php
-        $filterTab = request('tab', 'semua');
-        $tabs = ['semua' => 'Semua', 'menunggu' => 'Menunggu', 'diterima' => 'Diterima', 'ditolak' => 'Ditolak'];
-        @endphp
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <span class="small text-muted">{{ $volunteers->count() }} relawan ditemukan</span>
-            <div class="d-flex align-items-center gap-2">
-                <span class="small text-muted">Tampil</span>
-                <select class="form-select form-select-sm" style="width:80px;" 
-                        onchange="window.location.href='{{ route('admin.assignments.show', $campaign) }}?tab={{ $filterTab }}&per_page='+this.value">
-                @foreach([5, 10, 25, 50] as $size)
-                    <option value="{{ $size }}" {{ request('per_page', 10) == $size ? 'selected' : '' }}>
-                    {{ $size }}
-                    </option>
-                @endforeach
-                </select>
-                <span class="small text-muted">baris</span>
-            </div>
+      @php
+      $filterTab = request('tab', 'semua');
+      $tabs = ['semua' => 'Semua', 'menunggu' => 'Menunggu', 'diterima' => 'Diterima', 'ditolak' => 'Ditolak'];
+      @endphp
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="small text-muted">{{ $volunteers->count() }} relawan ditemukan</span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="small text-muted">Tampil</span>
+          <select class="form-select form-select-sm" style="width:80px;"
+                  onchange="window.location.href='{{ route('admin.assignments.show', $campaign) }}?tab={{ $filterTab }}&per_page='+this.value">
+          @foreach([5, 10, 25, 50] as $size)
+            <option value="{{ $size }}" {{ request('per_page', 10) == $size ? 'selected' : '' }}>
+            {{ $size }}
+            </option>
+          @endforeach
+          </select>
+          <span class="small text-muted">baris</span>
         </div>
+      </div>
+
       <div class="d-flex gap-2 mb-4 flex-wrap">
         @foreach($tabs as $val => $label)
           <a href="{{ route('admin.assignments.show', [$campaign, 'tab' => $val]) }}"
@@ -167,7 +180,14 @@
           <div class="flex-grow-1">
             <div class="d-flex justify-content-between align-items-start">
               <div>
-                <div class="fw-semibold text-dark" style="font-size:.9rem;">{{ $vol->user->name }}</div>
+                <div class="fw-semibold text-dark" style="font-size:.9rem;">
+                  {{ $vol->user->name }}
+                  @if($vol->is_coordinator)
+                    <span class="badge rounded-pill badge-koordinator ms-1" style="font-size:.65rem;">
+                      <i class="fa-solid fa-star me-1"></i>Koordinator
+                    </span>
+                  @endif
+                </div>
                 <div class="text-muted" style="font-size:.75rem;">{{ $vol->user->email }}</div>
                 @if($vol->role)
                   <span class="badge bg-light text-primary border border-primary-subtle mt-1" style="font-size:.7rem;">
@@ -196,14 +216,34 @@
               </div>
             @endif
 
-            @if($vol->verifikasi === 'menunggu')
-            <div class="mt-3">
+            <div class="mt-3 d-flex gap-2 flex-wrap">
+              @if($vol->verifikasi === 'menunggu')
               <button type="button" class="btn btn-sm btn-success rounded-3" style="font-size:.78rem;"
                 data-bs-toggle="modal" data-bs-target="#verifikasiModal{{ $vol->id }}">
                 <i class="fa-solid fa-check me-1"></i>Terima / Tolak
               </button>
+              @endif
+
+              @if($vol->verifikasi === 'diterima' && !$vol->is_coordinator)
+              <form action="{{ route('admin.assignments.set-coordinator', $vol) }}" method="POST">
+                @csrf
+                @method('PATCH')
+                <button type="submit" class="btn-koordinator">
+                  <i class="fa-solid fa-star me-1"></i>Jadikan Koordinator
+                </button>
+              </form>
+              @endif
+
+              @if($vol->is_coordinator)
+              <form action="{{ route('admin.assignments.unset-coordinator', $vol) }}" method="POST">
+                @csrf
+                @method('PATCH')
+                <button type="submit" class="btn-lepas-koordinator">
+                  <i class="fa-solid fa-star-half-stroke me-1"></i>Lepas Koordinator
+                </button>
+              </form>
+              @endif
             </div>
-            @endif
           </div>
         </div>
       </div>
@@ -246,9 +286,10 @@
         Belum ada relawan yang mendaftar.
       </div>
       @endforelse
+
       <div class="mt-3">
-    {{ $volunteers->links() }}
-    </div>
+        {{ $volunteers->links() }}
+      </div>
     </div>
   </div>
 

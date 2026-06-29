@@ -89,4 +89,26 @@ class AdminAssignmentController extends Controller
         return redirect()->route('admin.assignments.show', $volunteer->campaign_id)
             ->with('success', 'Status relawan berhasil diperbarui.');
     }
+
+    public function setKoordinator(CampaignVolunteer $volunteer)
+    {
+        // Lepas koordinator lama di kampanye ini dulu
+        CampaignVolunteer::where('campaign_id', $volunteer->campaign_id)
+            ->where('is_coordinator', true)
+            ->update(['is_coordinator' => false]);
+
+        // Tunjuk yang baru
+        $volunteer->update(['is_coordinator' => true]);
+
+        return redirect()->route('admin.assignments.show', $volunteer->campaign_id)
+            ->with('success', 'Koordinator berhasil ditunjuk.');
+    }
+
+    public function unsetKoordinator(CampaignVolunteer $volunteer)
+    {
+        $volunteer->update(['is_coordinator' => false]);
+
+        return redirect()->route('admin.assignments.show', $volunteer->campaign_id)
+            ->with('success', 'Koordinator berhasil dilepas.');
+    }
 }

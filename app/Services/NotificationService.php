@@ -9,6 +9,7 @@ class NotificationService
     // Kampanye disetujui admin
     public static function campaignApproved($campaign)
     {
+        if (!$campaign->submitted_by) return;
         Notification::create([
             'user_id' => $campaign->submitted_by,
             'type'    => 'campaign_approved',
@@ -21,6 +22,7 @@ class NotificationService
     // Kampanye ditolak admin
     public static function campaignRejected($campaign)
     {
+        if (!$campaign->submitted_by) return;
         Notification::create([
             'user_id' => $campaign->submitted_by,
             'type'    => 'campaign_rejected',

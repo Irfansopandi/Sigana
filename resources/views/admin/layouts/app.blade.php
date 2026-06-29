@@ -33,13 +33,14 @@
     /* ── SIDEBAR ── */
     .sidebar {
       width: var(--sidebar-w);
-      min-height: 100vh;
+      height: 100vh;
       background: linear-gradient(180deg, var(--navy-900) 0%, var(--navy-800) 100%);
       display: flex;
       flex-direction: column;
       position: fixed;
       top: 0; left: 0;
       z-index: 100;
+      overflow: hidden;
       transition: transform .3s ease;
     }
 
@@ -67,7 +68,14 @@
     .sidebar-brand-text span.ga  { color: #f87171;     font-weight: 700; font-size: 1.1rem; }
     .sidebar-brand-text small    { color: rgba(255,255,255,0.45); font-size: 0.7rem; display: block; }
 
-    .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+    .sidebar-nav { 
+      flex: 1; 
+      padding: 12px 0; 
+      overflow-y: auto;
+      min-height: 0; 
+      scrollbar-width: none;       
+      -ms-overflow-style: none;
+    }
 
     .nav-label {
       color: rgba(255,255,255,0.3);
@@ -103,7 +111,8 @@
     .sidebar-footer {
       padding: 14px 20px;
       border-top: 1px solid rgba(255,255,255,0.08);
-      margin-bottom: 16px;
+      margin-bottom: 0;
+      flex-shrink: 0;
     }
 
     .sidebar-user {
@@ -341,6 +350,10 @@
     </a>
     <a href="{{ route('admin.transparency.index') }}" class="nav-link {{ request()->routeIs('admin.transparency.*') ? 'active' : '' }}">
       <i class="fa-solid fa-file-lines"></i> <span>Laporan Transparansi</span>
+    </a>
+    <a href="{{ route('admin.coordinator-reports.index') }}" 
+      class="nav-link {{ request()->routeIs('admin.coordinator-reports.*') ? 'active' : '' }}">
+      <i class="fa-solid fa-clipboard-check"></i> <span>Laporan Koordinator</span>
     </a>
 
     <div class="nav-label">Sistem</div>

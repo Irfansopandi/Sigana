@@ -17,16 +17,13 @@ class RoleMiddleware
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $normalizedRole = $user->role ?? 'user';
+        $userRole = strtolower($user->role ?? 'user');
 
-        $allowedRoles = array_map(function ($role) {
-            return strtolower($role);
-        }, $roles);
+        $allowedRoles = array_map('strtolower', $roles);
 
-        $userRole = strtolower($normalizedRole);
-
-        if (!in_array($userRole, $allowedRoles) && !in_array('user', $allowedRoles)) {
-            abort(403, 'Akses ditolak.');
+        if (!in_array($userRole, $allowedRoles)) {
+            $halamanDituju = implode(' atau ', $allowedRoles);
+            abort(403, "Halaman ini hanya dapat diakses oleh $halamanDituju.");
         }
 
         return $next($request);

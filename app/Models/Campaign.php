@@ -211,4 +211,16 @@ class Campaign extends Model
     {
         return $this->hasMany(CampaignRole::class);
     }
+
+    public function coordinatorReports()
+    {
+        return $this->hasMany(CoordinatorReport::class);
+    }
+
+    public function coordinator()
+    {
+        return $this->hasOne(CampaignVolunteer::class)
+            ->where('is_coordinator', true)
+            ->where('verifikasi', 'diterima');
+    }
 }

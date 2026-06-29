@@ -31,8 +31,12 @@ class GoogleController extends Controller
 
             Auth::login($user, true);
 
-            return redirect()->route('user.dashboard')
-                ->with('login_success', true);
+            return match ($user->role) {
+                'admin'   => redirect()->route('admin.dashboard')->with('login_success', true),
+                'relawan' => redirect()->route('relawan.dashboard')->with('login_success', true),
+                default   => redirect()->route('user.dashboard')->with('login_success', true),
+            };
+
 
         } catch (\Exception $e) {
             return redirect()->route('login')->withErrors([

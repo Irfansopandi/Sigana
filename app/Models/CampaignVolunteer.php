@@ -42,4 +42,10 @@ class CampaignVolunteer extends Model
     {
         return $this->hasMany(CampaignRole::class);
     }
+
+    public function coordinatorReports()
+    {
+        return $this->hasMany(CoordinatorReport::class, 'user_id', 'user_id')
+            ->where('campaign_id', $this->campaign_id);
+    }
 }

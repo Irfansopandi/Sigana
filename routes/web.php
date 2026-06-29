@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AdminTransparencyController;
 use App\Http\Controllers\Admin\AdminVolunteerController;
 use App\Http\Controllers\Admin\AdminAssignmentController;
 use App\Http\Controllers\Admin\AdminCertificateController;
+use App\Http\Controllers\Admin\AdminCoordinatorReportController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Relawan\RelawanDashboardController;
 use App\Http\Controllers\User\UserDashboardController;
@@ -107,6 +108,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::delete('/assignments/roles/{role}', [AdminAssignmentController::class, 'destroyRole'])->name('assignments.roles.destroy');
     Route::post('/assignments/volunteers/{volunteer}/verifikasi', [AdminAssignmentController::class, 'verifikasi'])->name('assignments.verifikasi');
     Route::post('/assignments', [AdminAssignmentController::class, 'store'])->name('assignments.store');
+    Route::patch('assignments/volunteers/{volunteer}/set-coordinator', [AdminAssignmentController::class, 'setKoordinator'])->name('admin.assignments.set-coordinator');
+    Route::patch('assignments/volunteers/{volunteer}/unset-coordinator', [AdminAssignmentController::class, 'unsetKoordinator'])->name('admin.assignments.unset-coordinator');
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::get('/settings/profile', [AdminSettingsController::class, 'profile'])->name('settings.profile');
     Route::match(['put', 'patch'], '/settings/profile', [AdminSettingsController::class, 'updateProfile'])->name('settings.profile.update');
@@ -114,6 +117,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/certificates', [AdminCertificateController::class, 'index'])->name('certificates.index');
     Route::post('/certificates', [AdminCertificateController::class, 'store'])->name('certificates.store');
     Route::delete('/certificates/{certificate}', [AdminCertificateController::class, 'destroy'])->name('certificates.destroy');
+    Route::get('coordinator-reports', [AdminCoordinatorReportController::class, 'index'])->name('coordinator-reports.index');
+    Route::get('coordinator-reports/{coordinatorReport}', [AdminCoordinatorReportController::class, 'show'])->name('coordinator-reports.show');
+    Route::post('coordinator-reports/{coordinatorReport}/approve', [AdminCoordinatorReportController::class, 'approve'])->name('coordinator-reports.approve');
+    Route::post('coordinator-reports/{coordinatorReport}/reject', [AdminCoordinatorReportController::class, 'reject'])->name('coordinator-reports.reject');
 });
 
 // Relawan
