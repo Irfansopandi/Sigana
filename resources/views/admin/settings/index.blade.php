@@ -16,14 +16,14 @@
         <div class="border rounded-4 p-4 h-100">
           <h6 class="fw-semibold mb-3">Profil Admin</h6>
           <p class="small text-muted">Kelola informasi akun, email, dan keamanan.</p>
-          <a href="#" class="btn btn-sm btn-primary">Ubah Profil</a>
+          <a href="{{ route('admin.settings.profile') }}" class="btn btn-sm btn-outline-primary">Ubah Profil</a>
         </div>
       </div>
       <div class="col-md-6">
         <div class="border rounded-4 p-4 h-100">
           <h6 class="fw-semibold mb-3">Pengaturan Sistem</h6>
           <p class="small text-muted">Kelola notifikasi, integrasi, dan opsi dashboard.</p>
-          <a href="#" class="btn btn-sm btn-outline-primary">Atur Sistem</a>
+          <a href="{{ route('admin.settings.system') }}" class="btn btn-sm btn-outline-primary">Atur Sistem</a>
         </div>
       </div>
     </div>
