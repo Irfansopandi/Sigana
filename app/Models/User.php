@@ -29,6 +29,12 @@ class User extends Authenticatable
         'tanggal_lahir',
         'jenis_kelamin',
         'keahlian',
+        'nik',
+        'alamat',
+        'pengalaman',
+        'foto_ktp',
+        'status',
+        'last_login_at',
     ];
 
     /**
@@ -53,6 +59,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'tanggal_lahir'  => 'date',
             'keahlian'  => 'array',
+            'last_login_at' => 'datetime',
         ];
     }
 

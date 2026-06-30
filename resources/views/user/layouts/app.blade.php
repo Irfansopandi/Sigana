@@ -313,6 +313,19 @@
     #notifDropdown .card-header {
         border-radius: 16px 16px 0 0 !important;
     }
+    #notifList::-webkit-scrollbar {
+      width: 6px;
+    }
+    #notifList::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #notifList::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    #notifList::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
 
   .card-hover {
     transition: transform .2s, box-shadow .2s;
@@ -436,12 +449,17 @@
                         <span class="fw-semibold small">Notifikasi</span>
                         <a href="{{ route('user.notifications') }}" 
                           class="btn btn-sm btn-outline-secondary rounded-pill px-3 text-decoration-none" 
-                          style="font-size:.75rem;">
+                          style="font-size:.75rem;"
+                          onclick="localStorage.setItem('user_notif_seen_at', Date.now()); document.getElementById('notifBadge').classList.add('d-none'); document.getElementById('notifList').innerHTML = ''; document.getElementById('notifEmpty').classList.remove('d-none');">
                             Lihat semua
                         </a>
                     </div>
-                    <div class="card-body p-0" id="notifList" style="max-height:320px;overflow-y:auto;">
-                        <div class="text-center text-muted small py-4" id="notifEmpty">Tidak ada notifikasi baru</div>
+                    <div class="card-body p-0" style="max-height:320px;overflow-y:auto;">
+                        <div class="text-center text-muted small py-4" id="notifEmpty">
+                            <i class="fa-solid fa-bell-slash mb-2 d-block opacity-40"></i>
+                            Tidak ada notifikasi baru
+                        </div>
+                        <div id="notifList"></div>
                     </div>
                 </div>
             </div>
@@ -571,17 +589,17 @@ function loadNotif() {
     fetch('{{ route("user.notifications.unread") }}')
         .then(r => r.json())
         .then(data => {
-            if (data.count > 0) {
-                notifBadge.classList.remove('d-none');
-                notifBadge.textContent = data.count > 9 ? '9+' : data.count;
-            } else {
-                notifBadge.classList.add('d-none');
-            }
+            const lastSeen = parseInt(localStorage.getItem('user_notif_seen_at') || '0');
+            const unseenNotifs = data.notifications.filter(n => {
+                return new Date(n.time).getTime() > lastSeen;
+            });
 
-            if (data.notifications.length > 0) {
+            if (unseenNotifs.length > 0) {
+                notifBadge.classList.remove('d-none');
+                notifBadge.textContent = unseenNotifs.length > 9 ? '9+' : unseenNotifs.length;
                 notifEmpty.classList.add('d-none');
-                notifList.innerHTML = data.notifications.map(n => `
-                    <a href="${n.url ?? '#'}" class="d-flex gap-3 px-3 py-2 text-decoration-none border-bottom notif-item ${!n.is_read ? 'bg-light' : ''}"
+                notifList.innerHTML = unseenNotifs.map(n => `
+                    <a href="${n.url ?? '#'}" class="d-flex gap-3 px-3 py-2 text-decoration-none border-bottom notif-item bg-light"
                         data-id="${n.id}">
                         <div class="mt-1">${icons[n.type] ?? '<i class="fa-solid fa-bell text-muted"></i>'}</div>
                         <div>
@@ -590,6 +608,10 @@ function loadNotif() {
                         </div>
                     </a>
                 `).join('');
+            } else {
+                notifBadge.classList.add('d-none');
+                notifEmpty.classList.remove('d-none');
+                notifList.innerHTML = '';
             }
         });
 }

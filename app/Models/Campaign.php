@@ -86,6 +86,12 @@ class Campaign extends Model
      */
     public function getIsExpiredAttribute(): bool
     {
+        // Selesai juga kalau admin sudah menandai Laporan Transparansi sebagai "Selesai",
+        // terlepas dari sisa hari kampanye.
+        if (optional($this->transparencyReport)->status === 'Selesai') {
+            return true;
+        }
+
         return $this->days_left <= 0;
     }
 
@@ -245,5 +251,10 @@ class Campaign extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'submitted_by');
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(\App\Models\CoordinatorReport::class, 'campaign_id');
     }
 }

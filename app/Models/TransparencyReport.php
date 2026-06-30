@@ -67,9 +67,32 @@ class TransparencyReport extends Model
     {
         return match ($this->status) {
             'Dalam Penyaluran' => 'penyaluran',
-            'Hampir Selesai' => 'selesai',
+            'Hampir Selesai' => 'hampir-selesai',
+            'Selesai' => 'selesai',
             'Aktif' => 'aktif',
             default => 'aktif',
+        };
+    }
+
+    public function getStatusClassAttribute(): string
+    {
+        return match ($this->status) {
+            'Aktif'            => 'bg-primary',
+            'Dalam Penyaluran' => 'bg-warning text-dark',
+            'Hampir Selesai'   => 'bg-info text-dark',
+            'Selesai'          => 'bg-success',
+            default            => 'bg-secondary',
+        };
+    }
+
+    public function getStatusIconAttribute(): string
+    {
+        return match ($this->status) {
+            'Aktif'            => 'fa-solid fa-circle-dot',
+            'Dalam Penyaluran' => 'fa-solid fa-truck',
+            'Hampir Selesai'   => 'fa-solid fa-circle-check',
+            'Selesai'          => 'fa-solid fa-flag-checkered',
+            default            => 'fa-solid fa-circle-question',
         };
     }
 

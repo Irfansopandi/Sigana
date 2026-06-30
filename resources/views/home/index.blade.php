@@ -107,7 +107,7 @@
             style="border-radius:50px; border:1.5px solid #6c757d; color:#6c757d; background:rgba(108,117,125,0.08); font-size:0.85rem; transition:all 0.3s ease;"
             onmouseover="this.style.background='rgba(108,117,125,0.15)';this.style.boxShadow='0 6px 20px rgba(108,117,125,0.2)';"
             onmouseout="this.style.background='rgba(108,117,125,0.08)';this.style.boxShadow='none';">
-            <i class="fa-solid fa-hands-helping me-2"></i>Gabung Relawan
+            <i class="fa-solid fa-hands-helping me-2"></i>Daftar Relawan
           </a>
           <a href="{{ route('bencana') }}" class="btn px-4 py-3"
             style="border-radius:50px; border:1.5px solid #16a34a; color:#16a34a; background:rgba(22,163,74,0.08); font-size:0.85rem; transition:all 0.3s ease;"

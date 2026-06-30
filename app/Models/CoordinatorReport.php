@@ -41,4 +41,24 @@ class CoordinatorReport extends Model
     {
         return $this->belongsTo(User::class, 'verified_by');
     }
+
+    public function photos(): HasMany
+    {
+        return $this->hasMany(CoordinatorReportPhoto::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(CoordinatorReportItem::class);
+    }
+
+    public function timelines(): HasMany
+    {
+        return $this->hasMany(CoordinatorReportTimeline::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(CoordinatorReportDocument::class);
+    }
 }

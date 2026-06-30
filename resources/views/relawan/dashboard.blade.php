@@ -109,7 +109,7 @@
             Terima kasih sudah menjadi relawan SIGANA. Semangat bertugas hari ini!
           </p>
           <div class="d-flex flex-wrap gap-3">
-            <a href="{{ route('bencana') }}" class="hero-btn-outline">
+            <a href="{{ route('relawan.bencana') }}" class="hero-btn-outline">
               <i class="fa-solid fa-map-location-dot"></i> Lihat Bencana
             </a>
           </div>
@@ -206,7 +206,7 @@
       <h6 class="fw-semibold mb-0">
         <i class="fa-solid fa-list-check me-2 text-primary"></i>Kampanye Bencana Terkini
       </h6>
-      <a href="{{ route('bencana') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+      <a href="{{ route('relawan.bencana') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">

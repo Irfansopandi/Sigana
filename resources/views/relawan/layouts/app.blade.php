@@ -301,6 +301,35 @@
       .sidebar.show { transform: translateX(0); }
       .main-wrapper { margin-left: 0; }
     }
+    #notifBtn {
+      background: none;
+      border: none;
+    }
+    #notifIcon {
+      display: inline-block;
+      transition: transform 0.2s;
+    }
+    #notifBtn:hover #notifIcon {
+      transform: rotate(15deg);
+    }
+    #relawanNotifDropdown {
+      border-radius: 14px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.12);
+      overflow: hidden;
+    }
+    #notifList::-webkit-scrollbar {
+      width: 6px;
+    }
+    #notifList::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #notifList::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    #notifList::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
   </style>
   @stack('styles')
 </head>
@@ -325,15 +354,25 @@
         </a> 
 
         <div class="nav-label">Tugas</div>
-        <a href="#" class="nav-link">
+        <a href="{{ route('relawan.bencana') }}" class="nav-link {{ request()->routeIs('relawan.bencana') ? 'active' : '' }}">
             <i class="fa-solid fa-map-location-dot"></i> <span> Bencana</span>
         </a>
-        <a href="#" class="nav-link">
-            <i class="fa-solid fa-clipboard-list"></i> <span>Laporan Tugas</span>
+        <a href="{{ route('relawan.bencana-diikuti') }}" class="nav-link {{ request()->routeIs('relawan.bencana-diikuti') || request()->routeIs('relawan.bencana-diikuti.selesai') ? 'active' : '' }}">
+            <i class="fa-solid fa-clipboard-list"></i> <span>Bencana Diikuti</span>
         </a>
-        <a href="#" class="nav-link">
-            <i class="fa-solid fa-circle-info"></i> <span> Info Kampanye</span>
-        </a>
+
+        @php
+          $isCoordinator = \App\Models\CampaignVolunteer::where('user_id', auth()->id())
+            ->where('is_coordinator', true)
+            ->where('verifikasi', 'diterima')
+            ->exists();
+        @endphp
+        @if($isCoordinator)
+          <div class="nav-label">Koordinator</div>
+          <a href="{{ route('relawan.coordinator-reports.index') }}" class="nav-link {{ request()->routeIs('relawan.coordinator-reports.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-file-lines"></i> <span> Laporan Bencana</span>
+          </a>
+        @endif
 
         <div class="nav-label">Akun</div>
         <a href="#" class="nav-link">
@@ -374,12 +413,42 @@
             </button>
             <span class="topbar-title">@yield('page_title', 'Dashboard')</span>
         </div>
-        <div class="topbar-right">
-            <span class="text-muted small">{{ now()->translatedFormat('l, d F Y') }}</span>
-            <div class="topbar-badge">
-                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+        <div class="topbar-right d-flex align-items-center gap-2" style="position:relative;">
+
+          {{-- Bell Notifikasi --}}
+          <div class="position-relative" id="notifWrapper">
+            <button id="notifBtn" class="btn p-0 position-relative" style="width:36px;height:36px;background:none;border:none;" title="Notifikasi">
+              <i class="fa-solid fa-bell text-muted fs-5" id="notifIcon"></i>
+              <span id="notifBadge" class="position-absolute badge rounded-pill bg-danger d-none"
+                    style="font-size:.6rem;top:-4px;right:-6px;"></span>
+            </button>
+
+            {{-- Dropdown --}}
+            <div id="notifDropdown" class="card shadow border-0 position-absolute d-none"
+                style="width:320px;z-index:999;right:0;top:100%;border-radius:14px !important;overflow:hidden;">
+              <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                <span class="fw-semibold small">Notifikasi</span>
+                <a href="{{ route('relawan.notifications') }}" 
+                  class="btn btn-sm btn-outline-secondary rounded-pill px-3 text-decoration-none" 
+                  style="font-size:.75rem;"
+                  onclick="localStorage.setItem('relawan_notif_seen_at', Date.now()); document.getElementById('notifBadge').classList.add('d-none'); document.getElementById('notifList').innerHTML = ''; document.getElementById('notifEmpty').classList.remove('d-none');">
+                  Lihat Semua
+                </a>
+              </div>
+              <div id="notifEmpty" class="text-center text-muted small py-4">
+                <i class="fa-solid fa-bell-slash mb-2 d-block opacity-40"></i>
+                Tidak ada notifikasi baru
+              </div>
+              <div id="notifList" style="max-height: 320px; overflow-y: auto;"></div>
             </div>
-        </div>
+          </div>
+
+          <span class="text-muted small">{{ now()->translatedFormat('l, d F Y') }}</span>
+
+          <div class="topbar-badge">
+              {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+          </div>
+      </div>
     </header>
 
   <main class="main-content">
@@ -411,6 +480,74 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{{-- ── Relawan Notification System ── --}}
+<script>
+const notifBtn = document.getElementById('notifBtn');
+const notifDropdown = document.getElementById('notifDropdown');
+const notifBadge = document.getElementById('notifBadge');
+const notifList = document.getElementById('notifList');
+const notifEmpty = document.getElementById('notifEmpty');
+
+const icons = {
+    campaign_approved: '<i class="fa-solid fa-circle-check text-success"></i>',
+    campaign_rejected: '<i class="fa-solid fa-circle-xmark text-danger"></i>',
+    donation_success:  '<i class="fa-solid fa-heart text-pink" style="color:#ec4899"></i>',
+    transparency_update: '<i class="fa-solid fa-file-lines text-primary"></i>',
+    new_campaign:      '<i class="fa-solid fa-hand-holding-heart text-warning"></i>',
+    volunteer_approved: '<i class="fa-solid fa-circle-check text-success"></i>',
+    volunteer_rejected: '<i class="fa-solid fa-circle-xmark text-danger"></i>',
+    account_verified:  '<i class="fa-solid fa-circle-check text-success"></i>',
+    account_pending:   '<i class="fa-solid fa-clock text-warning"></i>',
+    join_accepted:     '<i class="fa-solid fa-handshake text-info"></i>',
+    join_rejected:     '<i class="fa-solid fa-circle-xmark text-danger"></i>',
+    join_pending:      '<i class="fa-solid fa-hourglass-half text-secondary"></i>',
+    coordinator_appointed: '<i class="fa-solid fa-crown text-warning"></i>',
+};
+
+function loadNotif() {
+    fetch('{{ route("relawan.notifications.unread") }}')
+        .then(r => r.json())
+        .then(data => {
+            const lastSeen = parseInt(localStorage.getItem('relawan_notif_seen_at') || '0');
+            const unseenNotifs = data.notifications.filter(n => {
+                return new Date(n.time).getTime() > lastSeen;
+            });
+
+            if (unseenNotifs.length > 0) {
+                notifBadge.classList.remove('d-none');
+                notifBadge.textContent = unseenNotifs.length > 9 ? '9+' : unseenNotifs.length;
+                notifEmpty.classList.add('d-none');
+                notifList.innerHTML = unseenNotifs.map(n => `
+                    <a href="${n.url ?? '#'}" class="d-flex gap-3 px-3 py-2 text-decoration-none border-bottom notif-item bg-light"
+                        data-id="${n.id}">
+                        <div class="mt-1">${icons[n.type] ?? '<i class="fa-solid fa-bell text-muted"></i>'}</div>
+                        <div>
+                            <div class="small fw-semibold text-dark">${n.title}</div>
+                            <div class="small text-muted">${n.message}</div>
+                        </div>
+                    </a>
+                `).join('');
+            } else {
+                notifBadge.classList.add('d-none');
+                notifEmpty.classList.remove('d-none');
+                notifList.innerHTML = '';
+            }
+        });
+}
+
+notifBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notifDropdown.classList.toggle('d-none');
+    loadNotif();
+});
+
+document.addEventListener('click', () => notifDropdown.classList.add('d-none'));
+notifDropdown.addEventListener('click', e => e.stopPropagation());
+
+loadNotif();
+setInterval(loadNotif, 30000);
+</script>
 
 @stack('scripts')
 {{-- SweetAlert login sucess --}}

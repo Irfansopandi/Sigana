@@ -41,7 +41,9 @@ class AdminAssignmentController extends Controller
 
         $query = $campaign->volunteers()->with(['user', 'role'])->latest();
 
-        if ($filterTab !== 'semua') {
+        if ($filterTab === 'koordinator') {
+            $query->where('minat_koordinator', true);
+        } elseif ($filterTab !== 'semua') {
             $query->where('verifikasi', $filterTab);
         }
 

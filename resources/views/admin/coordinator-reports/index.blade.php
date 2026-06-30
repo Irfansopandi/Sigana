@@ -92,6 +92,30 @@
   .status-tab.active.pending   { border-color: #f59e0b; background:#fffbeb; color:#b45309; }
   .status-tab.active.rejected  { border-color: #ef4444; background:#fef2f2; color:#b91c1c; }
 
+  .filter-bar {
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      margin-bottom: 20px;
+  }
+
+  .report-row:hover { background: #f8fafc; }
+
+  .badge-status {
+      font-size: .75rem;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 99px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+  }
+  .badge-pending  { background:#fef9c3; color:#854d0e; }
+  .badge-approved { background:#dcfce7; color:#166534; }
+  .badge-rejected { background:#fee2e2; color:#991b1b; }
+
 </style>
 @endpush
 
@@ -276,11 +300,11 @@
           </td>
           <td>
             @if($report->status === 'pending')
-              <span class="badge-status badge-pending">Menunggu</span>
+              <span class="badge-status badge-pending"><i class="fa-solid fa-hourglass-half"></i> Menunggu</span>
             @elseif($report->status === 'approved')
-              <span class="badge-status badge-approved">Disetujui</span>
+              <span class="badge-status badge-approved"><i class="fa-solid fa-circle-check"></i> Disetujui</span>
             @else
-              <span class="badge-status badge-rejected">Ditolak</span>
+              <span class="badge-status badge-rejected"><i class="fa-solid fa-circle-xmark"></i> Ditolak</span>
             @endif
           </td>
           <td class="text-center">

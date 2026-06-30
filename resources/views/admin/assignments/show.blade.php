@@ -69,6 +69,20 @@
   }
   .btn-icon-delete { background:#fef2f2; color:#dc2626; border-color:#fecaca; }
   .btn-icon-delete:hover { background:#fee2e2; border-color:#fca5a5; }
+
+  .doc-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: .75rem; font-weight: 500;
+    padding: 6px 12px; border-radius: 8px;
+    background: #fff; border: 1.5px solid #cbd5e1; color: #475569;
+    text-decoration: none; transition: all .2s;
+  }
+  .doc-btn:hover {
+    background: #eff6ff; border-color: #93c5fd; color: #1d4ed8;
+    box-shadow: 0 2px 8px rgba(37,99,235,.12);
+  }
+  .doc-btn i { transition: transform .2s; }
+  .doc-btn:hover i { transform: translateY(1px); }
 </style>
 @endpush
 
@@ -126,16 +140,30 @@
   <div class="col-lg-8">
     <div class="detail-card">
       <h5><i class="fa-solid fa-users text-success me-2"></i>Pendaftar Relawan
-        <span class="badge bg-light text-muted border ms-2" style="font-size:.75rem;">{{ $volunteers->count() }}</span>
+        <span class="badge bg-light text-muted border ms-2" style="font-size:.75rem;">{{ $campaign->volunteers()->count() }}</span>
       </h5>
 
       @php
       $filterTab = request('tab', 'semua');
-      $tabs = ['semua' => 'Semua', 'menunggu' => 'Menunggu', 'diterima' => 'Diterima', 'ditolak' => 'Ditolak'];
+      $tabs = [
+          'semua' => 'Semua',
+          'menunggu' => 'Menunggu',
+          'diterima' => 'Diterima',
+          'ditolak' => 'Ditolak',
+          'koordinator' => 'Calon Koordinator'
+      ];
       @endphp
 
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="small text-muted">{{ $volunteers->count() }} relawan ditemukan</span>
+        <span class="small text-muted">
+          @if($filterTab === 'koordinator')
+            {{ $campaign->volunteers()->where('minat_koordinator', true)->count() }} calon koordinator ditemukan
+          @elseif($filterTab === 'semua')
+            {{ $campaign->volunteers()->count() }} relawan ditemukan
+          @else
+            {{ $campaign->volunteers()->where('verifikasi', $filterTab)->count() }} relawan ditemukan
+          @endif
+        </span>
         <div class="d-flex align-items-center gap-2">
           <span class="small text-muted">Tampil</span>
           <select class="form-select form-select-sm" style="width:80px;"
@@ -161,7 +189,13 @@
             {{ $label }}
             <span class="ms-1 badge rounded-pill"
               style="font-size:.65rem; {{ $filterTab === $val ? 'background:#2563eb; color:#fff;' : 'background:#f1f5f9; color:#64748b;' }}">
-              {{ $val === 'semua' ? $volunteers->count() : $volunteers->where('verifikasi', $val)->count() }}
+              @if($val === 'semua')
+                {{ $campaign->volunteers()->count() }}
+              @elseif($val === 'koordinator')
+                {{ $campaign->volunteers()->where('minat_koordinator', true)->count() }}
+              @else
+                {{ $campaign->volunteers()->where('verifikasi', $val)->count() }}
+              @endif
             </span>
           </a>
         @endforeach
@@ -216,15 +250,93 @@
               </div>
             @endif
 
+            {{-- Informasi Data Diri Lengkap & Dokumen Pendukung --}}
+            <div class="row g-2 mt-2 pt-2 border-top border-light" style="font-size: .8rem;">
+              <div class="col-sm-6">
+                <span class="text-muted d-block small" style="font-size: 0.72rem;">No. Telepon</span>
+                <span class="text-dark fw-semibold"><i class="fa-solid fa-phone text-muted me-1"></i>{{ $vol->user->phone ?? '-' }}</span>
+              </div>
+              <div class="col-sm-6">
+                <span class="text-muted d-block small" style="font-size: 0.72rem;">Jenis Kelamin</span>
+                <span class="text-dark fw-semibold">
+                  <i class="fa-solid fa-venus-mars text-muted me-1"></i>
+                  @if($vol->user->jenis_kelamin === 'L' || $vol->user->jenis_kelamin === 'laki-laki' || $vol->user->jenis_kelamin === 'Laki-laki')
+                    Laki-laki
+                  @elseif($vol->user->jenis_kelamin === 'P' || $vol->user->jenis_kelamin === 'perempuan' || $vol->user->jenis_kelamin === 'Perempuan')
+                    Perempuan
+                  @else
+                    -
+                  @endif
+                </span>
+              </div>
+              <div class="col-sm-6">
+                <span class="text-muted d-block small" style="font-size: 0.72rem;">Tanggal Lahir / Usia</span>
+                <span class="text-dark fw-semibold">
+                  <i class="fa-solid fa-cake-candles text-muted me-1"></i>
+                  @if($vol->user->tanggal_lahir)
+                    {{ \Carbon\Carbon::parse($vol->user->tanggal_lahir)->translatedFormat('d M Y') }} ({{ \Carbon\Carbon::parse($vol->user->tanggal_lahir)->age }} tahun)
+                  @else
+                    -
+                  @endif
+                </span>
+              </div>
+              @if($vol->minat_koordinator)
+              <div class="col-sm-6">
+                <span class="text-muted d-block small" style="font-size: 0.72rem;">Minat Koordinator</span>
+                <span class="text-dark fw-semibold">
+                  <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-2 py-1" style="font-size:.7rem;">
+                    <i class="fa-solid fa-user-shield me-1"></i>Minat Koordinator
+                  </span>
+                </span>
+              </div>
+              @endif
+            </div>
+
+            {{-- Dokumen Pendukung Koordinator --}}
+            @if($vol->minat_koordinator && ($vol->dokumen_1 || $vol->dokumen_2 || $vol->dokumen_3))
+              <div class="mt-3 p-2 rounded-3 border bg-light bg-opacity-50" style="font-size: .8rem;">
+                <div class="fw-semibold text-dark mb-1" style="font-size: 0.78rem;">
+                  <i class="fa-solid fa-file-pdf text-danger me-1"></i>Dokumen Pendukung Koordinator:
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                  @if($vol->dokumen_1)
+                    <a href="{{ Storage::url($vol->dokumen_1) }}" target="_blank" class="doc-btn">
+                      <i class="fa-solid fa-download text-primary"></i>Dokumen 1
+                    </a>
+                  @endif
+                  @if($vol->dokumen_2)
+                    <a href="{{ Storage::url($vol->dokumen_2) }}" target="_blank" class="doc-btn">
+                      <i class="fa-solid fa-download text-primary"></i>Dokumen 2
+                    </a>
+                  @endif
+                  @if($vol->dokumen_3)
+                    <a href="{{ Storage::url($vol->dokumen_3) }}" target="_blank" class="doc-btn">
+                      <i class="fa-solid fa-download text-primary"></i>Dokumen 3
+                    </a>
+                  @endif
+                </div>
+              </div>
+            @endif
+
             <div class="mt-3 d-flex gap-2 flex-wrap">
               @if($vol->verifikasi === 'menunggu')
-              <button type="button" class="btn btn-sm btn-success rounded-3" style="font-size:.78rem;"
-                data-bs-toggle="modal" data-bs-target="#verifikasiModal{{ $vol->id }}">
-                <i class="fa-solid fa-check me-1"></i>Terima / Tolak
+              {{-- Tombol Terima --}}
+              <form action="{{ route('admin.assignments.verifikasi', $vol) }}" method="POST" class="d-inline terima-relawan-form">
+                @csrf
+                <input type="hidden" name="verifikasi" value="diterima">
+                <button type="submit" class="btn btn-sm btn-success rounded-3 btn-terima-relawan" style="font-size:.78rem; padding: 6px 14px;">
+                  <i class="fa-solid fa-check me-1"></i>Terima
+                </button>
+              </form>
+
+              {{-- Tombol Tolak --}}
+              <button type="button" class="btn btn-sm btn-danger rounded-3" style="font-size:.78rem; padding: 6px 14px;"
+                data-bs-toggle="modal" data-bs-target="#tolakModal{{ $vol->id }}">
+                <i class="fa-solid fa-xmark me-1"></i>Tolak
               </button>
               @endif
 
-              @if($vol->verifikasi === 'diterima' && !$vol->is_coordinator)
+              @if($vol->verifikasi === 'diterima' && !$vol->is_coordinator && $vol->minat_koordinator)
               <form action="{{ route('admin.assignments.set-coordinator', $vol) }}" method="POST">
                 @csrf
                 @method('PATCH')
@@ -248,33 +360,27 @@
         </div>
       </div>
 
-      {{-- Modal Verifikasi --}}
-      <div class="modal fade" id="verifikasiModal{{ $vol->id }}" tabindex="-1">
+      {{-- Modal Tolak --}}
+      <div class="modal fade" id="tolakModal{{ $vol->id }}" tabindex="-1">
         <div class="modal-dialog">
           <div class="modal-content border-0 rounded-4 shadow">
             <form action="{{ route('admin.assignments.verifikasi', $vol) }}" method="POST">
               @csrf
+              <input type="hidden" name="verifikasi" value="ditolak">
               <div class="modal-header border-0">
-                <h6 class="modal-title fw-bold">Verifikasi: {{ $vol->user->name }}</h6>
+                <h6 class="modal-title fw-bold text-danger"><i class="fa-solid fa-circle-xmark me-2"></i>Tolak Pendaftaran: {{ $vol->user->name }}</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
               </div>
               <div class="modal-body">
-                <div class="mb-3">
-                  <label class="form-label small fw-medium">Keputusan</label>
-                  <select name="verifikasi" class="form-select" required>
-                    <option value="diterima">✅ Terima</option>
-                    <option value="ditolak">❌ Tolak</option>
-                  </select>
-                </div>
                 <div class="mb-0">
-                  <label class="form-label small fw-medium">Catatan Admin (opsional)</label>
-                  <textarea name="catatan_admin" rows="3" class="form-control"
-                    placeholder="Alasan penolakan atau pesan untuk relawan..."></textarea>
+                  <label class="form-label small fw-medium">Alasan Penolakan / Catatan Admin <span class="text-danger">*</span></label>
+                  <textarea name="catatan_admin" rows="3" class="form-control" required
+                    placeholder="Tulis alasan mengapa pendaftaran ini ditolak..."></textarea>
                 </div>
               </div>
               <div class="modal-footer border-0">
                 <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Batal</button>
-                <button type="submit" class="btn-save">Simpan Keputusan</button>
+                <button type="submit" class="btn btn-danger btn-sm rounded-3">Ya, Tolak Pendaftaran</button>
               </div>
             </form>
           </div>
@@ -345,6 +451,24 @@ document.querySelectorAll('.delete-form').forEach(function(form) {
       confirmButtonColor: '#dc2626',
       cancelButtonColor: '#64748b',
       confirmButtonText: 'Ya, hapus',
+      cancelButtonText: 'Batal'
+    }).then(function(result) {
+      if (result.isConfirmed) form.submit();
+    });
+  });
+});
+
+document.querySelectorAll('.terima-relawan-form').forEach(function(form) {
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    Swal.fire({
+      title: 'Terima Relawan ini?',
+      text: 'Relawan akan terdaftar aktif dalam kampanye bencana ini.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#22c55e',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Terima',
       cancelButtonText: 'Batal'
     }).then(function(result) {
       if (result.isConfirmed) form.submit();

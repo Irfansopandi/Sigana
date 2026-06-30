@@ -42,6 +42,14 @@
             @case('campaign_expired')
               <i class="fa-solid fa-clock-rotate-left text-muted"></i>
               @break
+            @case('relawan_register')
+              <i class="fa-solid fa-user-plus" style="color:#8b5cf6"></i>
+              @break
+            @case('volunteer_join')
+              <i class="fa-solid fa-people-group" style="color:#0ea5e9"></i>
+              @break
+            @default
+              <i class="fa-solid fa-bell text-muted"></i>
           @endswitch
         </div>
         <div class="flex-grow-1">

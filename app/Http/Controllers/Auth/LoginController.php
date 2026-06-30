@@ -59,6 +59,7 @@ class LoginController extends Controller
         }
 
         // Login
+        $user->update(['last_login_at' => now()]);
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 

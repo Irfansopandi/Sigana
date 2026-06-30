@@ -77,6 +77,24 @@
   .status-banner.pending  { background: #fef3c7; border-left: 4px solid #f59e0b; }
   .status-banner.approved { background: #dcfce7; border-left: 4px solid #22c55e; }
   .status-banner.rejected { background: #fee2e2; border-left: 4px solid #ef4444; }
+
+  .item-table td, .item-table th {
+      vertical-align: middle;
+  }
+  .item-table th:last-child,
+  .item-table td:last-child {
+      white-space: nowrap;
+      width: 1%;
+  }
+  .item-table th:nth-child(1),
+  .item-table td:nth-child(1) {
+      width: 1%;
+      white-space: nowrap;
+  }
+  .item-table tfoot td {
+      white-space: nowrap;
+      font-size: .92rem;
+  }
 </style>
 @endpush
 
@@ -203,7 +221,7 @@
             <tr>
               <th class="px-4 py-3">#</th>
               <th class="py-3">Kategori</th>
-              <th class="py-3">Keterangan</th>
+              <th class="py-3" style="width:45%">Keterangan</th>
               <th class="py-3 text-end pe-4">Jumlah</th>
             </tr>
           </thead>
@@ -221,7 +239,9 @@
           </tbody>
           <tfoot>
             <tr style="background:#f8fafc">
-              <td colspan="3" class="px-4 py-3 fw-bold small text-end">Total</td>
+              <td class="px-4 py-3"></td>
+              <td class="py-3 fw-bold small">Total</td>
+              <td class="py-3"></td>
               <td class="pe-4 py-3 fw-bold small text-end text-success">Rp {{ number_format($total, 0, ',', '.') }}</td>
             </tr>
           </tfoot>

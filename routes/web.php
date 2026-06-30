@@ -14,7 +14,10 @@ use App\Http\Controllers\Admin\AdminCertificateController;
 use App\Http\Controllers\Admin\AdminCoordinatorReportController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminCoordinatorSelectionController;
 use App\Http\Controllers\Relawan\RelawanDashboardController;
+use App\Http\Controllers\Relawan\RelawanNotificationController;
+use App\Http\Controllers\Relawan\RelawanCoordinatorReportController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -111,8 +114,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::delete('/assignments/roles/{role}', [AdminAssignmentController::class, 'destroyRole'])->name('assignments.roles.destroy');
     Route::post('/assignments/volunteers/{volunteer}/verifikasi', [AdminAssignmentController::class, 'verifikasi'])->name('assignments.verifikasi');
     Route::post('/assignments', [AdminAssignmentController::class, 'store'])->name('assignments.store');
-    Route::patch('assignments/volunteers/{volunteer}/set-coordinator', [AdminAssignmentController::class, 'setKoordinator'])->name('admin.assignments.set-coordinator');
-    Route::patch('assignments/volunteers/{volunteer}/unset-coordinator', [AdminAssignmentController::class, 'unsetKoordinator'])->name('admin.assignments.unset-coordinator');
+    Route::patch('assignments/volunteers/{volunteer}/set-coordinator', [AdminAssignmentController::class, 'setKoordinator'])->name('assignments.set-coordinator');
+    Route::patch('assignments/volunteers/{volunteer}/unset-coordinator', [AdminAssignmentController::class, 'unsetKoordinator'])->name('assignments.unset-coordinator');
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
     Route::get('/settings/profile', [AdminSettingsController::class, 'profile'])->name('settings.profile');
     Route::match(['put', 'patch'], '/settings/profile', [AdminSettingsController::class, 'updateProfile'])->name('settings.profile.update');
@@ -121,9 +124,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::post('/certificates', [AdminCertificateController::class, 'store'])->name('certificates.store');
     Route::delete('/certificates/{certificate}', [AdminCertificateController::class, 'destroy'])->name('certificates.destroy');
     Route::get('coordinator-reports', [AdminCoordinatorReportController::class, 'index'])->name('coordinator-reports.index');
+    Route::get('/certificates/{campaign}', [AdminCertificateController::class, 'show'])->name('certificates.show');
     Route::get('coordinator-reports/{coordinatorReport}', [AdminCoordinatorReportController::class, 'show'])->name('coordinator-reports.show');
     Route::post('coordinator-reports/{coordinatorReport}/approve', [AdminCoordinatorReportController::class, 'approve'])->name('coordinator-reports.approve');
     Route::post('coordinator-reports/{coordinatorReport}/reject', [AdminCoordinatorReportController::class, 'reject'])->name('coordinator-reports.reject');
+
+    // Seleksi Koordinator Bencana
+    Route::get('/coordinator-selections', [AdminCoordinatorSelectionController::class, 'index'])->name('coordinator-selections.index');
+    Route::post('/coordinator-selections/volunteers/{volunteer}/verifikasi', [AdminCoordinatorSelectionController::class, 'verifikasi'])->name('coordinator-selections.verifikasi');
     Route::get('/notifications/unread', [\App\Http\Controllers\Admin\AdminNotificationController::class, 'unread'])->name('notifications.unread');
     Route::get('/notifications', [\App\Http\Controllers\Admin\AdminNotificationController::class, 'index'])->name('notifications');
 });
@@ -131,9 +139,32 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 // Relawan
 Route::prefix('relawan')->name('relawan.')->middleware(['auth', 'role:relawan'])->group(function () {
     Route::get('/dashboard', [RelawanDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/laporan', function () { return 'Coming soon'; })->name('laporan.index');
+    Route::get('/bencana', [RelawanDashboardController::class, 'bencana'])->name('bencana');
+    Route::get('/bencana-diikuti', [RelawanDashboardController::class, 'bencanaDiikuti'])->name('bencana-diikuti');
+    Route::get('/bencana-diikuti/selesai', [RelawanDashboardController::class, 'bencanaDiikutiSelesai'])->name('bencana-diikuti.selesai');
     Route::get('/bencana/{campaign}/gabung-relawan', [\App\Http\Controllers\Relawan\VolunteerJoinController::class, 'create'])->name('volunteer-join.create');
     Route::post('/bencana/{campaign}/gabung-relawan', [\App\Http\Controllers\Relawan\VolunteerJoinController::class, 'store'])->name('volunteer-join.store');
+    Route::get('/bencana-diikuti/{campaign}/detail', [RelawanDashboardController::class, 'bencanaDiikutiDetail'])->name('bencana-diikuti.detail');
+    Route::get('/notifikasi', [RelawanNotificationController::class, 'index'])->name('notifications');
+    Route::get('/notifikasi/unread', [RelawanNotificationController::class, 'unread'])->name('notifications.unread');
+
+    // Coordinator reports resource routes
+    Route::resource('coordinator-reports', RelawanCoordinatorReportController::class)->names([
+        'index' => 'coordinator-reports.index',
+        'create' => 'coordinator-reports.create',
+        'store' => 'coordinator-reports.store',
+        'show' => 'coordinator-reports.show',
+        'edit' => 'coordinator-reports.edit',
+        'update' => 'coordinator-reports.update',
+        'destroy' => 'coordinator-reports.destroy',
+    ]);
+
+    Route::delete('coordinator-reports/photos/{photo}', [RelawanCoordinatorReportController::class, 'destroyPhoto'])
+    ->name('coordinator-reports.photos.destroy');
+    Route::delete('coordinator-reports/documents/{document}', [RelawanCoordinatorReportController::class, 'destroyDocument'])
+        ->name('coordinator-reports.documents.destroy');
+    Route::get('/sertifikat/{campaign}', [\App\Http\Controllers\Relawan\RelawanCertificateController::class, 'show'])
+    ->name('sertifikat');
 });
 
 

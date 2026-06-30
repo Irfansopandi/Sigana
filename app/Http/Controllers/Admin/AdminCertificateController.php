@@ -11,21 +11,18 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminCertificateController extends Controller
 {
-    // Index: kampanye yang progress donasi = 100%
     public function index(Request $request)
     {
         $perPage = request('per_page', 10);
 
-        $allCampaigns = Campaign::withCount([
-            'volunteers as relawan_diterima' => fn($q) => $q->where('verifikasi', 'diterima'),
-        ])
-        ->when($request->search, fn($q, $s) => $q->where('title', 'like', "%$s%"))
-        ->get()
-        ->filter(function ($c) {
-            $target = $c->getRawOriginal('target_amount') ?? $c->target_amount;
-            $collected = $c->getRawOriginal('collected_amount') ?? $c->collected_amount;
-            return $target > 0 && $collected >= $target;
-        })->values();
+        // Kampanye yang Laporan Transparansinya berstatus "Selesai"
+        $allCampaigns = Campaign::with('transparencyReport')
+            ->withCount([
+                'volunteers as relawan_diterima' => fn($q) => $q->where('verifikasi', 'diterima'),
+            ])
+            ->whereHas('transparencyReport', fn($q) => $q->where('status', 'Selesai'))
+            ->when($request->search, fn($q, $s) => $q->where('title', 'like', "%$s%"))
+            ->get();
 
         $totalKampanye = $allCampaigns->count();
         $totalSertifikat = VolunteerCertificate::count();
@@ -42,50 +39,73 @@ class AdminCertificateController extends Controller
         return view('admin.certificates.index', compact('campaigns', 'totalKampanye', 'totalSertifikat'));
     }
 
-    // Detail: relawan diterima dalam kampanye ini
     public function show(Campaign $campaign, Request $request)
     {
-        $perPage = request('per_page', 10);
-
-        $volunteers = CampaignVolunteer::with(['user', 'role'])
-            ->where('campaign_id', $campaign->id)
+        $volunteers = CampaignVolunteer::where('campaign_id', $campaign->id)
             ->where('verifikasi', 'diterima')
+            ->with(['user', 'role'])
             ->when($request->search, function ($q, $s) {
                 $q->whereHas('user', fn($u) => $u->where('name', 'like', "%$s%"));
             })
-            ->paginate($perPage)
-            ->withQueryString();
+            ->get();
+
+        // Koordinator dipisah, tampil sendiri di atas
+        $coordinator = $volunteers->first(fn($cv) => $cv->is_coordinator);
+
+        // Sisanya dikelompokkan per bagian tugas (logic sama persis kayak RelawanDashboardController)
+        $grouped = $volunteers
+            ->filter(fn($cv) => !$cv->is_coordinator)
+            ->groupBy(function ($cv) {
+                return $cv->role?->nama ?? ($cv->tugas_lain ?: 'Tanpa Tugas');
+            });
 
         $certMap = VolunteerCertificate::where('assignment_id', $campaign->id)
             ->pluck('id', 'user_id');
 
-        return view('admin.certificates.show', compact('campaign', 'volunteers', 'certMap'));
+        return view('admin.certificates.show', compact('campaign', 'coordinator', 'grouped', 'certMap'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id'       => 'required|exists:users,id',
             'assignment_id' => 'required|exists:campaigns,id',
             'title'         => 'required|string|max:150',
-            'file'          => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'issued_at'     => 'required|date',
             'notes'         => 'nullable|string',
+            'files'         => 'required|array|min:1',
+            'files.*'       => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
-        $path = $request->file('file')->store('certificates', 'public');
+        // Pastikan user_id yang dikirim memang relawan diterima di campaign ini (anti-tamper)
+        $validUserIds = CampaignVolunteer::where('campaign_id', $validated['assignment_id'])
+            ->where('verifikasi', 'diterima')
+            ->pluck('user_id')
+            ->toArray();
 
-        VolunteerCertificate::create([
-            'user_id'       => $validated['user_id'],
-            'assignment_id' => $validated['assignment_id'],
-            'title'         => $validated['title'],
-            'file'          => $path,
-            'issued_at'     => $validated['issued_at'],
-            'notes'         => $validated['notes'] ?? null,
-        ]);
+        $count = 0;
+        foreach ($validated['files'] as $userId => $file) {
+            if (!$file || !in_array($userId, $validUserIds)) continue;
+
+            $path = $file->store('certificates', 'public');
+
+            VolunteerCertificate::updateOrCreate(
+                ['user_id' => $userId, 'assignment_id' => $validated['assignment_id']],
+                [
+                    'title'     => $validated['title'],
+                    'file'      => $path,
+                    'issued_at' => $validated['issued_at'],
+                    'notes'     => $validated['notes'] ?? null,
+                ]
+            );
+            $count++;
+        }
+
+        if ($count === 0) {
+            return redirect()->back()->with('error', 'Tidak ada file yang diupload.');
+        }
 
         return redirect()->route('admin.certificates.show', $validated['assignment_id'])
-            ->with('success', 'Sertifikat berhasil diberikan.');
+            ->with('success', "Sertifikat berhasil diberikan ke {$count} relawan.");
     }
 
     public function destroy(VolunteerCertificate $certificate)

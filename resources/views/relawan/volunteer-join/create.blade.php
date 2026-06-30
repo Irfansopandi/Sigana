@@ -283,9 +283,13 @@
                   <label class="form-label">Jenis Kelamin</label>
                   <select name="jenis_kelamin" class="form-select" required>
                     <option value="">-- Pilih --</option>
-                    <option value="laki-laki" {{ old('jenis_kelamin', auth()->user()->jenis_kelamin) === 'laki-laki' ? 'selected' : '' }}>Laki-laki</option>
-                    <option value="perempuan" {{ old('jenis_kelamin', auth()->user()->jenis_kelamin) === 'perempuan' ? 'selected' : '' }}>Perempuan</option>
+                    <option value="L" {{ old('jenis_kelamin', auth()->user()->jenis_kelamin) === 'L' || old('jenis_kelamin', auth()->user()->jenis_kelamin) === 'laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+                    <option value="P" {{ old('jenis_kelamin', auth()->user()->jenis_kelamin) === 'P' || old('jenis_kelamin', auth()->user()->jenis_kelamin) === 'perempuan' ? 'selected' : '' }}>Perempuan</option>
                   </select>
+                </div>
+                <div class="col-md-12">
+                  <label class="form-label">Alamat Email</label>
+                  <input type="email" name="email" class="form-control" value="{{ old('email', auth()->user()->email) }}" required>
                 </div>
               </div>
             </div>
@@ -349,10 +353,10 @@
 
             <div class="form-section">
               <div class="form-section-title"><i class="fa-solid fa-list-check"></i> Pilih Tugas</div>
-              <p class="text-muted small mb-3">Pilih salah satu tugas yang sudah disiapkan admin, atau ajukan minat tugas lain.</p>
+              <p class="text-muted small mb-3">Pilih salah satu tugas yang sudah disiapkan admin untuk kampanye ini.</p>
               <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label">Tugas yang Tersedia</label>
+                <div class="col-12">
+                  <label class="form-label">Tugas yang Tersedia <span class="text-danger">*</span></label>
                   <select name="campaign_role_id" id="roleSelect" class="form-select">
                     <option value="">-- Pilih Tugas --</option>
                     @foreach($campaign->roles as $role)
@@ -361,23 +365,27 @@
                       </option>
                     @endforeach
                   </select>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Minat Tugas Lain <span class="text-muted">(opsional)</span></label>
-                  <input type="text" name="tugas_lain" id="tugasLainInput" class="form-control"
-                    value="{{ old('tugas_lain') }}" placeholder="Contoh: Dokumentasi & media sosial">
+                  <input type="hidden" name="tugas_lain" value="">
                 </div>
               </div>
             </div>
 
             <div class="form-section" id="pengalamanSection">
               <div class="form-section-title"><i class="fa-solid fa-briefcase"></i> Pengalaman Relawan</div>
-              <textarea name="pengalaman" class="form-control" rows="3" placeholder="Ceritakan pengalaman kamu sebagai relawan sebelumnya...">{{ old('pengalaman') }}</textarea>
+              <textarea name="pengalaman" id="pengalamanInput" class="form-control" rows="3" maxlength="1000" placeholder="Ceritakan pengalaman kamu sebagai relawan sebelumnya...">{{ old('pengalaman') }}</textarea>
+              <div class="d-flex justify-content-between align-items-center mt-1">
+                <span class="text-muted" style="font-size: 0.72rem;">Maksimal 1000 karakter.</span>
+                <span class="text-muted" style="font-size: 0.72rem;" id="pengalamanCharCount">0/1000</span>
+              </div>
             </div>
 
             <div class="form-section mb-3">
               <div class="form-section-title"><i class="fa-solid fa-comment-dots"></i> Alasan Ikut Relawan</div>
-              <textarea name="alasan" class="form-control" rows="3" placeholder="Ceritakan alasan kamu ingin jadi relawan di kampanye ini..." required>{{ old('alasan') }}</textarea>
+              <textarea name="alasan" id="alasanInput" class="form-control" rows="3" maxlength="1000" placeholder="Ceritakan alasan kamu ingin jadi relawan di kampanye ini..." required>{{ old('alasan') }}</textarea>
+              <div class="d-flex justify-content-between align-items-center mt-1">
+                <span class="text-muted" style="font-size: 0.72rem;">Maksimal 1000 karakter.</span>
+                <span class="text-muted" style="font-size: 0.72rem;" id="alasanCharCount">0/1000</span>
+              </div>
             </div>
 
             <div class="d-flex justify-content-between mt-4">
@@ -436,50 +444,41 @@
 @push('scripts')
 <script>
   // ── Filter input phone biar cuma angka yang bisa diketik ──
-  document.getElementById('phoneInput').addEventListener('input', function() {
-    this.value = this.value.replace(/[^0-9]/g, '');
-  });
-
-  // ── Pilihan Minat Koordinator ──
-  const optYa = document.getElementById('optYa');
-  const optTidak = document.getElementById('optTidak');
-  const minatInput = document.getElementById('minatKoordinatorInput');
-  const step3Indicator = document.getElementById('step3Indicator');
-  const lineToStep3 = document.getElementById('lineToStep3');
-  const btnNextOrSubmit = document.getElementById('btnNextOrSubmit');
-
-  function setMinatKoordinator(value) {
-    minatInput.value = value;
-    if (value === '1') {
-      optYa.classList.add('selected');
-      optTidak.classList.remove('selected');
-      step3Indicator.style.display = '';
-      lineToStep3.style.display = '';
-      btnNextOrSubmit.setAttribute('type', 'button');
-      btnNextOrSubmit.setAttribute('data-next', '3');
-      btnNextOrSubmit.innerHTML = 'Lanjut <i class="fa-solid fa-arrow-right"></i>';
-    } else {
-      optTidak.classList.add('selected');
-      optYa.classList.remove('selected');
-      step3Indicator.style.display = 'none';
-      lineToStep3.style.display = 'none';
-      btnNextOrSubmit.setAttribute('type', 'submit');
-      btnNextOrSubmit.removeAttribute('data-next');
-      btnNextOrSubmit.innerHTML = 'Kirim Pendaftaran <i class="fa-solid fa-paper-plane"></i>';
-    }
+  const phoneInput = document.getElementById('phoneInput');
+  if (phoneInput) {
+    phoneInput.addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
   }
 
-  optYa.addEventListener('click', () => setMinatKoordinator('1'));
-  optTidak.addEventListener('click', () => setMinatKoordinator('0'));
+  // ── Live Character Counter ──
+  function setupCharCounter(inputId, counterId, maxLen) {
+    const input = document.getElementById(inputId);
+    const counter = document.getElementById(counterId);
+    if (!input || !counter) return;
 
-  // Set kondisi awal sesuai old() / default
-  setMinatKoordinator(minatInput.value === '1' ? '1' : '0');
+    const updateCounter = () => {
+      const len = input.value.length;
+      counter.textContent = `${len}/${maxLen}`;
+      if (len >= maxLen) {
+        counter.classList.add('text-danger');
+        counter.classList.remove('text-muted');
+      } else {
+        counter.classList.remove('text-danger');
+        counter.classList.add('text-muted');
+      }
+    };
+
+    input.addEventListener('input', updateCounter);
+    updateCounter();
+  }
 
   // ── Navigasi Wizard ──
   const panels = document.querySelectorAll('.wizard-panel');
   const steps = document.querySelectorAll('.wizard-step');
 
   function goToStep(stepNumber) {
+    if (!stepNumber || isNaN(stepNumber)) return;
     panels.forEach(p => p.classList.toggle('active', p.dataset.panel === String(stepNumber)));
     steps.forEach(s => {
       const n = parseInt(s.dataset.step);
@@ -489,112 +488,255 @@
     window.scrollTo({ top: document.querySelector('.card').offsetTop - 20, behavior: 'smooth' });
   }
 
-  document.querySelectorAll('[data-next]').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const currentPanel = this.closest('.wizard-panel');
+  // ── Highlight field error ──
+  function markError(el) {
+    el.classList.add('is-invalid');
+    el.addEventListener('input', () => el.classList.remove('is-invalid'), { once: true });
+    el.addEventListener('change', () => el.classList.remove('is-invalid'), { once: true });
+  }
 
-        // Validasi sederhana sebelum lanjut step
-        const requiredInputs = currentPanel.querySelectorAll('[required]');
-        for (const input of requiredInputs) {
-        if (!input.checkValidity()) {
-            input.reportValidity();
-            return;
-        }
-        }
+  // ── Validasi per panel ──
+  function validatePanel(panel) {
+    if (!panel) return [];
+    const panelNum = panel.dataset.panel;
+    const errors = [];
 
-        // Validasi umur minimal 17 tahun khusus di fase 1
-        if (currentPanel.dataset.panel === '1' && !checkUmur()) {
-        Swal.fire('Tidak Memenuhi Syarat', 'Usia minimal untuk mendaftar relawan adalah 17 tahun.', 'warning');
-        return;
-        }
+    if (panelNum === '1') {
+      const name = panel.querySelector('[name="name"]');
+      const phone = panel.querySelector('[name="phone"]');
+      const email = panel.querySelector('[name="email"]');
+      const tgl = panel.querySelector('[name="tanggal_lahir"]');
+      const gender = panel.querySelector('[name="jenis_kelamin"]');
 
-        goToStep(parseInt(this.dataset.next));
-    });
-    });
+      if (!name.value.trim()) { markError(name); errors.push('Nama lengkap wajib diisi.'); }
+      if (!phone.value.trim()) { markError(phone); errors.push('Nomor HP wajib diisi.'); }
+      else if (!/^[0-9]{9,15}$/.test(phone.value.trim())) { markError(phone); errors.push('Nomor HP harus berupa angka (9–15 digit).'); }
+      if (!email.value.trim()) { markError(email); errors.push('Alamat email wajib diisi.'); }
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) { markError(email); errors.push('Format alamat email tidak valid.'); }
+      if (!tgl.value) { markError(tgl); errors.push('Tanggal lahir wajib diisi.'); }
+      else if (!checkUmur()) { markError(tgl); errors.push('Usia minimal untuk mendaftar relawan adalah 17 tahun.'); }
+      if (!gender.value) { markError(gender); errors.push('Jenis kelamin wajib dipilih.'); }
+    }
 
-  document.querySelectorAll('[data-prev]').forEach(btn => {
-    btn.addEventListener('click', function() {
-      goToStep(parseInt(this.dataset.prev));
-    });
-  });
-
-  // ── Chip Keahlian ──
-  document.querySelectorAll('.keahlian-chip').forEach(chip => {
-    chip.addEventListener('click', function() {
-      const checkbox = this.querySelector('input');
-      checkbox.checked = !checkbox.checked;
-      this.classList.toggle('selected', checkbox.checked);
-    });
-  });
-
-  // ── Preview dokumen per slot ──
-  document.querySelectorAll('.doc-single-input').forEach(input => {
-    input.addEventListener('change', function() {
-      const slot = this.dataset.slot;
-      const preview = document.getElementById('docPreview' + slot);
-
-      if (this.files && this.files[0]) {
-        const file = this.files[0];
-
-        if (file.type.startsWith('image/')) {
-          const reader = new FileReader();
-          reader.onload = ev => {
-            preview.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;" alt="Preview">`;
-          };
-          reader.readAsDataURL(file);
-        } else {
-          preview.innerHTML = `
-            <div class="d-flex align-items-center gap-2 py-2">
-              <i class="fa-solid fa-file-pdf text-danger fa-lg"></i>
-              <span class="small">${file.name}</span>
-            </div>`;
-        }
-      } else {
-        preview.innerHTML = '<div class="text-muted small py-3 text-center border rounded">Belum ada file</div>';
+    if (panelNum === '2') {
+      // Keahlian wajib minimal 1
+      const checkedKeahlian = panel.querySelectorAll('[name="keahlian[]"]:checked');
+      if (checkedKeahlian.length === 0) {
+        panel.querySelectorAll('.keahlian-chip').forEach(c => c.style.borderColor = '#ef4444');
+        errors.push('Pilih minimal 1 keahlian.');
+        setTimeout(() => {
+          panel.querySelectorAll('.keahlian-chip').forEach(c => c.style.borderColor = '');
+        }, 3000);
       }
-    });
-  });
+
+      // Tugas: wajib memilih dari dropdown
+      const roleSelect = panel.querySelector('[name="campaign_role_id"]');
+      if (!roleSelect || !roleSelect.value) {
+        if (roleSelect) markError(roleSelect);
+        errors.push('Pilih salah satu tugas yang tersedia.');
+      }
+
+      // Alasan wajib diisi
+      const alasan = panel.querySelector('[name="alasan"]');
+      if (!alasan || !alasan.value.trim()) {
+        if (alasan) markError(alasan);
+        errors.push('Alasan ikut relawan wajib diisi.');
+      }
+    }
+
+    return errors;
+  }
 
   // ── Validasi umur minimal 17 tahun ──
-    function checkUmur() {
-    const tgl = document.getElementById('inp_tgl').value;
+  function checkUmur() {
+    const tglEl = document.getElementById('inp_tgl');
     const hint = document.getElementById('hint_tgl');
+    if (!tglEl || !hint) return false;
+    const tgl = tglEl.value;
     let ageOk = false;
 
     if (tgl) {
         const age = (new Date() - new Date(tgl)) / (365.25 * 24 * 3600 * 1000);
         ageOk = age >= 17;
         if (!ageOk) {
-        hint.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-circle-xmark me-1"></i>Usia minimal 17 tahun.</span>';
+          hint.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-circle-xmark me-1"></i>Usia minimal 17 tahun.</span>';
         } else {
-        hint.innerHTML = '<span style="color:#22c55e;"><i class="fa-solid fa-circle-check me-1"></i>Usia valid.</span>';
+          hint.innerHTML = '<span style="color:#22c55e;"><i class="fa-solid fa-circle-check me-1"></i>Usia valid.</span>';
         }
     } else {
         hint.innerHTML = '';
     }
     return ageOk;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    setupCharCounter('alasanInput', 'alasanCharCount', 1000);
+    setupCharCounter('pengalamanInput', 'pengalamanCharCount', 1000);
+
+    const tglEl = document.getElementById('inp_tgl');
+    if (tglEl) {
+      tglEl.addEventListener('change', checkUmur);
+      tglEl.addEventListener('input', checkUmur);
+      checkUmur();
     }
 
-    document.getElementById('inp_tgl').addEventListener('change', checkUmur);
-    document.getElementById('inp_tgl').addEventListener('input', checkUmur);
-    checkUmur();
+    // ── Pilihan Minat Koordinator ──
+    const optYa = document.getElementById('optYa');
+    const optTidak = document.getElementById('optTidak');
+    const minatInput = document.getElementById('minatKoordinatorInput');
+    const step3Indicator = document.getElementById('step3Indicator');
+    const lineToStep3 = document.getElementById('lineToStep3');
+    const btnNextOrSubmit = document.getElementById('btnNextOrSubmit');
 
-  // ── Konfirmasi sebelum submit ──
-  document.getElementById('volunteerForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const form = this;
-    Swal.fire({
-      title: 'Kirim pendaftaran relawan?',
-      text: 'Pastikan data yang kamu isi sudah benar sebelum dikirim.',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#38bdf8',
-      cancelButtonColor: '#64748b',
-      confirmButtonText: 'Ya, kirim',
-      cancelButtonText: 'Cek lagi'
-    }).then((result) => {
-      if (result.isConfirmed) form.submit();
+    function setMinatKoordinator(value) {
+      if (!minatInput) return;
+      minatInput.value = value;
+      if (value === '1') {
+        if (optYa) optYa.classList.add('selected');
+        if (optTidak) optTidak.classList.remove('selected');
+        
+        const rb = document.querySelector('input[name="minat_koordinator_radio"][value="1"]');
+        if (rb) rb.checked = true;
+
+        if (step3Indicator) step3Indicator.style.display = '';
+        if (lineToStep3) lineToStep3.style.display = '';
+        if (btnNextOrSubmit) {
+          btnNextOrSubmit.setAttribute('type', 'button');
+          btnNextOrSubmit.setAttribute('data-next', '3');
+          btnNextOrSubmit.innerHTML = 'Lanjut <i class="fa-solid fa-arrow-right"></i>';
+        }
+      } else {
+        if (optTidak) optTidak.classList.add('selected');
+        if (optYa) optYa.classList.remove('selected');
+
+        const rb = document.querySelector('input[name="minat_koordinator_radio"][value="0"]');
+        if (rb) rb.checked = true;
+
+        if (step3Indicator) step3Indicator.style.display = 'none';
+        if (lineToStep3) lineToStep3.style.display = 'none';
+        if (btnNextOrSubmit) {
+          btnNextOrSubmit.setAttribute('type', 'submit');
+          btnNextOrSubmit.removeAttribute('data-next');
+          btnNextOrSubmit.innerHTML = 'Kirim Pendaftaran <i class="fa-solid fa-paper-plane"></i>';
+        }
+      }
+    }
+
+    if (optYa) optYa.addEventListener('click', () => setMinatKoordinator('1'));
+    if (optTidak) optTidak.addEventListener('click', () => setMinatKoordinator('0'));
+
+    if (minatInput) {
+      setMinatKoordinator(minatInput.value === '1' ? '1' : '0');
+    }
+
+    // ── Wizard Clicks (event delegation — handles dynamic data-next changes) ──
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('[data-next]');
+      if (btn) {
+        const nextStep = btn.getAttribute('data-next');
+        if (!nextStep) return;
+
+        e.preventDefault();
+        const currentPanel = btn.closest('.wizard-panel');
+        const errors = validatePanel(currentPanel);
+
+        if (errors.length > 0) {
+          Swal.fire({
+            title: 'Lengkapi Data Terlebih Dahulu',
+            html: '<ul class="text-start mb-0 ps-3">' + errors.map(err => `<li>${err}</li>`).join('') + '</ul>',
+            icon: 'warning',
+            confirmButtonColor: '#38bdf8',
+            confirmButtonText: 'Oke, saya perbaiki',
+          });
+          return;
+        }
+
+        goToStep(parseInt(nextStep));
+        return;
+      }
+
+      const prevBtn = e.target.closest('[data-prev]');
+      if (prevBtn) {
+        goToStep(parseInt(prevBtn.getAttribute('data-prev')));
+      }
     });
+
+    // ── Chip Keahlian ──
+    document.querySelectorAll('.keahlian-chip').forEach(chip => {
+      chip.addEventListener('click', function() {
+        const checkbox = this.querySelector('input');
+        if (checkbox) {
+          checkbox.checked = !checkbox.checked;
+          this.classList.toggle('selected', checkbox.checked);
+        }
+      });
+    });
+
+    // ── Preview dokumen per slot ──
+    document.querySelectorAll('.doc-single-input').forEach(input => {
+      input.addEventListener('change', function() {
+        const slot = this.dataset.slot;
+        const preview = document.getElementById('docPreview' + slot);
+        if (!preview) return;
+
+        if (this.files && this.files[0]) {
+          const file = this.files[0];
+
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = ev => {
+              preview.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;" alt="Preview">`;
+            };
+            reader.readAsDataURL(file);
+          } else {
+            preview.innerHTML = `
+              <div class="d-flex align-items-center gap-2 py-2">
+                <i class="fa-solid fa-file-pdf text-danger fa-lg"></i>
+                <span class="small">${file.name}</span>
+              </div>`;
+          }
+        } else {
+          preview.innerHTML = '<div class="text-muted small py-3 text-center border rounded">Belum ada file</div>';
+        }
+      });
+    });
+
+    // ── Konfirmasi sebelum submit ──
+    const form = document.getElementById('volunteerForm');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Validasi panel 2 dulu (selalu, baik relawan biasa maupun koordinator)
+        const panel2 = document.querySelector('.wizard-panel[data-panel="2"]');
+        const errorsP2 = validatePanel(panel2);
+        if (errorsP2.length > 0) {
+          // Tampilkan panel 2 dulu agar user bisa lihat yang belum diisi
+          goToStep(2);
+          Swal.fire({
+            title: 'Lengkapi Data Terlebih Dahulu',
+            html: '<ul class="text-start mb-0 ps-3">' + errorsP2.map(e => `<li>${e}</li>`).join('') + '</ul>',
+            icon: 'warning',
+            confirmButtonColor: '#38bdf8',
+            confirmButtonText: 'Oke, saya perbaiki',
+          });
+          return;
+        }
+
+        Swal.fire({
+          title: 'Kirim pendaftaran relawan?',
+          text: 'Pastikan data yang kamu isi sudah benar sebelum dikirim.',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#38bdf8',
+          cancelButtonColor: '#64748b',
+          confirmButtonText: 'Ya, kirim',
+          cancelButtonText: 'Cek lagi'
+        }).then((result) => {
+          if (result.isConfirmed) form.submit();
+        });
+      });
+    }
   });
 </script>
 @endpush

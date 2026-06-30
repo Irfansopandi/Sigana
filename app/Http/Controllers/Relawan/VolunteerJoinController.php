@@ -21,7 +21,7 @@ class VolunteerJoinController extends Controller
 
         if ($sudahDaftar) {
             return redirect()
-                ->route('relawan.dashboard')
+                ->route('relawan.bencana-diikuti')
                 ->with('error', 'Kamu sudah terdaftar sebagai relawan di kampanye ini.');
         }
 
@@ -36,7 +36,7 @@ class VolunteerJoinController extends Controller
 
         if ($sudahDaftar) {
             return redirect()
-                ->route('relawan.dashboard')
+                ->route('relawan.bencana-diikuti')
                 ->with('error', 'Kamu sudah terdaftar sebagai relawan di kampanye ini.');
         }
 
@@ -46,15 +46,16 @@ class VolunteerJoinController extends Controller
         $rules = [
             'name'              => 'required|string|max:100',
             'phone'             => 'required|numeric|digits_between:9,15',
+            'email'             => 'required|email|max:150|unique:users,email,' . Auth::id(),
             'tanggal_lahir'     => 'required|date|before_or_equal:' . now()->subYears(17)->format('Y-m-d'),
-            'jenis_kelamin'     => 'required|in:laki-laki,perempuan',
+            'jenis_kelamin'     => 'required|in:L,P',
             'minat_koordinator' => 'required|boolean',
 
             // ── Fase 2: Keahlian & Tugas ──
             'keahlian'          => 'required|array|min:1',
             'keahlian.*'        => 'string|max:50',
-            'campaign_role_id'  => 'nullable|exists:campaign_roles,id',
-            'tugas_lain'        => 'nullable|required_without:campaign_role_id|string|max:150',
+            'campaign_role_id'  => 'required|exists:campaign_roles,id',
+            'tugas_lain'        => 'nullable|string|max:150',
             'alasan'            => 'required|string|max:1000',
         ];
 
@@ -68,7 +69,37 @@ class VolunteerJoinController extends Controller
         }
 
         $messages = [
+            'name.required'              => 'Nama lengkap wajib diisi.',
+            'name.max'                   => 'Nama lengkap maksimal 100 karakter.',
+            'phone.required'             => 'Nomor HP wajib diisi.',
+            'phone.numeric'              => 'Nomor HP harus berupa angka.',
+            'phone.digits_between'       => 'Nomor HP harus terdiri dari 9–15 digit.',
+            'email.required'             => 'Alamat email wajib diisi.',
+            'email.email'                => 'Format alamat email tidak valid.',
+            'email.max'                  => 'Alamat email maksimal 150 karakter.',
+            'email.unique'               => 'Alamat email ini sudah terdaftar oleh pengguna lain.',
+            'tanggal_lahir.required'     => 'Tanggal lahir wajib diisi.',
             'tanggal_lahir.before_or_equal' => 'Usia minimal untuk mendaftar relawan adalah 17 tahun.',
+            'jenis_kelamin.required'     => 'Jenis kelamin wajib dipilih.',
+            'jenis_kelamin.in'           => 'Pilihan jenis kelamin tidak valid.',
+            'minat_koordinator.required' => 'Pilihan minat koordinator wajib dipilih.',
+            'keahlian.required'          => 'Pilih minimal 1 keahlian.',
+            'keahlian.min'               => 'Pilih minimal 1 keahlian.',
+            'keahlian.array'             => 'Format keahlian tidak valid.',
+            'campaign_role_id.required'  => 'Pilih salah satu tugas yang tersedia.',
+            'campaign_role_id.exists'    => 'Tugas yang dipilih tidak valid.',
+            'tugas_lain.max'             => 'Minat tugas lain maksimal 150 karakter.',
+            'alasan.required'            => 'Alasan ikut relawan wajib diisi.',
+            'alasan.max'                 => 'Alasan maksimal 1000 karakter.',
+            'pengalaman.required'        => 'Pengalaman wajib diisi untuk calon koordinator.',
+            'pengalaman.max'             => 'Pengalaman maksimal 1000 karakter.',
+            'dokumen_1.required'         => 'Dokumen pendukung pertama wajib diunggah untuk calon koordinator.',
+            'dokumen_1.mimes'            => 'Dokumen harus berupa file gambar (jpg, png) atau PDF.',
+            'dokumen_1.max'              => 'Ukuran dokumen maksimal 2MB.',
+            'dokumen_2.mimes'            => 'Dokumen harus berupa file gambar (jpg, png) atau PDF.',
+            'dokumen_2.max'              => 'Ukuran dokumen maksimal 2MB.',
+            'dokumen_3.mimes'            => 'Dokumen harus berupa file gambar (jpg, png) atau PDF.',
+            'dokumen_3.max'              => 'Ukuran dokumen maksimal 2MB.',
         ];
 
         $validated = $request->validate($rules, $messages);
@@ -79,6 +110,7 @@ class VolunteerJoinController extends Controller
         $user->update([
             'name'          => $validated['name'],
             'phone'         => $validated['phone'],
+            'email'         => $validated['email'],
             'tanggal_lahir' => $validated['tanggal_lahir'],
             'jenis_kelamin' => $validated['jenis_kelamin'],
         ]);
@@ -108,7 +140,7 @@ class VolunteerJoinController extends Controller
         CampaignVolunteer::create($data);
 
         return redirect()
-            ->route('relawan.dashboard')
-            ->with('success', 'Pendaftaran relawan berhasil dikirim, menunggu verifikasi admin.');
+            ->route('relawan.bencana-diikuti')
+            ->with('join_success', 'Pendaftaran relawan berhasil dikirim! Menunggu verifikasi admin.');
     }
 }

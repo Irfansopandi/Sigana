@@ -139,7 +139,7 @@
           <div class="row g-0">
 
             <div class="col-md-6">
-              <div class="detail-row pe-4">
+              <div class="detail-row pe-md-3">
                 <div class="detail-label">Nama Lengkap</div>
                 <div class="view-value detail-value">{{ $user->name }}</div>
                 <input type="text" name="name" class="edit-input form-control form-control-sm mt-1"
@@ -148,16 +148,7 @@
             </div>
 
             <div class="col-md-6">
-              <div class="detail-row ps-md-4">
-                <div class="detail-label">NIK</div>
-                <div class="view-value detail-value">{{ $user->nik ?? '-' }}</div>
-                <input type="text" name="nik" class="edit-input form-control form-control-sm mt-1"
-                  value="{{ $user->nik }}" style="border-radius:8px;">
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <div class="detail-row pe-4">
+              <div class="detail-row ps-md-3">
                 <div class="detail-label">Email</div>
                 <div class="view-value detail-value">{{ $user->email }}</div>
                 <input type="email" name="email" class="edit-input form-control form-control-sm mt-1"
@@ -166,7 +157,7 @@
             </div>
 
             <div class="col-md-6">
-              <div class="detail-row ps-md-4">
+              <div class="detail-row pe-md-3">
                 <div class="detail-label">Nomor Telepon</div>
                 <div class="view-value detail-value">{{ $user->phone ?? '-' }}</div>
                 <input type="number" name="phone" class="edit-input form-control form-control-sm mt-1"
@@ -175,7 +166,7 @@
             </div>
 
             <div class="col-md-6">
-              <div class="detail-row pe-4">
+              <div class="detail-row ps-md-3">
                 <div class="detail-label">Jenis Kelamin</div>
                 <div class="view-value detail-value">
                   {{ $user->jenis_kelamin === 'L' ? 'Laki-laki' : ($user->jenis_kelamin === 'P' ? 'Perempuan' : '-') }}
@@ -189,46 +180,11 @@
             </div>
 
             <div class="col-md-6">
-              <div class="detail-row ps-md-4">
+              <div class="detail-row pe-md-3">
                 <div class="detail-label">Tanggal Lahir</div>
                 <div class="view-value detail-value">{{ $user->tanggal_lahir?->format('d M Y') ?? '-' }}</div>
                 <input type="date" name="tanggal_lahir" class="edit-input form-control form-control-sm mt-1"
                   value="{{ $user->tanggal_lahir?->format('Y-m-d') }}" style="border-radius:8px;">
-              </div>
-            </div>
-
-            <div class="col-12">
-              <div class="detail-row">
-                <div class="detail-label">Alamat</div>
-                <div class="view-value detail-value">{{ $user->alamat ?? '-' }}</div>
-                <textarea name="alamat" class="edit-input form-control form-control-sm mt-1"
-                  rows="2" style="border-radius:8px;">{{ $user->alamat }}</textarea>
-              </div>
-            </div>
-
-            <div class="col-12">
-              <div class="detail-row">
-                <div class="detail-label">Keahlian</div>
-                <div class="view-value detail-value">
-                  @if(!empty($user->keahlian))
-                    <div class="d-flex flex-wrap gap-2 mt-1">
-                      @foreach($user->keahlian as $k)
-                        <span class="badge rounded-pill px-3 py-2" style="background:#eff6ff; color:#1d4ed8; font-size:0.78rem;">{{ $k }}</span>
-                      @endforeach
-                    </div>
-                  @else
-                    -
-                  @endif
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12">
-              <div class="detail-row">
-                <div class="detail-label">Pengalaman</div>
-                <div class="view-value detail-value" style="white-space:pre-line;">{{ $user->pengalaman ?? '-' }}</div>
-                <textarea name="pengalaman" class="edit-input form-control form-control-sm mt-1"
-                  rows="3" style="border-radius:8px;">{{ $user->pengalaman }}</textarea>
               </div>
             </div>
 
@@ -279,6 +235,10 @@
             <div class="detail-label">Tanggal Daftar</div>
             <div class="detail-value">{{ $user->created_at->format('d M Y, H:i') }}</div>
           </div>
+          <div class="detail-row">
+            <div class="detail-label">Login Terakhir</div>
+            <div class="detail-value">{{ $user->last_login_at?->format('d M Y, H:i') ?? '-' }}</div>
+          </div>
 
           @if(!$user->is_verified)
           <div class="mt-4">
@@ -297,34 +257,6 @@
               </button>
             @endif
           </div>
-          @endif
-        </div>
-      </div>
-
-      {{-- Foto KTP --}}
-      <div class="card border-0 shadow-sm" style="border-radius:1rem;">
-        <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
-          <h6 class="fw-semibold"><i class="fa-solid fa-id-card me-2 text-warning"></i>Foto KTP</h6>
-        </div>
-        <div class="card-body px-4 pb-4">
-          <div class="ktp-wrapper">
-            @if($user->foto_ktp)
-              <a href="{{ asset('storage/' . $user->foto_ktp) }}" target="_blank">
-                <img src="{{ asset('storage/' . $user->foto_ktp) }}" alt="Foto KTP {{ $user->name }}">
-              </a>
-            @else
-              <div class="text-center text-muted py-4">
-                <i class="fa-solid fa-image fa-2x mb-2 d-block opacity-30"></i>
-                <span class="small">Foto KTP belum diunggah</span>
-              </div>
-            @endif
-          </div>
-          @if($user->foto_ktp)
-          <a href="{{ asset('storage/' . $user->foto_ktp) }}" target="_blank"
-            class="btn w-100 mt-3 btn-sm"
-            style="border-radius:8px; border:1.5px solid #e2e8f0; color:#64748b; background:#fff;">
-            <i class="fa-solid fa-arrow-up-right-from-square me-2"></i>Lihat Ukuran Penuh
-          </a>
           @endif
         </div>
       </div>

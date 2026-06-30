@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Campaign;
+use App\Models\CampaignVolunteer;
 use App\Models\Donation;
 use App\Models\CoordinatorReport;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AdminNotificationController extends Controller
@@ -80,6 +82,41 @@ class AdminNotificationController extends Controller
             ]);
         }
 
+        // 5. Relawan baru daftar akun (status = pending)
+        $newRelawan = User::where('role', 'relawan')
+            ->where('status', 'pending')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        foreach ($newRelawan as $rel) {
+            $notifications->push([
+                'type'    => 'relawan_register',
+                'title'   => 'Pendaftaran Relawan Baru',
+                'message' => "{$rel->name} mendaftar sebagai relawan dan menunggu verifikasi.",
+                'url'     => route('admin.volunteers.show', $rel->id),
+                'time'    => $rel->created_at,
+            ]);
+        }
+
+        // 6. Relawan baru gabung kampanye bencana (verifikasi = menunggu)
+        $newJoins = CampaignVolunteer::where('verifikasi', 'menunggu')
+            ->with(['user', 'campaign'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        foreach ($newJoins as $join) {
+            if (!$join->user || !$join->campaign) continue;
+            $notifications->push([
+                'type'    => 'volunteer_join',
+                'title'   => 'Relawan Gabung Bencana',
+                'message' => "{$join->user->name} mendaftar di \"{$join->campaign->title}\".",
+                'url'     => route('admin.assignments.show', $join->campaign_id),
+                'time'    => $join->created_at,
+            ]);
+        }
+
         $sorted = $notifications->sortByDesc('time')->values()->take(10);
 
         return response()->json([
@@ -136,6 +173,40 @@ class AdminNotificationController extends Controller
                 'message' => "Kampanye \"{$campaign->title}\" sudah melewati batas waktu.",
                 'url'     => route('admin.campaigns.show', $campaign->id),
                 'time'    => $campaign->updated_at,
+            ]);
+        }
+
+        // 5. Relawan baru daftar akun (status = pending)
+        $newRelawan = User::where('role', 'relawan')
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        foreach ($newRelawan as $rel) {
+            $notifications->push([
+                'type'    => 'relawan_register',
+                'title'   => 'Pendaftaran Relawan Baru',
+                'message' => "{$rel->name} mendaftar sebagai relawan dan menunggu verifikasi.",
+                'url'     => route('admin.volunteers.show', $rel->id),
+                'time'    => $rel->created_at,
+            ]);
+        }
+
+        // 6. Relawan baru gabung kampanye bencana (verifikasi = menunggu)
+        $newJoins = CampaignVolunteer::where('verifikasi', 'menunggu')
+            ->with(['user', 'campaign'])
+            ->latest()
+            ->take(20)
+            ->get();
+
+        foreach ($newJoins as $join) {
+            if (!$join->user || !$join->campaign) continue;
+            $notifications->push([
+                'type'    => 'volunteer_join',
+                'title'   => 'Relawan Gabung Bencana',
+                'message' => "{$join->user->name} mendaftar di \"{$join->campaign->title}\".",
+                'url'     => route('admin.assignments.show', $join->campaign_id),
+                'time'    => $join->created_at,
             ]);
         }
 

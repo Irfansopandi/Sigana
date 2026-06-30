@@ -53,9 +53,6 @@ class AdminUserController extends Controller
             'role'          => 'required|in:user,relawan,admin',
             'jenis_kelamin' => 'nullable|in:L,P',
             'tanggal_lahir' => 'nullable|date',
-            'nik'           => 'nullable|string|max:16',
-            'alamat'        => 'nullable|string',
-            'pengalaman'    => 'nullable|string',
         ]);
 
         $user->update($validated);

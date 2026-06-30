@@ -47,7 +47,10 @@ class AdminVolunteerController extends Controller
             return redirect()->route('admin.volunteers.index')->with('error', 'Pengguna bukan relawan.');
         }
 
-        $user->update(['email_verified_at' => now()]);
+        $user->update([
+            'email_verified_at' => now(),
+            'status'            => 'active',
+        ]);
         $user->refresh();
 
         return redirect()->route('admin.volunteers.index')->with('success', 'Relawan berhasil diverifikasi.');
@@ -65,9 +68,6 @@ class AdminVolunteerController extends Controller
             'phone'         => 'nullable|digits_between:8,15',
             'jenis_kelamin' => 'nullable|in:L,P',
             'tanggal_lahir' => 'nullable|date',
-            'nik'           => 'nullable|string|max:16',
-            'alamat'        => 'nullable|string',
-            'pengalaman'    => 'nullable|string',
         ]);
 
         $user->update($validated);

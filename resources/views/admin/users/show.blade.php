@@ -259,38 +259,6 @@
               </div>
             </div>
 
-            @if($user->role === 'relawan')
-            {{-- NIK --}}
-            <div class="col-md-6">
-              <div class="detail-row pe-4">
-                <div class="detail-label">NIK</div>
-                <div class="view-value detail-value">{{ $user->nik ?? '-' }}</div>
-                <input type="text" name="nik" class="edit-input form-control form-control-sm mt-1"
-                  value="{{ $user->nik }}" style="border-radius:8px;">
-              </div>
-            </div>
-
-            {{-- Alamat --}}
-            <div class="col-md-6">
-              <div class="detail-row ps-md-4">
-                <div class="detail-label">Alamat</div>
-                <div class="view-value detail-value">{{ $user->alamat ?? '-' }}</div>
-                <textarea name="alamat" class="edit-input form-control form-control-sm mt-1"
-                  rows="2" style="border-radius:8px;">{{ $user->alamat }}</textarea>
-              </div>
-            </div>
-
-            {{-- Pengalaman --}}
-            <div class="col-12">
-              <div class="detail-row">
-                <div class="detail-label">Pengalaman</div>
-                <div class="view-value detail-value" style="white-space:pre-line;">{{ $user->pengalaman ?? '-' }}</div>
-                <textarea name="pengalaman" class="edit-input form-control form-control-sm mt-1"
-                  rows="3" style="border-radius:8px;">{{ $user->pengalaman }}</textarea>
-              </div>
-            </div>
-            @endif
-
             {{-- Tanggal Daftar & Login (read-only, tidak perlu edit) --}}
             <div class="col-md-6">
               <div class="detail-row pe-4">
@@ -301,7 +269,7 @@
             <div class="col-md-6">
               <div class="detail-row ps-md-4">
                 <div class="detail-label">Login Terakhir</div>
-                <div class="detail-value">{{ $user->updated_at->format('d M Y, H:i') }}</div>
+                <div class="detail-value">{{ $user->last_login_at?->format('d M Y, H:i') ?? '-' }}</div>
               </div>
             </div>
 
@@ -360,37 +328,6 @@
           </div>
         </div>
       </div>
-
-      {{-- Foto KTP --}}
-      @if($user->role === 'relawan')
-      <div class="card border-0 shadow-sm" style="border-radius:1rem;">
-        <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
-          <h6 class="fw-semibold"><i class="fa-solid fa-id-card me-2 text-warning"></i>Foto KTP</h6>
-        </div>
-        <div class="card-body px-4 pb-4">
-          <div style="border:2px dashed #e2e8f0;border-radius:12px;overflow:hidden;background:#f8fafc;min-height:180px;display:flex;align-items:center;justify-content:center;">
-            @if($user->foto_ktp)
-              <a href="{{ asset('storage/' . $user->foto_ktp) }}" target="_blank">
-                <img src="{{ asset('storage/' . $user->foto_ktp) }}" alt="Foto KTP"
-                  style="width:100%;border-radius:10px;object-fit:cover;">
-              </a>
-            @else
-              <div class="text-center text-muted py-4">
-                <i class="fa-solid fa-image fa-2x mb-2 d-block opacity-30"></i>
-                <span class="small">Foto KTP belum diunggah</span>
-              </div>
-            @endif
-          </div>
-          @if($user->foto_ktp)
-          <a href="{{ asset('storage/' . $user->foto_ktp) }}" target="_blank"
-            class="btn w-100 mt-3 btn-sm"
-            style="border-radius:8px; border:1.5px solid #e2e8f0; color:#64748b; background:#fff;">
-            <i class="fa-solid fa-arrow-up-right-from-square me-2"></i>Lihat Ukuran Penuh
-          </a>
-          @endif
-        </div>
-      </div>
-      @endif
     </div>
   </div>
 </form>

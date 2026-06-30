@@ -309,6 +309,19 @@
     #notifDropdown .card-header {
         border-radius: 16px 16px 0 0 !important;
     }
+    #notifList::-webkit-scrollbar {
+      width: 6px;
+    }
+    #notifList::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #notifList::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    #notifList::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 991px) {
@@ -351,9 +364,9 @@
     <a href="{{ route('admin.assignments.index') }}" class="nav-link {{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}">
       <i class="fa-solid fa-list-check"></i> <span>Penugasan Relawan</span>
     </a>
-      <a href="{{ route('admin.certificates.index') }}" class="nav-link {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}">
-        <i class="bi bi-mortarboard-fill"></i> <span>Sertifikat Relawan</span>
-      </a>
+    <a href="{{ route('admin.certificates.index') }}" class="nav-link {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}">
+      <i class="bi bi-mortarboard-fill"></i> <span>Sertifikat Relawan</span>
+    </a>
 
 
     <div class="nav-label">Bencana</div>
@@ -435,15 +448,19 @@
                   id="notifDropdown" style="width:340px;z-index:999;right:0;top:100%;">
                   <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
                       <span class="fw-semibold small">Notifikasi</span>
-                      <a href="{{ route('admin.notifications') }}" 
+                       <a href="{{ route('admin.notifications') }}" 
                         class="btn btn-sm btn-outline-secondary rounded-pill px-3 text-decoration-none" 
                         style="font-size:.75rem;"
-                        onclick="localStorage.setItem('admin_notif_seen_at', Date.now()); document.getElementById('notifBadge').classList.add('d-none'); document.getElementById('notifList').innerHTML = '<div class=\'text-center text-muted small py-4\'>Tidak ada notifikasi baru</div>';">
+                        onclick="localStorage.setItem('admin_notif_seen_at', Date.now()); document.getElementById('notifBadge').classList.add('d-none'); document.getElementById('notifList').innerHTML = ''; document.getElementById('notifEmpty').classList.remove('d-none');">
                           Lihat semua
                       </a>
                   </div>
-                  <div class="card-body p-0" id="notifList" style="max-height:360px;overflow-y:auto;">
-                      <div class="text-center text-muted small py-4" id="notifEmpty">Tidak ada notifikasi baru</div>
+                  <div class="card-body p-0" style="max-height:360px;overflow-y:auto;">
+                      <div class="text-center text-muted small py-4" id="notifEmpty">
+                          <i class="fa-solid fa-bell-slash mb-2 d-block opacity-40"></i>
+                          Tidak ada notifikasi baru
+                      </div>
+                      <div id="notifList"></div>
                   </div>
               </div>
           </div>
@@ -609,6 +626,8 @@ const adminIcons = {
     donation_success:   '<i class="fa-solid fa-heart" style="color:#ec4899"></i>',
     coordinator_report: '<i class="fa-solid fa-clipboard-check text-primary"></i>',
     campaign_expired:   '<i class="fa-solid fa-clock-rotate-left text-muted"></i>',
+    relawan_register:   '<i class="fa-solid fa-user-plus" style="color:#8b5cf6"></i>',
+    volunteer_join:     '<i class="fa-solid fa-people-group" style="color:#0ea5e9"></i>',
 };
 
 function loadAdminNotif() {
@@ -636,7 +655,8 @@ function loadAdminNotif() {
                 `).join('');
             } else {
                 notifBadge.classList.add('d-none');
-                notifList.innerHTML = '<div class="text-center text-muted small py-4">Tidak ada notifikasi baru</div>';
+                notifEmpty.classList.remove('d-none');
+                notifList.innerHTML = '';
             }
         });
 }

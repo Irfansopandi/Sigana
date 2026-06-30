@@ -77,7 +77,7 @@
     <div class="search-filter-panel shadow-sm">
       <div class="row g-3 align-items-center">
         <!-- Search Input -->
-        <div class="col-lg-4 col-md-6 col-12">
+        <div class="col-lg-3 col-md-6 col-12">
           <div class="search-input-wrapper">
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" id="transparencySearchInput" class="form-control" placeholder="Cari laporan transparansi...">
@@ -85,12 +85,13 @@
         </div>
 
         <!-- Filter Buttons (Desktop) -->
-        <div class="col-lg-5 col-12 d-none d-lg-block">
-          <div class="filter-categories-container justify-content-start">
+        <div class="col-lg-6 col-12 d-none d-lg-block">
+          <div class="filter-categories-container justify-content-start" style="flex-wrap: wrap; row-gap: 8px;">
             <button class="filter-cat-btn active" data-status="all">Semua Status</button>
-            <button class="filter-cat-btn" data-status="penyaluran">Dalam Penyaluran</button>
-            <button class="filter-cat-btn" data-status="selesai">Hampir Selesai</button>
             <button class="filter-cat-btn" data-status="aktif">Aktif</button>
+            <button class="filter-cat-btn" data-status="penyaluran">Dalam Penyaluran</button>
+            <button class="filter-cat-btn" data-status="hampir-selesai">Hampir Selesai</button>
+            <button class="filter-cat-btn" data-status="selesai">Selesai</button>
           </div>
         </div>
 
@@ -98,9 +99,10 @@
         <div class="col-md-6 col-12 d-lg-none">
           <select id="mobileStatusSelect" class="form-select" style="height: 48px; border-radius: 12px; border: 1px solid rgba(15,23,42,0.1); font-weight: 600;">
             <option value="all">Semua Status</option>
-            <option value="penyaluran">Dalam Penyaluran</option>
-            <option value="selesai">Hampir Selesai</option>
             <option value="aktif">Aktif</option>
+            <option value="penyaluran">Dalam Penyaluran</option>
+            <option value="hampir-selesai">Hampir Selesai</option>
+            <option value="selesai">Selesai</option>
           </select>
         </div>
 
