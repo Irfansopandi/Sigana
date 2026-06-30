@@ -228,17 +228,71 @@
     <small class="text-muted mt-2 d-block"><i class="fa-solid fa-info-circle me-1"></i>Klik pada peta untuk memilih koordinat, atau klik Deteksi untuk lokasi saat ini.</small>
   </div>
 
+  {{-- Kebutuhan Logistik --}}
+  <div class="form-section">
+    <div class="section-title"><i class="fa-solid fa-truck text-primary"></i>Kebutuhan Logistik Mendesak</div>
+    <p class="text-muted small mb-3">Tambahkan barang/bantuan yang dibutuhkan beserta target jumlahnya.</p>
+
+    <div id="needsWrapper">
+      @php $oldNeeds = old('needs', isset($campaign) ? $campaign->needs->map(fn($n) => ['name' => $n->name, 'qty' => $n->qty])->toArray() : []); @endphp
+      @forelse($oldNeeds as $i => $need)
+        <div class="row g-2 mb-2 need-row">
+          <div class="col-md-6">
+            <input type="text" class="form-control" name="needs[{{ $i }}][name]" placeholder="Contoh: Truk Tangki Air Bersih" value="{{ $need['name'] ?? '' }}">
+          </div>
+          <div class="col-md-5">
+            <input type="text" class="form-control" name="needs[{{ $i }}][qty]" placeholder="Contoh: 100 Tangki" value="{{ $need['qty'] ?? '' }}">
+          </div>
+          <div class="col-md-1 d-flex align-items-center">
+            <button type="button" class="btn btn-sm btn-outline-danger w-100 btn-remove-need"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+      @empty
+        <div class="row g-2 mb-2 need-row">
+          <div class="col-md-6">
+            <input type="text" class="form-control" name="needs[0][name]" placeholder="Contoh: Truk Tangki Air Bersih">
+          </div>
+          <div class="col-md-5">
+            <input type="text" class="form-control" name="needs[0][qty]" placeholder="Contoh: 100 Tangki">
+          </div>
+          <div class="col-md-1 d-flex align-items-center">
+            <button type="button" class="btn btn-sm btn-outline-danger w-100 btn-remove-need"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+      @endforelse
+    </div>
+
+    <button type="button" class="btn btn-sm btn-locate mt-2" id="btnAddNeed">
+      <i class="fa-solid fa-plus me-1"></i>Tambah Kebutuhan
+    </button>
+  </div>
+
   {{-- Dokumentasi --}}
   <div class="form-section">
     <div class="section-title"><i class="fa-solid fa-paperclip text-info"></i>Dokumentasi Pendukung</div>
-    <p class="text-muted small mb-3">Unggah hingga 3 file dokumentasi (foto/PDF, maks. 2MB per file).</p>
+    <p class="text-muted small mb-3">Unggah hingga 3 dokumentasi pendukung (foto/PDF, maks. 2MB per file).</p>
 
-    <input type="file" class="form-control @error('documentation') is-invalid @enderror"
-      name="documentation[]" accept=".pdf,image/*" multiple id="docInput">
-    <small class="text-muted">Format: PDF, JPG, PNG — Maks. 3 file</small>
-    @error('documentation') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+    <div class="row g-3">
+      @for ($i = 1; $i <= 3; $i++)
+        <div class="col-md-4">
+          <div class="doc-item">
+            <div class="small text-muted mb-2 fw-semibold">Dokumentasi {{ $i }}</div>
 
-    <div class="row g-2 mt-3" id="docPreviewRow"></div>
+            <div id="docPreview{{ $i }}">
+              <div class="text-muted small py-3 text-center border rounded">Belum ada file</div>
+            </div>
+
+            <div class="d-flex gap-2 mt-2">
+              <input type="file" class="form-control form-control-sm doc-single-input @error('documentation_slot_' . $i) is-invalid @enderror"
+                data-slot="{{ $i }}" name="documentation_slot_{{ $i }}" accept=".pdf,image/*">
+            </div>
+            @error('documentation_slot_' . $i)
+              <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
+          </div>
+        </div>
+      @endfor
+    </div>
   </div>
 
   {{-- Submit --}}
@@ -268,42 +322,31 @@
     }
   });
 
-  // Preview & validasi max 3 file dokumentasi
-  document.getElementById('docInput').addEventListener('change', function() {
-    const row = document.getElementById('docPreviewRow');
-    row.innerHTML = '';
+  // Preview dokumentasi per slot
+  document.querySelectorAll('.doc-single-input').forEach(input => {
+    input.addEventListener('change', function() {
+      const slot = this.dataset.slot;
+      const preview = document.getElementById('docPreview' + slot);
 
-    if (this.files.length > 3) {
-      alert('Maksimal 3 file dokumentasi.');
-      this.value = '';
-      return;
-    }
+      if (this.files && this.files[0]) {
+        const file = this.files[0];
 
-    Array.from(this.files).forEach((file, i) => {
-      const col = document.createElement('div');
-      col.className = 'col-md-4';
-
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-          col.innerHTML = `
-            <div class="doc-item">
-              <div class="small text-muted mb-2 fw-semibold">Dokumentasi ${i + 1}</div>
-              <img src="${ev.target.result}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;" alt="Dok ${i+1}">
-            </div>`;
-        };
-        reader.readAsDataURL(file);
-      } else {
-        col.innerHTML = `
-          <div class="doc-item">
-            <div class="small text-muted mb-2 fw-semibold">Dokumentasi ${i + 1}</div>
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = ev => {
+            preview.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;" alt="Preview">`;
+          };
+          reader.readAsDataURL(file);
+        } else {
+          preview.innerHTML = `
             <div class="d-flex align-items-center gap-2 py-2">
               <i class="fa-solid fa-file-pdf text-danger fa-lg"></i>
               <span class="small">${file.name}</span>
-            </div>
-          </div>`;
+            </div>`;
+        }
+      } else {
+        preview.innerHTML = '<div class="text-muted small py-3 text-center border rounded">Belum ada file</div>';
       }
-      row.appendChild(col);
     });
   });
 
@@ -363,11 +406,45 @@
 
   // Sync input manual ke peta
   ['latitude', 'longitude'].forEach(id => {
-    document.getElementById(id).addEventListener('change', function() {
-      const lat = parseFloat(document.getElementById('latitude').value);
-      const lng = parseFloat(document.getElementById('longitude').value);
-      if (!isNaN(lat) && !isNaN(lng)) updateCoords(lat, lng);
+      document.getElementById(id).addEventListener('change', function() {
+        const lat = parseFloat(document.getElementById('latitude').value);
+        const lng = parseFloat(document.getElementById('longitude').value);
+        if (!isNaN(lat) && !isNaN(lng)) updateCoords(lat, lng);
+      });
     });
+
+
+  // KEBUTUHAN LOGISTIK
+  let needIndex = document.querySelectorAll('.need-row').length;
+
+  document.getElementById('btnAddNeed').addEventListener('click', function() {
+    const wrapper = document.getElementById('needsWrapper');
+    const row = document.createElement('div');
+    row.className = 'row g-2 mb-2 need-row';
+    row.innerHTML = `
+      <div class="col-md-6">
+        <input type="text" class="form-control" name="needs[${needIndex}][name]" placeholder="Contoh: Truk Tangki Air Bersih">
+      </div>
+      <div class="col-md-5">
+        <input type="text" class="form-control" name="needs[${needIndex}][qty]" placeholder="Contoh: 100 Tangki">
+      </div>
+      <div class="col-md-1 d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-outline-danger w-100 btn-remove-need"><i class="fa-solid fa-trash"></i></button>
+      </div>`;
+    wrapper.appendChild(row);
+    needIndex++;
+  });
+
+  document.getElementById('needsWrapper').addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-remove-need');
+    if (btn) {
+      const rows = document.querySelectorAll('.need-row');
+      if (rows.length > 1) {
+        btn.closest('.need-row').remove();
+      } else {
+        btn.closest('.need-row').querySelectorAll('input').forEach(inp => inp.value = '');
+      }
+    }
   });
 </script>
 @endpush

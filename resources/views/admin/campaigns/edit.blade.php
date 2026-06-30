@@ -82,6 +82,16 @@
     </a>
   </div>
 </div>
+  @if($errors->any())
+  <div class="alert alert-danger">
+    <strong>Ada kesalahan input:</strong>
+    <ul class="mb-0 mt-1">
+      @foreach($errors->all() as $error)
+        <li>{{ $error }}</li>
+      @endforeach
+    </ul>
+  </div>
+  @endif
 
 <form action="{{ route('admin.campaigns.update', $campaign) }}" method="POST" enctype="multipart/form-data">
   @csrf
@@ -190,6 +200,45 @@
     </div>
   </div>
 
+  {{-- Kebutuhan Logistik --}}
+  <div class="form-section">
+    <div class="section-title"><i class="fa-solid fa-truck text-primary"></i>Kebutuhan Logistik Mendesak</div>
+    <p class="text-muted small mb-3">Tambahkan barang/bantuan yang dibutuhkan beserta target jumlahnya.</p>
+
+    <div id="needsWrapper">
+      @php $oldNeeds = old('needs', isset($campaign) ? $campaign->needs->map(fn($n) => ['name' => $n->name, 'qty' => $n->qty])->toArray() : []); @endphp
+      @forelse($oldNeeds as $i => $need)
+        <div class="row g-2 mb-2 need-row">
+          <div class="col-md-6">
+            <input type="text" class="form-control" name="needs[{{ $i }}][name]" placeholder="Contoh: Truk Tangki Air Bersih" value="{{ $need['name'] ?? '' }}">
+          </div>
+          <div class="col-md-5">
+            <input type="text" class="form-control" name="needs[{{ $i }}][qty]" placeholder="Contoh: 100 Tangki" value="{{ $need['qty'] ?? '' }}">
+          </div>
+          <div class="col-md-1 d-flex align-items-center">
+            <button type="button" class="btn btn-sm btn-outline-danger w-100 btn-remove-need"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+      @empty
+        <div class="row g-2 mb-2 need-row">
+          <div class="col-md-6">
+            <input type="text" class="form-control" name="needs[0][name]" placeholder="Contoh: Truk Tangki Air Bersih">
+          </div>
+          <div class="col-md-5">
+            <input type="text" class="form-control" name="needs[0][qty]" placeholder="Contoh: 100 Tangki">
+          </div>
+          <div class="col-md-1 d-flex align-items-center">
+            <button type="button" class="btn btn-sm btn-outline-danger w-100 btn-remove-need"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+      @endforelse
+    </div>
+
+    <button type="button" class="btn btn-sm btn-locate mt-2" id="btnAddNeed">
+      <i class="fa-solid fa-plus me-1"></i>Tambah Kebutuhan
+    </button>
+  </div>
+
   {{-- Foto --}}
   <div class="form-section">
     <div class="section-title"><i class="fa-solid fa-image text-warning"></i>Foto Kampanye</div>
@@ -242,39 +291,51 @@
   {{-- Dokumentasi --}}
   <div class="form-section">
     <div class="section-title"><i class="fa-solid fa-paperclip text-info"></i>Dokumentasi Pendukung</div>
-    <p class="text-muted small mb-3">Unggah hingga 3 file dokumentasi (foto/PDF, maks. 2MB per file). Kosongkan jika tidak ingin mengubah.</p>
+    <p class="text-muted small mb-3">Setiap slot bisa diganti atau dihapus secara terpisah (foto/PDF, maks. 2MB).</p>
 
-    <input type="file" class="form-control @error('documentation') is-invalid @enderror"
-      name="documentation[]" accept=".pdf,image/*" multiple id="docInput">
-    <small class="text-muted">Format: PDF, JPG, PNG — Maks. 3 file</small>
-    @error('documentation') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+    <div class="row g-3">
+      @for ($i = 1; $i <= 3; $i++)
+        @php
+          $doc = $campaign->{'documentation_' . $i};
+          $ext = $doc ? strtolower(pathinfo($doc, PATHINFO_EXTENSION)) : null;
+        @endphp
+        <div class="col-md-4">
+          <div class="doc-item">
+            <div class="small text-muted mb-2 fw-semibold">Dokumentasi {{ $i }}</div>
 
-    {{-- Preview dokumentasi yang sudah ada --}}
-    @php $docs = array_filter([$campaign->documentation_1, $campaign->documentation_2, $campaign->documentation_3]); @endphp
-    @if(!empty($docs))
-    <div class="row g-2 mt-3">
-      @foreach($docs as $i => $doc)
-      <div class="col-md-4">
-        <div class="doc-item">
-          <div class="small text-muted mb-2 fw-semibold">Dokumentasi {{ $i + 1 }}</div>
-          @php $ext = strtolower(pathinfo($doc, PATHINFO_EXTENSION)); @endphp
-          @if(in_array($ext, ['jpg','jpeg','png','webp']))
-            <img src="{{ url('storage/' . $doc) }}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;" alt="Dok {{ $i+1 }}">
-          @else
-            <div class="d-flex align-items-center gap-2 py-2">
-              <i class="fa-solid fa-file-pdf text-danger fa-lg"></i>
-              <span class="small">File PDF</span>
+            <div id="docPreview{{ $i }}">
+              @if($doc)
+                @if(in_array($ext, ['jpg','jpeg','png','webp']))
+                  <img src="{{ url('storage/' . $doc) }}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;" alt="Dok {{ $i }}">
+                @else
+                  <div class="d-flex align-items-center gap-2 py-2">
+                    <i class="fa-solid fa-file-pdf text-danger fa-lg"></i>
+                    <span class="small">File PDF</span>
+                  </div>
+                @endif
+              @else
+                <div class="text-muted small py-3 text-center border rounded">Belum ada file</div>
+              @endif
             </div>
-          @endif
-          <a href="{{ url('storage/' . $doc) }}" target="_blank"
-            class="btn btn-sm mt-2 w-100" style="border-radius:6px;border:1.5px solid #e2e8f0;color:#64748b;font-size:0.75rem;">
-            <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Lihat
-          </a>
+
+            <input type="hidden" name="delete_documentation_{{ $i }}" id="deleteFlag{{ $i }}" value="0">
+
+            <div class="d-flex gap-2 mt-2">
+              <input type="file" class="form-control form-control-sm doc-single-input"
+                data-slot="{{ $i }}" name="documentation_slot_{{ $i }}" accept=".pdf,image/*">
+              @if($doc)
+                <button type="button" class="btn btn-sm btn-outline-danger btn-delete-doc" data-slot="{{ $i }}" title="Hapus file ini">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              @endif
+            </div>
+            @error('documentation_slot_' . $i)
+              <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
+          </div>
         </div>
-      </div>
-      @endforeach
+      @endfor
     </div>
-    @endif
   </div>
 
   {{-- Submit --}}
@@ -304,13 +365,6 @@
     }
   });
 
-  // Validasi max 3 file dokumentasi
-  document.getElementById('docInput').addEventListener('change', function() {
-    if (this.files.length > 3) {
-      alert('Maksimal 3 file dokumentasi.');
-      this.value = '';
-    }
-  });
 
   // Peta Leaflet
   const initLat = {{ $campaign->latitude ?? -6.2 }};
@@ -359,6 +413,101 @@
       const lat = parseFloat(document.getElementById('latitude').value);
       const lng = parseFloat(document.getElementById('longitude').value);
       if (!isNaN(lat) && !isNaN(lng)) updateCoords(lat, lng);
+    });
+  });
+
+  // KEBUTUHAN LOGISTIK
+  let needIndex = document.querySelectorAll('.need-row').length;
+
+  document.getElementById('btnAddNeed').addEventListener('click', function() {
+    const wrapper = document.getElementById('needsWrapper');
+    const row = document.createElement('div');
+    row.className = 'row g-2 mb-2 need-row';
+    row.innerHTML = `
+      <div class="col-md-6">
+        <input type="text" class="form-control" name="needs[${needIndex}][name]" placeholder="Contoh: Truk Tangki Air Bersih">
+      </div>
+      <div class="col-md-5">
+        <input type="text" class="form-control" name="needs[${needIndex}][qty]" placeholder="Contoh: 100 Tangki">
+      </div>
+      <div class="col-md-1 d-flex align-items-center">
+        <button type="button" class="btn btn-sm btn-outline-danger w-100 btn-remove-need"><i class="fa-solid fa-trash"></i></button>
+      </div>`;
+    wrapper.appendChild(row);
+    needIndex++;
+  });
+
+  document.getElementById('needsWrapper').addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-remove-need');
+    if (btn) {
+      const rows = document.querySelectorAll('.need-row');
+      if (rows.length > 1) {
+        btn.closest('.need-row').remove();
+      } else {
+        btn.closest('.need-row').querySelectorAll('input').forEach(inp => inp.value = '');
+      }
+    }
+  });
+
+  // Preview & hapus dokumentasi per slot
+  document.querySelectorAll('.doc-single-input').forEach(input => {
+    input.addEventListener('change', function() {
+      const slot = this.dataset.slot;
+      document.getElementById('deleteFlag' + slot).value = '0';
+
+      if (this.files && this.files[0]) {
+        const file = this.files[0];
+        const preview = document.getElementById('docPreview' + slot);
+
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = ev => {
+            preview.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:80px;object-fit:cover;border-radius:6px;" alt="Preview">`;
+          };
+          reader.readAsDataURL(file);
+        } else {
+          preview.innerHTML = `
+            <div class="d-flex align-items-center gap-2 py-2">
+              <i class="fa-solid fa-file-pdf text-danger fa-lg"></i>
+              <span class="small">${file.name}</span>
+            </div>`;
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('.btn-delete-doc').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const thisBtn = this;
+      Swal.fire({
+        title: 'Hapus file dokumentasi ini?',
+        text: 'File yang dihapus tidak dapat dikembalikan.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, hapus',
+        cancelButtonText: 'Batal'
+      }).then(function(result) {
+        if (!result.isConfirmed) return;
+
+        const slot = thisBtn.dataset.slot;
+        document.getElementById('deleteFlag' + slot).value = '1';
+        document.querySelector(`input[name="documentation_slot_${slot}"]`).value = '';
+        document.getElementById('docPreview' + slot).innerHTML =
+          '<div class="text-muted small py-3 text-center border rounded text-danger">Akan dihapus</div>';
+        thisBtn.remove();
+
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'File berhasil dihapus',
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true
+        });
+      });
     });
   });
 </script>

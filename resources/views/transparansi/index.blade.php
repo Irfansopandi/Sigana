@@ -141,7 +141,7 @@
               <div class="transparency-overlay">
                 <span class="badge {{ $report->status_class }} px-3 py-2"><i class="{{ $report->status_icon }} me-1"></i> {{ $report->status }}</span>
               </div>
-              <img src="{{ asset($campaign->image) }}" class="w-100 h-100 object-fit-cover" alt="{{ $campaign->title }}">
+              <img src="{{ $campaign->image_url }}" class="w-100 h-100 object-fit-cover" alt="{{ $campaign->title }}">
             </div>
             <div class="card-body p-4 d-flex flex-column">
               <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.15rem;">{{ $campaign->title }}</h5>

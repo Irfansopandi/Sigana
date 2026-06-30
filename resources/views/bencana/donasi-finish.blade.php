@@ -143,8 +143,20 @@
 
       {{-- Sidebar Kampanye --}}
       <div class="col-lg-4">
-          <div class="bg-white rounded-4 p-4 shadow-sm border border-light">          <div class="rounded-3 overflow-hidden mb-3" style="height:160px;">
-            <img src="{{ asset($campaign->image) }}" class="w-100 h-100 object-fit-cover" alt="{{ $campaign->title }}">
+          @php
+            $imgPath = $campaign->getRawOriginal('image');
+            $imgUrl = $imgPath
+              ? (str_starts_with($imgPath, 'storage/') ? asset($imgPath) : asset('storage/' . $imgPath))
+              : null;
+          @endphp
+          <div class="rounded-3 overflow-hidden mb-3" style="height:160px;">
+            @if($imgUrl)
+              <img src="{{ $imgUrl }}" class="w-100 h-100 object-fit-cover" alt="{{ $campaign->title }}">
+            @else
+              <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background:#f1f5f9;color:#94a3b8;">
+                <i class="fa-solid fa-image fa-2x"></i>
+              </div>
+            @endif
           </div>
           <span class="badge {{ $campaign->status_class }} px-3 py-2 mb-2 d-inline-block">
             <i class="fa-solid fa-triangle-exclamation me-1"></i> {{ $campaign->status }}

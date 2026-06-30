@@ -41,11 +41,23 @@
       <div class="col-lg-8">
         <div class="bg-white rounded-4 p-4 p-md-5 shadow-sm border border-light">
           <!-- Main Image -->
+          @php
+            $imgPath = $campaign->getRawOriginal('image');
+            $imgUrl = $imgPath
+              ? (str_starts_with($imgPath, 'storage/') ? asset($imgPath) : asset('storage/' . $imgPath))
+              : null;
+          @endphp
           <div class="position-relative rounded-4 overflow-hidden mb-4 shadow-sm" style="max-height: 450px;">
             <span class="badge {{ $campaign->status_class }} position-absolute top-3 start-3 z-3 px-3 py-2 fs-6 fw-bold">
               <i class="fa-solid fa-triangle-exclamation me-1"></i> Status: {{ $campaign->status }}
             </span>
-            <img src="{{ asset($campaign->image) }}" class="w-100 object-fit-cover" style="min-height: 300px; max-height: 450px;" alt="{{ $campaign->title }}">
+            @if($imgUrl)
+              <img src="{{ $imgUrl }}" class="w-100 object-fit-cover" style="min-height: 300px; max-height: 450px;" alt="{{ $campaign->title }}">
+            @else
+              <div class="w-100 d-flex align-items-center justify-content-center" style="min-height: 300px; background:#f1f5f9;color:#94a3b8;">
+                <i class="fa-solid fa-image fa-3x"></i>
+              </div>
+            @endif
           </div>
 
           <!-- Meta Info -->
@@ -98,27 +110,30 @@
             </div>
           </div>
 
-          <!-- Documentation / Field Gallery -->
+          {{-- Documentation / Field Gallery --}}
+          @php $docs = array_filter([$campaign->documentation_1, $campaign->documentation_2, $campaign->documentation_3]); @endphp
+          @if(!empty($docs))
           <div class="mb-5">
             <h4 class="fw-bold mb-4 text-dark"><i class="fa-solid fa-camera text-primary me-2"></i>Dokumentasi Kondisi Lapangan</h4>
             <div class="row g-3">
-              <div class="col-4">
-                <div class="rounded-3 overflow-hidden shadow-sm ratio ratio-4x3">
-                  <img src="{{ asset('storage/assets/bencana/demak_flood.png') }}" class="doc-gallery-img object-fit-cover w-100 h-100" alt="Dokumentasi 1">
+              @foreach($docs as $i => $doc)
+                @php $ext = strtolower(pathinfo($doc, PATHINFO_EXTENSION)); @endphp
+                <div class="col-4">
+                  @if(in_array($ext, ['jpg','jpeg','png','webp']))
+                    <a href="{{ url('storage/' . $doc) }}" target="_blank" class="d-block rounded-3 overflow-hidden shadow-sm ratio ratio-4x3">
+                      <img src="{{ url('storage/' . $doc) }}" class="doc-gallery-img object-fit-cover w-100 h-100" alt="Dokumentasi {{ $i+1 }}">
+                    </a>
+                  @else
+                    <a href="{{ url('storage/' . $doc) }}" target="_blank" class="d-flex flex-column align-items-center justify-content-center rounded-3 shadow-sm ratio ratio-4x3 bg-light text-decoration-none">
+                      <i class="fa-solid fa-file-pdf text-danger fs-1 mb-2"></i>
+                      <span class="small text-dark">Lihat PDF</span>
+                    </a>
+                  @endif
                 </div>
-              </div>
-              <div class="col-4">
-                <div class="rounded-3 overflow-hidden shadow-sm ratio ratio-4x3">
-                  <img src="{{ asset('storage/assets/bencana/mamuju_earthquake.png') }}" class="doc-gallery-img object-fit-cover w-100 h-100" alt="Dokumentasi 2">
-                </div>
-              </div>
-              <div class="col-4">
-                <div class="rounded-3 overflow-hidden shadow-sm ratio ratio-4x3">
-                  <img src="{{ asset('storage/assets/bencana/semeru_eruption.png') }}" class="doc-gallery-img object-fit-cover w-100 h-100" alt="Dokumentasi 3">
-                </div>
-              </div>
+              @endforeach
             </div>
           </div>
+          @endif
 
           <!-- Recent Donors -->
           <div>
@@ -200,15 +215,21 @@
 </section>
 
 @section('meta')
+@php
+  $imgPath = $campaign->getRawOriginal('image');
+  $imgUrl = $imgPath
+    ? (str_starts_with($imgPath, 'storage/') ? asset($imgPath) : asset('storage/' . $imgPath))
+    : asset('storage/assets/default-campaign.jpg');
+@endphp
 <meta property="og:type" content="website">
 <meta property="og:title" content="{{ $campaign->title }} — SIGANA">
 <meta property="og:description" content="Sudah terkumpul {{ $campaign->collected }} dari target {{ $campaign->target }}. Yuk bantu donasi sekarang!">
-<meta property="og:image" content="{{ asset($campaign->image) }}">
+<meta property="og:image" content="{{ $imgUrl }}">
 <meta property="og:url" content="{{ route('bencana.detail', $campaign->slug) }}">
 <meta property="og:site_name" content="SIGANA">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ $campaign->title }} — SIGANA">
 <meta name="twitter:description" content="Sudah terkumpul {{ $campaign->collected }} dari target {{ $campaign->target }}.">
-<meta name="twitter:image" content="{{ asset($campaign->image) }}">
+<meta name="twitter:image" content="{{ $imgUrl }}">
 @endsection

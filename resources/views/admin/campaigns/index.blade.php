@@ -184,6 +184,15 @@
         {{-- Judul & Lokasi --}}
         <h6 class="fw-bold mb-1" style="font-size:0.85rem; line-height:1.3;">{{ $campaign->title }}</h6>
         <div class="small text-muted mb-2"><i class="fa-solid fa-location-dot me-1"></i>{{ $campaign->location }}</div>
+        @if($campaign->user)
+          <div class="small text-muted mb-2" style="font-size:0.75rem;">
+            <i class="fa-solid fa-user me-1"></i>Pelapor: <span class="fw-semibold text-dark">{{ $campaign->user->name }}</span>
+          </div>
+        @else
+          <div class="small text-muted mb-2" style="font-size:0.75rem;">
+            <i class="fa-solid fa-user-shield me-1"></i><span class="fst-italic">Dibuat oleh Admin</span>
+          </div>
+        @endif
 
         {{-- Badge Status --}}
         <div class="d-flex gap-1 flex-wrap mb-3">

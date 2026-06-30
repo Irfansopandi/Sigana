@@ -7,6 +7,7 @@ use App\Models\TransparencyReport;
 use App\Models\ReportAllocation;
 use App\Models\ReportTimeline;
 use App\Models\ReportDoc;
+use App\Models\ReportEvidence;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Services\NotificationService;
@@ -224,5 +225,37 @@ class AdminTransparencyController extends Controller
                 'status_icon' => 'fa-solid fa-circle-dot',
             ],
         };
+    }
+
+    // ====== Galeri Bukti Foto Penyaluran ======
+
+    public function storeEvidence(Request $request, TransparencyReport $report)
+    {
+        $validated = $request->validate([
+            'photo' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'desc'  => 'nullable|string|max:255',
+        ]);
+
+        $path = $request->file('photo')->store('evidence', 'public');
+
+        $report->evidence()->create([
+            'url'  => $path,
+            'desc' => $validated['desc'] ?? null,
+        ]);
+
+        return redirect()->route('admin.transparency.edit', $report)->with('success', 'Foto bukti penyaluran berhasil ditambahkan.');
+    }
+
+    public function destroyEvidence(ReportEvidence $evidence)
+    {
+        $reportId = $evidence->report_id;
+
+        if ($evidence->url) {
+            Storage::disk('public')->delete($evidence->url);
+        }
+
+        $evidence->delete();
+
+        return redirect()->route('admin.transparency.edit', $reportId)->with('success', 'Foto bukti penyaluran berhasil dihapus.');
     }
 }

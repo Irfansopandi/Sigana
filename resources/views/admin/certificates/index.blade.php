@@ -57,7 +57,7 @@
   </div>
   <div class="col-6 col-md-3">
     <div class="stat-card" style="border-left-color:#059669;">
-      <div class="stat-icon" style="background:#d1fae5; color:#059669;"><i class="fa-solid fa-certificate"></i></div>
+      <div class="stat-icon" style="background:#d1fae5; color:#059669;"><i class="bi bi-mortarboard-fill"></i></div>
       <div>
         <div class="small text-muted">Sertifikat Diberikan</div>
         <div class="fw-bold fs-4">{{ $totalSertifikat }}</div>

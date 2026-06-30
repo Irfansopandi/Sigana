@@ -89,6 +89,24 @@ class Campaign extends Model
         return $this->days_left <= 0;
     }
 
+    /**
+     * URL Gambar Kampanye
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        $imgPath = $this->attributes['image'] ?? null;
+        if (!$imgPath) {
+            return null;
+        }
+        if (str_starts_with($imgPath, 'http')) {
+            return $imgPath;
+        }
+        if (str_starts_with($imgPath, 'storage/')) {
+            return asset($imgPath);
+        }
+        return asset('storage/' . $imgPath);
+    }
+
     // ─────────────────────────────────────────────
     //  STATUS
     // ─────────────────────────────────────────────
@@ -222,5 +240,10 @@ class Campaign extends Model
         return $this->hasOne(CampaignVolunteer::class)
             ->where('is_coordinator', true)
             ->where('verifikasi', 'diterima');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'submitted_by');
     }
 }

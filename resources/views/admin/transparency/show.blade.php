@@ -251,6 +251,30 @@
       @endforeach
     </div>
     @endif
+    {{-- Galeri Bukti Foto Penyaluran --}}
+      @if($report->evidence->count())
+      <div class="detail-card">
+        <h5><i class="fa-solid fa-images text-primary me-2"></i>Galeri Bukti Foto Penyaluran</h5>
+        <p class="text-muted small mb-3">Dokumentasi foto penyaluran logistik dan pemeriksaan lapangan oleh relawan.</p>
+        <div class="row g-3">
+          @foreach($report->evidence as $i => $ev)
+          <div class="col-md-4">
+            <div class="rounded-3 overflow-hidden border" style="position:relative;">
+              <a href="{{ $ev->photo_url }}" target="_blank">
+                <img src="{{ $ev->photo_url }}" style="width:100%;height:150px;object-fit:cover;" alt="Foto Bukti {{ $i+1 }}">
+              </a>
+              <div class="px-2 py-1" style="background:#0f172a;color:#fff;font-size:0.72rem;text-align:center;">
+                Foto Bukti #{{ $i + 1 }}
+              </div>
+            </div>
+            @if($ev->desc)
+              <p class="text-muted small mt-2 mb-0">{{ $ev->desc }}</p>
+            @endif
+          </div>
+          @endforeach
+        </div>
+      </div>
+      @endif
 
   </div>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Campaign;
+use App\Models\TransparencyReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -49,6 +50,8 @@ class AdminCampaignController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validateCampaign($request);
+        $needs = $validated['needs'] ?? [];
+        unset($validated['needs']);
 
         $slug = Str::slug($validated['title']) . '-' . time();
         $validated['slug'] = $slug;
@@ -72,7 +75,30 @@ class AdminCampaignController extends Controller
             }
         }
 
-        Campaign::create($validated);
+        $campaign = Campaign::create($validated);
+
+        // Simpan kebutuhan logistik
+        foreach ($needs as $need) {
+            if (!empty($need['name'])) {
+                $campaign->needs()->create([
+                    'name' => $need['name'],
+                    'qty'  => $need['qty'] ?? null,
+                ]);
+            }
+        }
+
+        // Kampanye buatan admin otomatis disetujui — buat laporan transparansi awal
+        TransparencyReport::firstOrCreate(
+            ['campaign_id' => $campaign->id],
+            [
+                'status'        => 'Aktif',
+                'status_class'  => 'transparency-badge-aktif',
+                'status_icon'   => 'fa-solid fa-circle-dot',
+                'date'          => now()->toDateString(),
+                'description'   => 'Laporan transparansi penyaluran dana untuk kampanye "' . $campaign->title . '" akan segera diperbarui oleh admin.',
+                'beneficiaries' => 0,
+            ]
+        );
 
         return redirect()->route('admin.campaigns.index')->with('success', 'Kampanye berhasil ditambahkan!');
     }
@@ -90,6 +116,8 @@ class AdminCampaignController extends Controller
     public function update(Request $request, Campaign $campaign)
     {
         $validated = $this->validateCampaign($request);
+        $needs = $validated['needs'] ?? [];
+        unset($validated['needs']);
 
         if ($request->hasFile('image')) {
             if ($campaign->image && Storage::disk('public')->exists($campaign->image)) {
@@ -112,6 +140,16 @@ class AdminCampaignController extends Controller
         }
 
         $campaign->update($validated);
+        // Sinkronkan kebutuhan logistik: hapus lama, simpan baru
+        $campaign->needs()->delete();
+        foreach ($needs as $need) {
+            if (!empty($need['name'])) {
+                $campaign->needs()->create([
+                    'name' => $need['name'],
+                    'qty'  => $need['qty'] ?? null,
+                ]);
+            }
+        }
 
         return redirect()->route('admin.campaigns.show', $campaign)->with('success', 'Kampanye berhasil diperbarui!');
     }
@@ -136,6 +174,20 @@ class AdminCampaignController extends Controller
     public function approve(Campaign $campaign)
     {
         $campaign->update(['report_status' => 'disetujui']);
+
+        // Otomatis buat record transparansi awal kalau belum ada
+        \App\Models\TransparencyReport::firstOrCreate(
+            ['campaign_id' => $campaign->id],
+            [
+                'status'        => 'Aktif',
+                'status_class'  => 'transparency-badge-aktif',
+                'status_icon'   => 'fa-solid fa-circle-dot',
+                'date'          => now()->toDateString(),
+                'description'   => 'Laporan transparansi penyaluran dana untuk kampanye "' . $campaign->title . '" akan segera diperbarui oleh admin.',
+                'beneficiaries' => 0,
+            ]
+        );
+
         NotificationService::campaignApproved($campaign);
         NotificationService::newCampaignPublished($campaign);
         return redirect()->route('admin.campaigns.index')->with('success', 'Laporan bencana berhasil disetujui!');
@@ -168,6 +220,9 @@ class AdminCampaignController extends Controller
             'documentation_1' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'documentation_2' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'documentation_3' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'needs' => 'nullable|array',
+            'needs.*.name' => 'nullable|string|max:255',
+            'needs.*.qty' => 'nullable|string|max:100',
         ]);
     }
 

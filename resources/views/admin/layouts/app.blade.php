@@ -288,6 +288,28 @@
       left: 70px;
     }
 
+    #notifBtn {
+        background: none;
+        border: none;
+    }
+    #notifIcon {
+        display: inline-block;
+        transition: transform 0.2s;
+    }
+    #notifBtn:hover #notifIcon {
+        transform: rotate(15deg);
+    }
+
+    #notifDropdown {
+        border-radius: 16px !important;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+        overflow: hidden !important;
+    }
+
+    #notifDropdown .card-header {
+        border-radius: 16px 16px 0 0 !important;
+    }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 991px) {
       .sidebar { transform: translateX(-100%); }
@@ -330,7 +352,7 @@
       <i class="fa-solid fa-list-check"></i> <span>Penugasan Relawan</span>
     </a>
       <a href="{{ route('admin.certificates.index') }}" class="nav-link {{ request()->routeIs('admin.certificates.*') ? 'active' : '' }}">
-        <i class="fa-solid fa-certificate"></i> <span>Sertifikat Relawan</span>
+        <i class="bi bi-mortarboard-fill"></i> <span>Sertifikat Relawan</span>
       </a>
 
 
@@ -402,15 +424,38 @@
             <span class="topbar-title">@yield('page_title', 'Dashboard')</span>
         </div>
         <div class="topbar-right">
-            <span class="text-muted small">{{ now()->translatedFormat('l, d F Y') }}</span>
-            <div class="topbar-badge overflow-hidden">
-                @if(auth()->user()->photo)
-                    <img src="{{ Storage::url(auth()->user()->photo) }}" alt="foto"
-                        style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
-                @else
-                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                @endif
-            </div>
+          <div class="position-relative" id="notifWrapper">
+              <button class="btn p-0 position-relative" id="notifBtn" style="width:36px;height:36px;background:none;border:none;">
+                  <i class="fa-solid fa-bell text-muted fs-5" id="notifIcon"></i>
+                  <span class="position-absolute badge rounded-pill bg-danger d-none" 
+                      id="notifBadge" style="font-size:.6rem; top:-4px; right:-6px;"></span>
+              </button>
+
+              <div class="card shadow border-0 position-absolute d-none" 
+                  id="notifDropdown" style="width:340px;z-index:999;right:0;top:100%;">
+                  <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
+                      <span class="fw-semibold small">Notifikasi</span>
+                      <a href="{{ route('admin.notifications') }}" 
+                        class="btn btn-sm btn-outline-secondary rounded-pill px-3 text-decoration-none" 
+                        style="font-size:.75rem;"
+                        onclick="localStorage.setItem('admin_notif_seen_at', Date.now()); document.getElementById('notifBadge').classList.add('d-none'); document.getElementById('notifList').innerHTML = '<div class=\'text-center text-muted small py-4\'>Tidak ada notifikasi baru</div>';">
+                          Lihat semua
+                      </a>
+                  </div>
+                  <div class="card-body p-0" id="notifList" style="max-height:360px;overflow-y:auto;">
+                      <div class="text-center text-muted small py-4" id="notifEmpty">Tidak ada notifikasi baru</div>
+                  </div>
+              </div>
+          </div>
+          <span class="text-muted small">{{ now()->translatedFormat('l, d F Y') }}</span>
+          <div class="topbar-badge overflow-hidden">
+              @if(auth()->user()->photo)
+              <img src="{{ Storage::url(auth()->user()->photo) }}" alt="foto"
+                style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+              @else
+                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+              @endif
+          </div>
         </div>
     </header>
 
@@ -551,6 +596,62 @@ function previewPhoto(input) {
     reader.readAsDataURL(file);
   }
 }
+
+// notifikasi
+const notifBtn = document.getElementById('notifBtn');
+const notifDropdown = document.getElementById('notifDropdown');
+const notifBadge = document.getElementById('notifBadge');
+const notifList = document.getElementById('notifList');
+const notifEmpty = document.getElementById('notifEmpty');
+
+const adminIcons = {
+    campaign_pending:   '<i class="fa-solid fa-triangle-exclamation text-warning"></i>',
+    donation_success:   '<i class="fa-solid fa-heart" style="color:#ec4899"></i>',
+    coordinator_report: '<i class="fa-solid fa-clipboard-check text-primary"></i>',
+    campaign_expired:   '<i class="fa-solid fa-clock-rotate-left text-muted"></i>',
+};
+
+function loadAdminNotif() {
+    fetch('{{ route("admin.notifications.unread") }}')
+        .then(r => r.json())
+        .then(data => {
+            const lastSeen = parseInt(localStorage.getItem('admin_notif_seen_at') || '0');
+
+            const unseenNotifs = data.notifications.filter(n => {
+                return new Date(n.time).getTime() > lastSeen;
+            });
+
+            if (unseenNotifs.length > 0) {
+                notifBadge.classList.remove('d-none');
+                notifBadge.textContent = unseenNotifs.length > 9 ? '9+' : unseenNotifs.length;
+                notifEmpty.classList.add('d-none');
+                notifList.innerHTML = unseenNotifs.map(n => `
+                    <a href="${n.url ?? '#'}" class="d-flex gap-3 px-3 py-2 text-decoration-none border-bottom">
+                        <div class="mt-1">${adminIcons[n.type] ?? '<i class="fa-solid fa-bell text-muted"></i>'}</div>
+                        <div>
+                            <div class="small fw-semibold text-dark">${n.title}</div>
+                            <div class="small text-muted">${n.message}</div>
+                        </div>
+                    </a>
+                `).join('');
+            } else {
+                notifBadge.classList.add('d-none');
+                notifList.innerHTML = '<div class="text-center text-muted small py-4">Tidak ada notifikasi baru</div>';
+            }
+        });
+}
+
+notifBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notifDropdown.classList.toggle('d-none');
+    loadAdminNotif();
+});
+
+document.addEventListener('click', () => notifDropdown.classList.add('d-none'));
+notifDropdown.addEventListener('click', e => e.stopPropagation());
+
+loadAdminNotif();
+setInterval(loadAdminNotif, 30000);
 
 </script>
 </body>

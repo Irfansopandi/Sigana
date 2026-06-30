@@ -215,8 +215,8 @@
             <td class="ps-4 text-muted small">{{ $i + 1 }}</td>
             <td>
               <div class="d-flex align-items-center gap-3">
-                @if($c->image)
-                  <img src="{{ asset($c->image) }}" class="campaign-thumb" alt="{{ $c->title }}">
+                @if($c->image_url)
+                  <img src="{{ $c->image_url }}" class="campaign-thumb" alt="{{ $c->title }}">
                 @else
                   <div class="campaign-thumb-placeholder">
                     <i class="fa-solid fa-image"></i>

@@ -228,18 +228,6 @@
 @if($campaigns->count())
 <div class="row g-3" id="campaignGrid">
   @foreach($campaigns as $campaign)
-  @php
-    $imgPath = $campaign->getRawOriginal('image');
-    if (!$imgPath) {
-        $imgUrl = null;
-    } elseif (str_starts_with($imgPath, 'http')) {
-        $imgUrl = $imgPath;
-    } elseif (str_starts_with($imgPath, 'storage/')) {
-        $imgUrl = asset($imgPath);
-    } else {
-        $imgUrl = asset('storage/' . $imgPath);
-    }
-  @endphp
   <div class="col-12 col-md-6 col-lg-4 col-xl-3 campaign-item"
     data-name="{{ strtolower($campaign->title . ' ' . $campaign->location) }}"
     data-category="{{ strtolower($campaign->category) }}"
@@ -249,8 +237,8 @@
 
       {{-- Gambar --}}
       <div class="position-relative">
-        @if($imgUrl)
-          <img src="{{ $imgUrl }}" alt="{{ $campaign->title }}" class="campaign-img">
+        @if($campaign->image_url)
+          <img src="{{ $campaign->image_url }}" alt="{{ $campaign->title }}" class="campaign-img">
         @else
           <div class="campaign-img-placeholder">
             <i class="fa-solid fa-image"></i>

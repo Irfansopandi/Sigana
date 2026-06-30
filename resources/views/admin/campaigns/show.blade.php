@@ -151,6 +151,55 @@
         </div>
       </div>
     </div>
+
+    {{-- Kebutuhan Logistik --}}
+    @if($campaign->needs->count())
+    <div class="form-section">
+      <div class="section-title"><i class="fa-solid fa-truck text-primary"></i>Kebutuhan Logistik Mendesak</div>
+      <p class="text-muted small mb-3">Berikut adalah barang dan dukungan logistik darurat yang sangat dibutuhkan pengungsi di lapangan:</p>
+      <div class="row g-3">
+        @foreach($campaign->needs as $need)
+        <div class="col-md-6">
+          <div class="info-box d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center justify-content-center" style="width:42px;height:42px;border-radius:50%;background:#eff6ff;color:#2563eb;flex-shrink:0;">
+              <i class="{{ $need->icon }}"></i>
+            </div>
+            <div>
+              <div class="info-value">{{ $need->name }}</div>
+              <div class="small text-muted">Target Kebutuhan: <strong>{{ $need->qty }}</strong></div>
+            </div>
+          </div>
+        </div>
+        @endforeach
+      </div>
+    </div>
+    @endif
+
+    {{-- Dokumentasi --}}
+    @php $docs = array_filter([$campaign->documentation_1, $campaign->documentation_2, $campaign->documentation_3]); @endphp
+    @if(!empty($docs))
+    <div class="form-section">
+      <div class="section-title"><i class="fa-solid fa-camera text-info"></i>Dokumentasi Kondisi Lapangan</div>
+      <div class="row g-2">
+        @foreach($docs as $i => $doc)
+        @php $ext = strtolower(pathinfo($doc, PATHINFO_EXTENSION)); @endphp
+        <div class="col-md-4">
+          @if(in_array($ext, ['jpg','jpeg','png','webp']))
+            <a href="{{ url('storage/' . $doc) }}" target="_blank">
+              <img src="{{ url('storage/' . $doc) }}" style="width:100%;height:160px;object-fit:cover;border-radius:10px;border:1.5px solid #e2e8f0;" alt="Dokumentasi {{ $i+1 }}">
+            </a>
+          @else
+            <a href="{{ url('storage/' . $doc) }}" target="_blank" class="doc-item d-flex align-items-center gap-2 text-decoration-none" style="height:160px; justify-content:center;">
+              <i class="fa-solid fa-file-pdf text-danger fa-2x"></i>
+              <span class="small text-dark">Lihat PDF</span>
+            </a>
+          @endif
+        </div>
+        @endforeach
+      </div>
+    </div>
+    @endif
+
   </div>
 
   <div class="col-xl-4">

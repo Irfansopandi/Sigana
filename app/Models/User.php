@@ -28,6 +28,7 @@ class User extends Authenticatable
         'email_verified_at',
         'tanggal_lahir',
         'jenis_kelamin',
+        'keahlian',
     ];
 
     /**

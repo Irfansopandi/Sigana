@@ -21,4 +21,19 @@ class ReportEvidence extends Model
     {
         return $this->belongsTo(TransparencyReport::class, 'report_id');
     }
+
+    public function getPhotoUrlAttribute(): string
+    {
+        $path = $this->getRawOriginal('url');
+
+        if (str_starts_with($path, 'http')) {
+            return $path;
+        }
+
+        if (str_starts_with($path, 'storage/')) {
+            return asset($path);
+        }
+
+        return asset('storage/' . $path);
+    }
 }

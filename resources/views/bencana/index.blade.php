@@ -96,9 +96,21 @@
           data-days="{{ $campaign->days_left }}"
           data-date="{{ strtotime($campaign->getRawOriginal('date_published')) }}">
         <div class="card h-100 campaign-card border-0 shadow-sm">
+         @php
+            $imgPath = $campaign->getRawOriginal('image');
+            $imgUrl = $imgPath
+              ? (str_starts_with($imgPath, 'storage/') ? asset($imgPath) : asset('storage/' . $imgPath))
+              : null;
+          @endphp
           <div class="campaign-img-wrapper position-relative" style="height: 200px;">
             <span class="badge {{ $campaign->status_class }} position-absolute top-3 start-3 z-3" style="padding: 6px 12px; font-weight: 600;"><i class="{{ $campaign->status_icon }} me-1"></i> {{ $campaign->status }}</span>
-            <img src="{{ asset($campaign->image) }}" class="card-img-top w-100 h-100 object-fit-cover" alt="{{ $campaign->title }}">
+            @if($imgUrl)
+              <img src="{{ $imgUrl }}" class="card-img-top w-100 h-100 object-fit-cover" alt="{{ $campaign->title }}">
+            @else
+              <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background:#f1f5f9;color:#94a3b8;">
+                <i class="fa-solid fa-image fa-2x"></i>
+              </div>
+            @endif
           </div>
           <div class="card-body p-4 d-flex flex-column">
             <div class="campaign-location mb-3">
@@ -129,7 +141,7 @@
               </a>
               @auth
                 @if(auth()->user()->role === 'relawan')
-                  <a href="{{ route('register.relawan') }}" class="btn flex-fill text-center"
+                  <a href="{{ route('relawan.volunteer-join.create', $campaign->id) }}" class="btn flex-fill text-center"
                     style="border-radius:12px; border:1.5px solid #ef4444; color:#ef4444; background:rgba(239,68,68,0.08); transition:all 0.3s ease;"
                     onmouseover="this.style.background='rgba(239,68,68,0.15)';this.style.boxShadow='0 6px 20px rgba(239,68,68,0.2)';"
                     onmouseout="this.style.background='rgba(239,68,68,0.08)';this.style.boxShadow='none';">

@@ -20,6 +20,7 @@ class HomeController extends Controller
             ->values();
 
         $transparansi = Campaign::where('report_status', 'disetujui')
+            ->has('transparencyReport')
             ->with('transparencyReport')
             ->orderByDesc('date_published')
             ->get()

@@ -165,7 +165,14 @@ class UserDashboardController extends Controller
             'longitude' => 'required|numeric|between:-180,180',
             'description_short' => 'required|string|max:500',
             'description_long' => 'required|string',
+            'needs' => 'nullable|array',
+            'needs.*.name' => 'nullable|string|max:255',
+            'needs.*.qty' => 'nullable|string|max:100',
+            
         ]);
+
+         $needs = $validated['needs'] ?? [];
+        unset($validated['needs']);
 
         $slug = Str::slug($validated['title']) . '-' . time();
 
@@ -192,7 +199,16 @@ class UserDashboardController extends Controller
         // Buang key 'documentation' karena bukan nama kolom di tabel campaigns
         unset($validated['documentation']);
 
-        Campaign::create($validated);
+        $campaign = Campaign::create($validated);
+
+        foreach ($needs as $need) {
+            if (!empty($need['name'])) {
+                $campaign->needs()->create([
+                    'name' => $need['name'],
+                    'qty'  => $need['qty'] ?? null,
+                ]);
+            }
+        }
 
         return redirect()->route('user.lapor-bencana')->with('success', 'Laporan bencana berhasil dikirim dan menunggu verifikasi admin.');
     }
@@ -230,32 +246,64 @@ class UserDashboardController extends Controller
             'category' => 'required|string|max:100',
             'victims' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'documentation' => 'nullable|array|max:3',
-            'documentation.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'description_short' => 'required|string|max:500',
             'description_long' => 'required|string',
+            'needs' => 'nullable|array',
+            'needs.*.name' => 'nullable|string|max:255',
+            'needs.*.qty' => 'nullable|string|max:100',
+            'documentation_slot_1' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'documentation_slot_2' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'documentation_slot_3' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'delete_documentation_1' => 'nullable|boolean',
+            'delete_documentation_2' => 'nullable|boolean',
+            'delete_documentation_3' => 'nullable|boolean',
         ]);
 
-        // Ganti foto utama cuma kalau user upload yang baru
+        $needs = $validated['needs'] ?? [];
+        unset($validated['needs']);
+
         if ($request->hasFile('image')) {
+            if ($campaign->image && Storage::disk('public')->exists($campaign->image)) {
+                Storage::disk('public')->delete($campaign->image);
+            }
             $validated['image'] = $request->file('image')->store('campaigns', 'public');
         }
 
-        // Ganti dokumentasi cuma kalau user upload yang baru
-        if ($request->hasFile('documentation')) {
-            foreach ($request->file('documentation') as $index => $file) {
-                $fieldName = 'documentation_' . ($index + 1);
-                $validated[$fieldName] = $file->store('reports', 'public');
-            }
-        }
-        unset($validated['documentation']);
+        foreach ([1, 2, 3] as $i) {
+            $field = 'documentation_' . $i;
+            $fileKey = 'documentation_slot_' . $i;
+            $deleteKey = 'delete_documentation_' . $i;
 
-        // Laporan yang diedit balik jadi "menunggu" lagi untuk diverifikasi ulang
+            if ($request->boolean($deleteKey)) {
+                if ($campaign->$field && Storage::disk('public')->exists($campaign->$field)) {
+                    Storage::disk('public')->delete($campaign->$field);
+                }
+                $validated[$field] = null;
+            } elseif ($request->hasFile($fileKey)) {
+                if ($campaign->$field && Storage::disk('public')->exists($campaign->$field)) {
+                    Storage::disk('public')->delete($campaign->$field);
+                }
+                $validated[$field] = $request->file($fileKey)->store('reports', 'public');
+            }
+
+            unset($validated[$fileKey], $validated[$deleteKey]);
+        }
+
         $validated['report_status'] = 'menunggu';
 
         $campaign->update($validated);
+
+        $campaign->needs()->delete();
+        foreach ($needs as $need) {
+            if (!empty($need['name'])) {
+                $campaign->needs()->create([
+                    'name' => $need['name'],
+                    'qty'  => $need['qty'] ?? null,
+                ]);
+            }
+        }
 
         return redirect()->route('user.lapor-bencana')->with('success', 'Laporan berhasil diperbarui dan menunggu verifikasi ulang.');
     }

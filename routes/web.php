@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\AdminVolunteerController;
 use App\Http\Controllers\Admin\AdminAssignmentController;
 use App\Http\Controllers\Admin\AdminCertificateController;
 use App\Http\Controllers\Admin\AdminCoordinatorReportController;
+use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Relawan\RelawanDashboardController;
 use App\Http\Controllers\User\UserDashboardController;
@@ -97,6 +98,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Dokumen Pendukung
     Route::post('/transparency/{report}/docs', [AdminTransparencyController::class, 'storeDoc'])->name('transparency.docs.store');
     Route::delete('/transparency/docs/{doc}', [AdminTransparencyController::class, 'destroyDoc'])->name('transparency.docs.destroy');
+    Route::post('transparency/{report}/evidence', [AdminTransparencyController::class, 'storeEvidence'])->name('transparency.evidence.store');
+    Route::delete('transparency/evidence/{evidence}', [AdminTransparencyController::class, 'destroyEvidence'])->name('transparency.evidence.destroy');
     Route::match(['put','patch'], '/transparency/{report}', [AdminTransparencyController::class, 'update'])->name('transparency.update');
     Route::get('/volunteers', [AdminVolunteerController::class, 'index'])->name('volunteers.index');
     Route::get('/volunteers/{user}', [AdminVolunteerController::class, 'show'])->name('volunteers.show');
@@ -121,12 +124,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('coordinator-reports/{coordinatorReport}', [AdminCoordinatorReportController::class, 'show'])->name('coordinator-reports.show');
     Route::post('coordinator-reports/{coordinatorReport}/approve', [AdminCoordinatorReportController::class, 'approve'])->name('coordinator-reports.approve');
     Route::post('coordinator-reports/{coordinatorReport}/reject', [AdminCoordinatorReportController::class, 'reject'])->name('coordinator-reports.reject');
+    Route::get('/notifications/unread', [\App\Http\Controllers\Admin\AdminNotificationController::class, 'unread'])->name('notifications.unread');
+    Route::get('/notifications', [\App\Http\Controllers\Admin\AdminNotificationController::class, 'index'])->name('notifications');
 });
 
 // Relawan
 Route::prefix('relawan')->name('relawan.')->middleware(['auth', 'role:relawan'])->group(function () {
     Route::get('/dashboard', [RelawanDashboardController::class, 'index'])->name('dashboard');
     Route::get('/laporan', function () { return 'Coming soon'; })->name('laporan.index');
+    Route::get('/bencana/{campaign}/gabung-relawan', [\App\Http\Controllers\Relawan\VolunteerJoinController::class, 'create'])->name('volunteer-join.create');
+    Route::post('/bencana/{campaign}/gabung-relawan', [\App\Http\Controllers\Relawan\VolunteerJoinController::class, 'store'])->name('volunteer-join.store');
 });
 
 

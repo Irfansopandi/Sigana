@@ -309,6 +309,34 @@
         <i class="fa-solid fa-plus me-2"></i>Tambah Dokumen
       </button>
     </div>
+    {{-- Galeri Bukti Foto Penyaluran --}}
+    <div class="detail-card">
+      <h5><i class="fa-solid fa-images text-primary me-2"></i>Galeri Bukti Foto Penyaluran</h5>
+
+      @foreach($report->evidence as $ev)
+      <div class="manage-item">
+        <div class="d-flex gap-2 align-items-start">
+          <img src="{{ $ev->photo_url }}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;flex-shrink:0;" alt="Foto">
+          <div>
+            <div class="text-muted" style="font-size:.78rem;">{{ $ev->desc ?: 'Tanpa keterangan' }}</div>
+          </div>
+        </div>
+        <div class="manage-item-actions">
+          <a href="{{ $ev->photo_url }}" target="_blank" class="btn-icon-sm btn-icon-edit text-decoration-none">
+            <i class="fa-solid fa-eye"></i>
+          </a>
+          <form action="{{ route('admin.transparency.evidence.destroy', $ev) }}" method="POST" class="delete-form">
+            @csrf @method('DELETE')
+            <button type="submit" class="btn-icon-sm btn-icon-delete"><i class="fa-solid fa-trash"></i></button>
+          </form>
+        </div>
+      </div>
+      @endforeach
+
+      <button type="button" class="btn-add-dashed" data-bs-toggle="modal" data-bs-target="#addEvidenceModal">
+        <i class="fa-solid fa-plus me-2"></i>Tambah Foto Bukti
+      </button>
+    </div>
   </div>
 </div>
 
@@ -347,6 +375,35 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Batal</button>
           <button type="submit" class="btn-save-status">Tambah</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{{-- ===== MODAL TAMBAH FOTO BUKTI ===== --}}
+<div class="modal fade" id="addEvidenceModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="{{ route('admin.transparency.evidence.store', $report) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div class="modal-header">
+          <h6 class="modal-title fw-bold">Tambah Foto Bukti Penyaluran</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small fw-medium">Foto (JPG/PNG, max 2MB)</label>
+            <input type="file" name="photo" class="form-control" accept="image/*" required>
+          </div>
+          <div class="mb-0">
+            <label class="form-label small fw-medium">Keterangan — opsional</label>
+            <textarea name="desc" rows="2" class="form-control" placeholder="Contoh: Distribusi bantuan susu formula dan popok bayi di tenda pengungsian."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn-save-status">Unggah</button>
         </div>
       </form>
     </div>
