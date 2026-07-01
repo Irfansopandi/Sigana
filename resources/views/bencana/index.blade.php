@@ -89,7 +89,7 @@
       @forelse($campaigns as $campaign)
       <div class="col-md-6 col-lg-4 campaign-card-item" 
           data-name="{{ strtolower($campaign->title . ' ' . $campaign->location) }}"
-          data-category="{{ $campaign->category }}"
+          data-category="{{ strtolower(trim($campaign->category)) }}"
           data-target="{{ $campaign->target_raw }}"
           data-collected="{{ $campaign->collected_raw }}"
           data-progress="{{ $campaign->progress_raw }}"

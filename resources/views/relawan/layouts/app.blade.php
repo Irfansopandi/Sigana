@@ -379,7 +379,7 @@
 
 
         <div class="nav-label">Akun</div>
-        <a href="#" class="nav-link">
+        <a href="{{ route('relawan.profile') }}" class="nav-link {{ request()->routeIs('relawan.profile') ? 'active' : '' }}">
             <i class="fa-solid fa-user"></i> <span> Profil Saya</span>
         </a>
             
@@ -391,8 +391,13 @@
 
   <div class="sidebar-footer">
     <div class="sidebar-user">
-      <div class="sidebar-user-avatar">
-        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+      <div class="sidebar-user-avatar" id="sidebarUserAvatar">
+          @if(auth()->user()->photo)
+              <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="Foto"
+                  style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+          @else
+              {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+          @endif
       </div>
       <div class="sidebar-user-info">
         <div class="name">{{ auth()->user()->name }}</div>
@@ -449,9 +454,14 @@
 
           <span class="text-muted small">{{ now()->translatedFormat('l, d F Y') }}</span>
 
-          <div class="topbar-badge">
-              {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-          </div>
+          <div class="topbar-badge" id="topbarUserAvatar">
+            @if(auth()->user()->photo)
+                <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="Foto"
+                    style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+            @else
+                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+            @endif
+        </div>
       </div>
     </header>
 

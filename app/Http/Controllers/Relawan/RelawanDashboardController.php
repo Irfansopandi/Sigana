@@ -6,7 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Campaign;
 use App\Models\TransparencyReport;
 use App\Models\CampaignVolunteer;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class RelawanDashboardController extends Controller
 {
@@ -108,6 +112,74 @@ class RelawanDashboardController extends Controller
         $report->load(['campaign', 'allocations', 'timeline', 'docs', 'evidence']);
 
         return view('relawan.transparansi-detail', compact('report'));
+    }
+
+    public function profile()
+    {
+        $user = Auth::user();
+        return view('relawan.profile', compact('user'));
+    }
+
+    public function updateInfo(Request $request)
+    {
+        $user = User::find(Auth::id());
+
+        $request->validate([
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|email|unique:users,email,' . $user->id,
+            'phone'         => 'nullable|digits_between:10,15',
+            'jenis_kelamin' => 'nullable|in:L,P',
+            'tanggal_lahir' => 'nullable|date',
+        ]);
+
+        $user->name          = $request->name;
+        $user->email         = $request->email;
+        $user->phone         = $request->phone;
+        $user->jenis_kelamin = $request->jenis_kelamin;
+        $user->tanggal_lahir = $request->tanggal_lahir;
+        $user->save();
+
+        return redirect()->route('relawan.profile')->with('success', 'Informasi profil berhasil diperbarui.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'password'         => 'required|min:8|confirmed',
+        ]);
+
+        $user = User::find(Auth::id());
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return redirect()->route('relawan.profile')->with('error', 'Password lama tidak sesuai.');
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return redirect()->route('relawan.profile')->with('success', 'Password berhasil diubah.');
+    }
+
+    public function updatePhoto(Request $request)
+    {
+        $request->validate(['photo' => 'required|image|mimes:jpeg,png,jpg|max:2048']);
+
+        $user = User::find(Auth::id());
+
+        if ($user->photo) {
+            Storage::disk('public')->delete($user->photo);
+        }
+
+        $path = $request->file('photo')->store('foto-profile', 'public');
+        $user->photo = $path;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Foto profil berhasil diperbarui.',
+            'url'     => asset('storage/' . $path),
+        ]);
     }
 
     

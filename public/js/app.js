@@ -293,7 +293,7 @@ if (statsSection) {
       // 1. Filtering
       cardItems.forEach(item => {
         const nameAttr = item.getAttribute('data-name');
-        const catAttr = item.getAttribute('data-category');
+        const catAttr = (item.getAttribute('data-category') || '').toLowerCase().trim();
         
         const matchesSearch = nameAttr.includes(searchQuery);
         const matchesCategory = (activeCategory === 'all' || catAttr === activeCategory);

@@ -110,6 +110,8 @@
   }
 </script>
 
+
+
 {{-- Leaflet JS --}}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -179,6 +181,16 @@ if (document.getElementById('map')) {
       .addTo(map);
   });
 }
+
+// n8n Chat Widget
+<link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+<script type="module">
+  import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+  createChat({
+    webhookUrl: 'https://n8n.server-luna.web.id/webhook/ad5d6b7e-602f-46d2-9aa1-b7bed51a4ec6/chat',
+  });
+</script>
 </script>
 </body>
 

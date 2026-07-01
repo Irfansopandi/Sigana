@@ -149,6 +149,10 @@ Route::prefix('relawan')->name('relawan.')->middleware(['auth', 'role:relawan'])
     Route::get('/transparansi/{report}', [RelawanDashboardController::class, 'show'])->name('transparansi.detail');
     Route::get('/notifikasi', [RelawanNotificationController::class, 'index'])->name('notifications');
     Route::get('/notifikasi/unread', [RelawanNotificationController::class, 'unread'])->name('notifications.unread');
+    Route::get('/profil', [RelawanDashboardController::class, 'profile'])->name('profile');
+    Route::put('/profil/info', [RelawanDashboardController::class, 'updateInfo'])->name('profile.update-info');
+    Route::put('/profil/password', [RelawanDashboardController::class, 'updatePassword'])->name('profile.update-password');
+    Route::put('/profil/photo', [RelawanDashboardController::class, 'updatePhoto'])->name('profile.update-photo');
 
     // Coordinator reports resource routes
     Route::resource('coordinator-reports', RelawanCoordinatorReportController::class)->names([

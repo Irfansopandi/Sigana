@@ -18,7 +18,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'midtrans/notification',
         ]);
+
+        $middleware->alias([
+            'chatbot.key' => \App\Http\Middleware\ChatbotApiKey::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
+
+    
