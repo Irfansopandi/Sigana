@@ -360,6 +360,9 @@
         <a href="{{ route('relawan.bencana-diikuti') }}" class="nav-link {{ request()->routeIs('relawan.bencana-diikuti') || request()->routeIs('relawan.bencana-diikuti.selesai') ? 'active' : '' }}">
             <i class="fa-solid fa-clipboard-list"></i> <span>Bencana Diikuti</span>
         </a>
+        <a href="{{ route('relawan.transparansi') }}" class="nav-link">
+            <i class="fa-solid fa-chart-line"></i> <span>Laporan Transparansi</span>
+        </a>
 
         @php
           $isCoordinator = \App\Models\CampaignVolunteer::where('user_id', auth()->id())
@@ -373,6 +376,7 @@
             <i class="fa-solid fa-file-lines"></i> <span> Laporan Bencana</span>
           </a>
         @endif
+
 
         <div class="nav-label">Akun</div>
         <a href="#" class="nav-link">

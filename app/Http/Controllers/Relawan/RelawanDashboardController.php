@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Relawan;
 
 use App\Http\Controllers\Controller;
 use App\Models\Campaign;
+use App\Models\TransparencyReport;
 use App\Models\CampaignVolunteer;
 use Illuminate\Support\Facades\Auth;
 
@@ -91,4 +92,23 @@ class RelawanDashboardController extends Controller
 
         return view('relawan.bencana-diikuti-detail', compact('campaign', 'grouped', 'coordinator'));
     }
+
+    public function transparansi()
+    {
+        $campaigns = Campaign::whereHas('transparencyReport')
+            ->with('transparencyReport')
+            ->latest()
+            ->get();
+
+        return view('relawan.transparansi', compact('campaigns'));
+    }
+
+    public function show(TransparencyReport $report)
+    {
+        $report->load(['campaign', 'allocations', 'timeline', 'docs', 'evidence']);
+
+        return view('relawan.transparansi-detail', compact('report'));
+    }
+
+    
 }

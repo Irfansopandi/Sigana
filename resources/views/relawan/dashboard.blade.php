@@ -221,7 +221,15 @@
             </tr>
           </thead>
           <tbody>
-            @forelse(\App\Models\Campaign::where('report_status', 'disetujui')->latest()->take(5)->get() as $i => $c)
+            @php
+              $kampanyeTerkini = \App\Models\Campaign::where('report_status', 'disetujui')
+                  ->latest()
+                  ->get()
+                  ->reject(fn($c) => $c->is_expired)
+                  ->take(5)
+                  ->values();
+            @endphp
+            @forelse($kampanyeTerkini as $i => $c)
             <tr>
               <td class="ps-4 text-muted small">{{ $i + 1 }}</td>
               <td class="fw-medium">{{ $c->title }}</td>

@@ -145,6 +145,8 @@ Route::prefix('relawan')->name('relawan.')->middleware(['auth', 'role:relawan'])
     Route::get('/bencana/{campaign}/gabung-relawan', [\App\Http\Controllers\Relawan\VolunteerJoinController::class, 'create'])->name('volunteer-join.create');
     Route::post('/bencana/{campaign}/gabung-relawan', [\App\Http\Controllers\Relawan\VolunteerJoinController::class, 'store'])->name('volunteer-join.store');
     Route::get('/bencana-diikuti/{campaign}/detail', [RelawanDashboardController::class, 'bencanaDiikutiDetail'])->name('bencana-diikuti.detail');
+    Route::get('/transparansi', [RelawanDashboardController::class, 'transparansi'])->name('transparansi');
+    Route::get('/transparansi/{report}', [RelawanDashboardController::class, 'show'])->name('transparansi.detail');
     Route::get('/notifikasi', [RelawanNotificationController::class, 'index'])->name('notifications');
     Route::get('/notifikasi/unread', [RelawanNotificationController::class, 'unread'])->name('notifications.unread');
 
