@@ -16,17 +16,19 @@ class AdminVolunteerController extends Controller
         $query = User::where('role', 'relawan')->latest();
 
         if ($status === 'verified') {
-            $query->whereNotNull('email_verified_at');
+            $query->where('status', 'active');
         } elseif ($status === 'unverified') {
-            $query->whereNull('email_verified_at');
+            $query->where('status', '!=', 'active')->orWhereNull('status');
         }
 
         $volunteers = $query->paginate($perPage)->withQueryString();
 
         $stats = [
             'total'      => User::where('role', 'relawan')->count(),
-            'verified'   => User::where('role', 'relawan')->whereNotNull('email_verified_at')->count(),
-            'unverified' => User::where('role', 'relawan')->whereNull('email_verified_at')->count(),
+            'verified'   => User::where('role', 'relawan')->where('status', 'active')->count(),
+            'unverified' => User::where('role', 'relawan')->where(function($q) {
+                $q->where('status', '!=', 'active')->orWhereNull('status');
+            })->count(),
         ];
 
         return view('admin.volunteers.index', compact('volunteers', 'stats', 'status', 'perPage'));

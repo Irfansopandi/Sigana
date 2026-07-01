@@ -439,7 +439,7 @@
         <div class="card h-100 transparency-card border-0 shadow-sm">
           <div class="transparency-img-wrapper">
             <div class="transparency-overlay">
-              <span class="badge transparency-badge-{{ $item->transparencyReport->status_slug }} px-3 py-2">
+              <span class="badge {{ $item->transparencyReport->status_class }} px-3 py-2">
                 <i class="{{ $item->transparencyReport->status_icon }} me-1"></i> {{ $item->transparencyReport->status }}
               </span>
             </div>
@@ -471,7 +471,7 @@
               </div>
             </div>
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <span class="badge transparency-badge-{{ $item->transparencyReport->status_slug }} px-3 py-2">
+              <span class="badge {{ $item->transparencyReport->status_class }} px-3 py-2">
                 <i class="{{ $item->transparencyReport->status_icon }} me-1"></i> {{ $item->transparencyReport->status }}
               </span>
               <span class="small text-muted">

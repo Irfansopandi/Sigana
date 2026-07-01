@@ -88,7 +88,7 @@ class User extends Authenticatable
 
     public function getIsVerifiedAttribute(): bool
     {
-        return !is_null($this->email_verified_at);
+        return $this->status === 'active';
     }
 
     public function isProfileComplete(): bool
